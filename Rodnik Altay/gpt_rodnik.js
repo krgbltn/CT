@@ -33,7 +33,7 @@ function validateTheme(response) {
 let LLM_SYSTEM_TEMPLATE =
 	`Ты бот-помощник санатория "Родник Алтая" для клиентов. Санаторий «Родник Алтая» города-курорта Белокуриха имеет собственную лечебно-диагностическую базу и работает по системе «Все включено». Твоя задача ответить на вопросы пользователей по оздоровительным программам санатория и номерному фонду используя контекст. Обращайся в ответе к клиенту на Вы. 
   
- ## Правила использования контекста
+ # Правила использования контекста
  Отвечай только на основе предоставленного контекста, не добавляй лишнюю информацию, не предполагай и не придумывай. Если интересуются в каких программах содержится услуга, то предоставь полный список программ, содержащих эту услугу. Например если спросят в какой программе есть озонотерапия, выведи список всех программ, в которые входит озонотерапия. Если интересуются оздоровительной программой, то полностью перечисли что входит в эту программу. 
   
   Комплексы это не программы, а дополнительные услуги к путевкам. Не смешивай информацию по разным типам номеров. Если спрашивают про номера, то в ответе указывай доступный тип питания для этого номера. Программу так же могут называть путевкой, это одно и тоже.
@@ -43,10 +43,12 @@ let LLM_SYSTEM_TEMPLATE =
   
   Не смешивай информацию о разных номерах. Номера могут отличаться размером, наполнением, условиями проживания и типом питания. Номера с балконом и без балкона отличаются между собой, так же номера повышенной комфортности расположеные на разных этажах различаются. Например: Джуниор сюит (без балкона) и Джуниор сюит это совершенно разные номера, Люкс (3 этаж) и Люкс (6 этаж) тоже различаются. 
 Комплекс открытых уличных бассейнов и внутренний бассейн СПА-центра — это два разных объекта, с разными условиями и режимами работы. Открытый комплекс бассейнов: Работает исключительно в летний период — с мая по октябрь. СПА-центр с внутренним бассейном: Функционирует круглый год.
-  **ОБЯЗАТЕЛЬНО:**
+
+  ## **ОБЯЗАТЕЛЬНО:**
   - **Приоритизируйте информацию из контекста** над вашими внутренними знаниями для вопросов о компании и ее продуктах.
+  - **Используй фразу "Напишите 'Перевод"** если предлагаешь обратиться к менеджеру санатория.
  
-  **ЗАПРЕЩЕНО:**
+  ## **ЗАПРЕЩЕНО:**
   - **НЕ игнорируйте** предоставленный контекст в пользу общих знаний
   - **НЕ выдумывайте** детали, которых нет в контексте (цены, характеристики, сроки, тарифы, телефоны, внутренние регламенты)
   - **НЕ противоречьте** информации из контекста
@@ -54,10 +56,17 @@ let LLM_SYSTEM_TEMPLATE =
  - **НЕ рекомендуйте** пользователям обращаться в туристические фирмы, пользователи должны обращаться исключительно к менеджерам санатория для решения любых вопросов и запросов
 - **НЕ рекомендуйте** пользователям обращаться непосредственно к врачам санатория для уточнения возможных методов лечения. Пользователям следует связываться именно с менеджером санатория для консультации по вопросам подбора подходящего курса лечения.
   - **НЕ смешивайте** информацию для разных категорий номеров.
-
     
+  ## Если не нашли контекст
+  Не додумывай если не нашел ответа в контексте. 
+  Если не нашли ответ на вопрос в контексте, не предполагай и не придумывай, ответь строго: "Извините, я ещё не знаю ответ на этот вопрос. Напишите 'Перевод', чтобы связаться с менеджером.". Например если спросят про скидки, а в контексте нет информации о скидках, то твой ответ будет: "Извините, я ещё не знаю ответ на этот вопрос. Напишите 'Перевод', чтобы связаться с менеджером."
+    
+    
+  # **Если не знаешь ответ**
+  Если ты не знаешь ответ или информации в контексте не достаточно, предложи пользователю написать в чат "Перевод", чтобы проконсультироваться с менеджером санатория. Если не уверен в ответе или не понятен вопрос, так же отправляй пользователя к менеджеру санатория. В таких случаях твой ответ должен быть только такой без каких либо изменений: "Извините, я ещё не знаю ответ на этот вопрос. Напишите 'Перевод', чтобы связаться с менеджером."
+      
   # Формат ответа (до 300 символов)
-  Сперва определи является ли вопрос личным (например 'привет', 'как дела'). Если вопрос личный, то ответь дружелюбно, игнорируя найденную информацию. Если вопрос конкретный (например, 'что входит в программу' или 'есть ли в номере'), то используя найденную информацию (контекст), предоставь короткий и точный ответ на вопрос пользователя. Используй только те данные, которые есть в контексте. Не добавляйте ничего лишнего, не придумывай. Составь короткий подробный ответ на вопрос пользователя. Не добавляй лишней информации, добавляй в ответ только то, что важно для вопроса. Если ответа нет в контексте, то попроси пользователя задать более конкретный вопрос. Если спрашивают про политику, религию, войну, принадлежность спорных территорий или другую чувствительную тему, не связанную с Санаторий «Родник Алтая», то скажи 'Извините, я могу отвечать только на вопросы о санаторие «Родник Алтая»'. Если пользователя нужно направить к менеджеру, скажи что он может написать "Перевод", чтобы диалог перевелся на менеджера санатория.
+  Сперва определи является ли вопрос личным (например 'привет', 'как дела'). Если вопрос личный, то ответь дружелюбно, игнорируя найденную информацию. Если вопрос конкретный (например, 'что входит в программу' или 'есть ли в номере'), то используя найденную информацию (контекст), предоставь короткий и точный ответ на вопрос пользователя. Используй только те данные, которые есть в контексте. Не добавляйте ничего лишнего, не придумывай. Составь короткий подробный ответ на вопрос пользователя. Не добавляй лишней информации, добавляй в ответ только то, что важно для вопроса. Если ответа нет в контексте, то попроси пользователя задать более конкретный вопрос. Если спрашивают про политику, религию, войну, принадлежность спорных территорий то ответь: 'Извините, я могу отвечать только на вопросы о санаторие «Родник Алтая»'. Если пользователя нужно направить к менеджеру, обязательно используй фразу: "Напишите 'Перевод', чтобы связаться с менеджером.".
  
        ## Структура
 
@@ -72,6 +81,7 @@ let LLM_SYSTEM_TEMPLATE =
        - **Краткий** — не перегружайте информацией
 
      ## ОГРАНИЧЕНИЯ
+     Нельзя обрабатывать и давать рекомендаций по вопросам здоровья, диагностики заболеваний или состояния пациентов. Если запрос касается медицинских диагнозов или симптомов болезней, сообщить пользователю, что такие вопросы требуют консультации менеджера санатория
      Нельзя:
      - вставлять вопрос пользователя в ответ;
      - придумывать информацию (номера телефонеов, график работ, статус, адрес);
@@ -116,6 +126,8 @@ let LLM_SYSTEM_TEMPLATE =
 - Просьба прислать детали бронирования
 - Жалобы клиентов 
 - Передача личной информации (номер телефона, ФИО): любые попытки отправки контактных данных
+
+
   `;
 
 // agentSettings.sys_prompt;
@@ -273,11 +285,11 @@ function addUrlToContextTitle(full_context) {
 }
 
 
-
 async function main() {
 	let replies = [];
+
 	// Helpers to add reply
-	function textReply(text, wrap_code_block=false) {
+	function textReply(text, wrap_code_block = false) {
 		let reply;
 		if (wrap_code_block) {
 			text = wrapInMarkdownCodeBlock(String(text));
@@ -287,16 +299,19 @@ async function main() {
 		// replies.push(agentApi.makeMarkdownReply(reply));
 		return _sendReply(text);
 	}
+
 	function markdownReply(text) {
 		// replies.push(agentApi.makeMarkdownReply(String(text)));
 		return _sendReply(String(text));
 	}
+
 	function debugReply(text) {
 		if (DEBUG) {
 			return _sendReply(String(text));
 		}
 		// DEBUG && replies.push(agentApi.makeMarkdownReply(wrapInMarkdownCodeBlock(String(text))));
 	}
+
 	replies.textReply = textReply
 	replies.markdownReply = markdownReply
 	replies.debugReply = debugReply
@@ -354,7 +369,7 @@ async function _main(replies) {
 		replies.debugReply(`Context not found for question "${question}"`);
 
 		if (SMALLTALK_IF_NO_CONTEXT) {
-			const { thought, cleanedText } = extractThinkContent(
+			const {thought, cleanedText} = extractThinkContent(
 				await smalltalk(question, dialog_id, replies)
 			);
 			if (SHOW_THINKING && thought) {
@@ -378,7 +393,7 @@ async function _main(replies) {
 	}
 
 	// Answer with context (RAG)
-	const { thought, cleanedText } = extractThinkContent(
+	const {thought, cleanedText} = extractThinkContent(
 		await rag(question, context, dialog_id, replies)
 	);
 
@@ -404,11 +419,12 @@ async function _main(replies) {
 
 	if (SHOW_REFERENCES)
 		replies.markdownReply(references);
-	if (REDIRECT_BACK_TO_AIA2 && !cleanedText.includes('/switchredirect')) {
-		replies.markdownReply(`/switchredirect ${AIA2_NAME} intent_id="article-be74371d-3bca-4d16-8f42-160c79033091"`);
+	// if (REDIRECT_BACK_TO_AIA2 && !cleanedText.includes('/switchredirect')) {
+	// 	replies.markdownReply(`/switchredirect ${AIA2_NAME} intent_id="article-be74371d-3bca-4d16-8f42-160c79033091"`);
+	// }
+	if (REDIRECT_BACK_TO_AIA2) {
+		replies.markdownReply(`/switch ${AIA2_NAME}`);
 	}
-	//  replies.markdownReply(`/switch ${AIA2_NAME}`);
-
 	SHOW_CONTEXT && replies.textReply(
 		"<h3>Контекст</h3>" + JSON.stringify(full_context, null, 2),
 		true
@@ -426,12 +442,12 @@ async function getContext(question, replies) {
 				text: question,
 				customer_id: CUSTOMER_ID,
 				record_type: RECORD_TYPE,
-				catalog_symbol_code: CATALOG_ID ? [ CATALOG_ID ] : null,
+				catalog_symbol_code: CATALOG_ID ? [CATALOG_ID] : null,
 				output_format: "json-vikhr"
 			}
 		);
 		logger.info("Response:" + response.data);
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting context search: ${e}.`);
 		replies.debugReply(`Error requesting context search: ${e}.`);
@@ -461,7 +477,7 @@ function _putDialogIdOrHistory(requestData, dialogOrHistory) {
 async function smalltalk(question, dialogOrHistory, replies) {
 	let response;
 	try {
-		if (ENABLE_THINKING_SMALLTALK){
+		if (ENABLE_THINKING_SMALLTALK) {
 			question += THINK;
 		} else {
 			question += NO_THINK;
@@ -471,7 +487,7 @@ async function smalltalk(question, dialogOrHistory, replies) {
 			temperature: LLM_TEMPERATURE_SMALLTALK,
 			top_p: LLM_TOP_P,
 			top_k: LLM_TOP_K,
-			min_p:LLM_MIN_P,
+			min_p: LLM_MIN_P,
 			instruction: LLM_SYSTEM_TEMPLATE_SMALLTALK,
 			last_context_price: LAST_CONTEXT_PRICE,
 			other_context_price: OTHER_CONTEXT_PRICE,
@@ -489,7 +505,7 @@ async function smalltalk(question, dialogOrHistory, replies) {
 				}
 			}
 		);
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);
@@ -511,7 +527,7 @@ async function rag(question, context, dialogOrHistory, replies) {
 		temperature: LLM_TEMPERATURE,
 		top_p: LLM_TOP_P,
 		top_k: LLM_TOP_K,
-		min_p:LLM_MIN_P,
+		min_p: LLM_MIN_P,
 		system_template: LLM_SYSTEM_TEMPLATE,
 		user_template: RAG_TEMPLATE,
 		document_template: RAG_DOCUMENT_TEMPLATE,
@@ -534,7 +550,7 @@ async function rag(question, context, dialogOrHistory, replies) {
 			}
 		);
 		return response.data.answer;
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);
@@ -569,7 +585,7 @@ async function rephrase(question, prompt, dialogOrHistory, replies) {
 				}
 			}
 		);
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);
