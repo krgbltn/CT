@@ -1,0 +1,163 @@
+{
+  "api": {
+    "base_url": "chat-ct.russianpost.ru",
+    "url_context_search": "http://contextsearch:8801",
+    "url_llm": "http://craftgpt:3020",
+    "llm_auth_token": "0eGBh8fnxYRRnrcSh1iqaPbutbgv9mtQ6ku33ELjsyk",
+    "url_mediator_service": "http://opbot-botmediator:8080/webhooks/mediator/messages"
+  },
+  "customer_id": "rupost",
+  "agent_name": "gpt_rupost",
+  "proxy": {
+    "USE_PROXY": false,
+    "url": "proxy.russianpost.ru",
+    "port": 3128
+  },
+  "llm_settings": {
+    "timeout": 200,
+    "temperature": 0.3,
+    "temperature_smalltalk": 0.3,
+    "top_p": 0.88,
+    "top_k": 20,
+    "min_p": 0
+  },
+  "context_settings": {
+    "LAST_CONTEXT_PRICE": 0.19,
+    "OTHER_CONTEXT_PRICE": 3.1,
+    "ADD_OTHER_CONTEXT": true,
+    "MAX_CONTEXTS": 15,
+    "MAX_COMPLEX_SCENARIOS": 5,
+    "CONTEXT_FROM_SCENARIOS": true,
+    "ADD_COMPLEX_SCENARIOS_TO_TOOLS": false,
+    "FILTERS": [
+      [
+        {
+          "field": "record_type",
+          "condition": "must",
+          "values": [
+            "rupost",
+            "rupost2"
+          ]
+        }
+      ]
+    ]
+  },
+  "agent_parameters": {
+    "DO_REPHRASE": true,
+    "REPHRASE_N_GENERATIONS": 1,
+    "REPHRASE_SAMPLES_PER_GENERATION": 6,
+    "ENABLE_THINKING_SMALLTALK": true,
+    "ENABLE_THINKING_RAG": true,
+    "SHOW_THINKING": false,
+    "MAX_CYCLES": 5,
+    "SMALLTALK_IF_NO_CONTEXT": true,
+    "RECORD_TYPE": null,
+    "SHOW_CONTEXT": false,
+    "SHOW_REFERENCES": false,
+    "USE_HISTORY": true,
+    "DEBUG": false,
+    "THINK": " /think",
+    "NO_THINK": " /no_think"
+  },
+  "roles": {
+    "USER": "user",
+    "BOT": "assistant",
+    "OPERATOR": "operator"
+  },
+  "keys": {
+    "QUEUE_KEY": "function_queue",
+    "N_CYCLES_KEY": "n_cycles"
+  },
+  "user_slots": [
+    {
+      "id": "report_track_text",
+      "description": "Итоговая информация о результате отслеживания почтового отправления по трек-номеру {rupost_track_input}. Если у клиента нет дополнительных вопросов - для ответа может быть использована только эта информация."
+    },
+    {
+      "id": "report_track_input",
+      "description": "Трек-номер почтового отправления. Если для формирования ответа по почтовому отправлению недостаточно информации - нужно запустить сценарий отслеживания, используя этот трек-номер. Если трек-номера нет и клиент спрашивает информацию по своему почтовому отправлению - нужно запросить у него трек-номер "
+    },
+    {
+      "id": "report_start_tracking",
+      "description": "Информация о дате последнего отслеживания почтового отправления. По этому слоту можно оценить актуальность имеющихся данных. Если дата в этом слоте отличается от текущей больше, чем на 2 часа (например) - нужно запустить повторное отслеживание отправления. "
+    },
+    {
+      "id": "report_date_plane",
+      "description": "Дата ожидаемой доставки почтового отправления в отделение почтовой связи клиента"
+    },
+    {
+      "id": "retention_period",
+      "description": "В данном слоте хранится информация о сроке хранения почтового отделения. Если {rupost_date_plan} меньше текущей даты, можно рассчитать оставшийся срок хранения для текущего почтового отправления клиента."
+    },
+    {
+      "id": "retention_end_date",
+      "description": "Это дата окончания срока хранения. После этой даты почтовое отправление будет отправлено отправителю."
+    },
+    {
+      "id": "is_operation_type_49",
+      "description": "Используй это поле только если значение поля \"true\" -  это значит, что срок хранения почтового обращения не может быть продлен."
+    }
+  ],
+  "agent_slots": {
+    "SCENARIO_RESULT": "scenario_result",
+    "SCENARIO_SOURCE": "scenario_source",
+    "LLM_ANSWER_HISTORY": "llm_history_messages",
+    "TRACK_NUMBER": "rupost_track_input",
+    "INDEX_OPS": "rupost_address_by_index_input_index"
+  },
+  "articles": {
+    "TRANSFER_FOR_OPERATOR": {
+      "ID": "article-53217fac-84df-41a4-9c96-60b8943a5366",
+      "NAME": "Отсутствие операторов"
+    },
+    "START_OPS_SEARCH": {
+      "ID": "article-f0bec0b3-c7a6-4af7-9165-7b3caf6c672e",
+      "NAME": "Поиск ОПС. Старт rupost_address_by_index_start_new"
+    },
+    "START_RUPOST_TRACKING": {
+      "ID": "article-093d82cd-6edc-4177-a08b-89b5dfb88556",
+      "NAME": "Отслеживание. Старт - rupost_track_start"
+    }
+  },
+  "standard_messages": {
+    "DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",
+    "TIMEOUT_ERROR_MSG": "Извините за задержку! Похоже, запрос занял больше времени, чем ожидалось. Пожалуйста, попробуйте снова позже.",
+    "MESSAGE_CANCEL_WAITING": "Готов ответить на ваш следующий вопрос! Чем ещё могу помочь?",
+    "NO_CONTEXT_TEXT": "К сожалению я не знаю ответ на ваш вопрос. попробуйте задать вопрос иначе."
+  },
+  "trans_map": {
+    "а": "a",
+    "б": "b",
+    "в": "v",
+    "г": "g",
+    "д": "d",
+    "е": "e",
+    "ё": "yo",
+    "ж": "zh",
+    "з": "z",
+    "и": "i",
+    "й": "y",
+    "к": "k",
+    "л": "l",
+    "м": "m",
+    "н": "n",
+    "о": "o",
+    "п": "p",
+    "р": "r",
+    "с": "s",
+    "т": "t",
+    "у": "u",
+    "ф": "f",
+    "х": "kh",
+    "ц": "ts",
+    "ч": "ch",
+    "ш": "sh",
+    "щ": "shch",
+    "ъ": "",
+    "ы": "y",
+    "ь": "",
+    "э": "e",
+    "ю": "yu",
+    "я": "ya"
+  }
+}
