@@ -1,10 +1,11 @@
+const currentDate = new Date().toLocaleDateString("ru-RU");
 const BASE_URL = 'cloud.craft-talk.ru';
 const CUSTOMER_ID = agentSettings.customer_id;
 const CATALOG_ID = agentSettings.catalog_id;
 const RECORD_TYPE = agentSettings.record_type;
 
 const SHOW_CONTEXT = false;
-const SMALLTALK_IF_NO_CONTEXT = false;
+const SMALLTALK_IF_NO_CONTEXT = true;
 const SHOW_REFERENCES = false;
 
 const REDIRECT_BACK_TO_AIA2 = agentSettings.redirect_back_to_aia2;
@@ -127,15 +128,23 @@ let LLM_SYSTEM_TEMPLATE =
 - Жалобы клиентов 
 - Передача личной информации (номер телефона, ФИО): любые попытки отправки контактных данных
 
+# Текущая информация
+
+Сегодня: ${currentDate}
+Часовой пояс: UTC+7 (Алтайский край)
 
   `;
 
-// agentSettings.sys_prompt;
-
 // системный промпт, если контекст не нашли
-let LLM_SYSTEM_TEMPLATE_SMALLTALK = agentSettings.prompt;
+let LLM_SYSTEM_TEMPLATE_SMALLTALK = `
+Ты бот-помощник санатория "Родник Алтая" для клиентов. Санаторий «Родник Алтая» города-курорта Белокуриха имеет собственную лечебно-диагностическую базу и работает по системе «Все включено». Твоя задача ответить на вопросы пользователей по оздоровительным программам санатория и номерному фонду используя контекст. Если ответ на вопрос клиента не был найден в базе знаний, ответь строго: "Извините, я ещё не знаю ответ на этот вопрос. Напишите 'Перевод', чтобы связаться с менеджером.". Но на личные вопросы, приветствия, благодарности, прощания или  smalltalk обращения отвечай дружелюбно, чтобы поддержать разговор. Обращайся в ответе к клиенту на Вы. 
 
-// user prompt, который будет отправляться на каждый запрос, когда нашелся контекст
+# Текущая информация
+
+Сегодня: ${currentDate}
+Часовой пояс: UTC+7 (Алтайский край)
+`;
+
 // обязательно должен содержать {question} и {context}
 let RAG_TEMPLATE = `{question}
 
@@ -231,7 +240,10 @@ function _sendReply(text, slots) {
 		MessageMarkdown: reply.message.text,
 		SendMessageParams: {
 			ProjectId: reply.customer_id,
-			OmniUserId: reply.omni_user_id,
+			DestinationChannel: {
+				ChannelId: reply.channel_id,
+				ChannelUserId: message.user.channel_user_id
+			},
 			Sender: {},
 			FilledSlots: slots,
 		}
@@ -379,10 +391,10 @@ async function _main(replies) {
 				replies.debugReply(thought);
 			}
 
-			// replies.markdownReply(cleanedText);
-			//   if (REDIRECT_BACK_TO_AIA2)
-			//   replies.markdownReply(`/switch ${AIA2_NAME}`);
-			//   return;
+			replies.markdownReply(cleanedText);
+			if (REDIRECT_BACK_TO_AIA2)
+				replies.markdownReply(`/switch ${AIA2_NAME}`);
+			return;
 		} else {
 			// replies.markdownReply(NO_CONTEXT_TEXT);
 			// if (REDIRECT_BACK_TO_AIA2)
