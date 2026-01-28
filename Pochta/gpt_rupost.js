@@ -548,7 +548,7 @@ const KEYS = agentSettings.keys;
 const AGENT_SLOTS = agentSettings.agent_slots;
 const WAIT_FOR_SCENARIO_TTL = 60 * 60 * 24; // 24 hours
 const PROXY = agentSettings.proxy;
-const AGENT = new https.Agent({rejectUnauthorized: false});
+const AGENT = new https.Agent({ rejectUnauthorized: false });
 const ARTICLES = agentSettings.articles;
 const LLM_SETTINGS = agentSettings.llm_settings;
 const STANDARD_MESSAGES = agentSettings.standard_messages;
@@ -614,7 +614,7 @@ const transfer_to_operator = scenario(null)(function () {
 });
 
 const transfer_to_tracking_scenario = scenario(AGENT_SLOTS.SCENARIO_RESULT)(
-	function ({track_number}) {
+	function ({ track_number }) {
 		slotRecording(AGENT_SLOTS.SCENARIO_SOURCE, "true");
 		slotRecording(AGENT_SLOTS.TRACK_NUMBER, track_number);
 		return switchredirect(ARTICLES.START_RUPOST_TRACKING.ID);
@@ -622,7 +622,7 @@ const transfer_to_tracking_scenario = scenario(AGENT_SLOTS.SCENARIO_RESULT)(
 );
 
 const transfer_to_ops_search_scenario = scenario(AGENT_SLOTS.SCENARIO_RESULT)(
-	function ({ops_index}) {
+	function ({ ops_index }) {
 		slotRecording(AGENT_SLOTS.SCENARIO_SOURCE, "true");
 		slotRecording(AGENT_SLOTS.INDEX_OPS, ops_index);
 		return switchredirect(ARTICLES.START_OPS_SEARCH.ID);
@@ -1031,9 +1031,9 @@ function getScenarioMessages(indices, history, inputIndex) {
 			}
 			return acc;
 		},
-		{messages: [], ids: []},
+		{ messages: [], ids: [] },
 	);
-	return [{scenario_dialogue: reduced.messages}, reduced.ids];
+	return [{ scenario_dialogue: reduced.messages }, reduced.ids];
 }
 
 function wrapInMarkdownCodeBlock(str) {
@@ -1103,7 +1103,6 @@ function prepareHistory(rawHistory, excludeIds) {
 async function main() {
 	let replies = {};
 	let response;
-
 	function textReply(text, meta = {}, wrapCodeBlock = false) {
 		if (!IS_QUERY_REPORT) {
 			let reply;
@@ -1115,25 +1114,21 @@ async function main() {
 			return _sendReply(reply, undefined, meta);
 		}
 	}
-
 	function markdownReply(text) {
 		if (!IS_QUERY_REPORT) return _sendReply(String(text));
 	}
-
 	function debugReply(text) {
 		// never await debugReply
 		if (AGENT_PARAMETERS.DEBUG && !IS_QUERY_REPORT) {
 			return _sendReply(wrapInMarkdownCodeBlock(String(text)));
 		}
 	}
-
 	function deleteSlot(slot) {
 		if (_sendReply.slots === undefined) {
 			_sendReply.slots = {};
 		}
 		_sendReply.slots[slot] = null;
 	}
-
 	replies.textReply = textReply;
 	replies.markdownReply = markdownReply;
 	replies.debugReply = debugReply;
@@ -1466,7 +1461,7 @@ async function _main(replies) {
 
 	// Учитывается только в случае, когда явно пришел запрос на скрипт только с текстом. Для отчетов
 	if (IS_QUERY_REPORT) {
-		const {cleanedText} = extractThinkContent(finalAnswer);
+		const { cleanedText } = extractThinkContent(finalAnswer);
 		finalAnswer = cleanedText;
 		return finalAnswer;
 	}
@@ -1477,7 +1472,7 @@ async function _printResponse(response, replies, isReplyGptToMessageId) {
 		return;
 	}
 
-	const {thought, cleanedText} = extractThinkContent(response.answer);
+	const { thought, cleanedText } = extractThinkContent(response.answer);
 	logger.debug(
 		`User question: ${message.message.text}. Thinking content ${JSON.stringify(thought)}`,
 	);
@@ -1711,7 +1706,7 @@ async function sendMessageToLLM(question, dialog_id, rawHistory, replies) {
 			return response;
 		} else {
 			replies.markdownReply(STANDARD_MESSAGES.NO_CONTEXT_TEXT);
-			return {answer: "", tool_calls: [], log_id: null};
+			return { answer: "", tool_calls: [], log_id: null };
 		}
 	}
 
@@ -1878,7 +1873,6 @@ function extractTitleFromChain(chain) {
  * @property {string} catalog_symbol_code - Id каталога
  * @property {Date} created_at - Дата создания
  */
-
 /**
  * Блок сообщения
  * @typedef {Object} Block
@@ -2165,9 +2159,8 @@ if (message.message_type === 1 && !IS_QUERY_REPORT) {
 		});
 } else if (IS_QUERY_REPORT) {
 	main()
-
 		.then((res) => {
-			resolve({answer: res});
+			resolve({ answer: res });
 		})
 		.catch((error) => {
 			logger.error(`Error: ${error}`);
