@@ -1,0 +1,9 @@
+{
+  "url_context_search": "http://contextsearch:8801",
+  "url_llm": "http://craftgpt:3020",
+  "llm_auth_token": "ywqHdQ6ywrk-ZdsVEXFSmfH5uHdJWIgreoaPnhG7Mek",
+  "llm_timeout": 200,
+  "llm_temperature": 0,
+  "customer_id": "energy-team",
+  "record_type": null
+}

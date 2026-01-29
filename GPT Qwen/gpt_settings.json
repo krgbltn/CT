@@ -1,0 +1,20 @@
+{
+  "url_context_search": "http://contextsearch:8801",
+  "url_llm": "http://craftgpt:3020",
+  "llm_timeout": 58,
+  "llm_temperature": 0.5,
+  "llm_temperature_smalltalk": 0.6,
+  "llm_auth_token": "OQVwECpw3hk9MofP3wioAlmKJ3ndOm3JY67vph_PgtM",
+  "do_rephrase": false,
+  "rephrase_n_generations": 4,
+  "rephrase_samples_per_generation": 3,
+  "enable_thinking_rag": false,
+  "enable_thinking_smalltalk": false,
+  "show_thinking": false,
+  "record_type": "my_office_gpt",
+  "customer_id": "my_office",
+  "catalog_id": "",
+  "enable_smalltalk": [
+    "on"
+  ]
+}
