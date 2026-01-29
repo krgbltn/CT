@@ -14,7 +14,5 @@
   "record_type": "my_office_gpt",
   "customer_id": "my_office",
   "catalog_id": "",
-  "enable_smalltalk": [
-    "on"
-  ]
+  "enable_smalltalk": true
 }
