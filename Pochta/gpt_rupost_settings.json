@@ -22,13 +22,14 @@
     "min_p": 0
   },
   "context_settings": {
+    "MAX_COMPLEX_QUESTION_EXAMPLES_LENGTH": 1000,
     "LAST_CONTEXT_PRICE": 0.19,
     "OTHER_CONTEXT_PRICE": 3.1,
     "ADD_OTHER_CONTEXT": true,
     "MAX_CONTEXTS": 15,
     "MAX_COMPLEX_SCENARIOS": 5,
     "CONTEXT_FROM_SCENARIOS": true,
-    "ADD_COMPLEX_SCENARIOS_TO_TOOLS": false,
+    "ADD_COMPLEX_SCENARIOS_TO_TOOLS": true,
     "FILTERS": [
       [
         {

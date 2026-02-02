@@ -1,4 +1,4 @@
-const currentDate = new Date().toLocaleDateString("ru-RU");
+const currentDate = new Date().toLocaleDateString('ru-RU')
 let LLM_SYSTEM_TEMPLATE = `
 # Идентичность и роль
 
@@ -225,12 +225,12 @@ let RAG_TEMPLATE = `[КОНТЕКСТ ИЗ БАЗЫ ЗНАНИЙ]
 [КОНЕЦ КОНТЕКСТА]
 
 {question}
-`;
+`
 const RAG_DOCUMENT_TEMPLATE = `## {title}:
 \`\`\`
 {content}
 \`\`\`
-`;
+`
 let LLM_SYSTEM_TEMPLATE_SMALLTALK = `
    # РОЛЬ
    Вы — виртуальный ассистент службы поддержки Почты России для работы с клиентами. Ваша задача — ответить на вопросы клиентов об отправлениях, отделениях используя инструменты. Размышляй на русском языке. 
@@ -448,7 +448,7 @@ const REPHRASE_PROMPT = `Ты - поисковый ассистент Почты
 - Основной раздел БЗ, который может содержать ответ (например: "Порядок вручения", "Порядок приёма", "Отслеживание", "QR-код", "Оплата", "Сроки хранения").
 - Конкретную ситуацию или подраздел, который точно описывает проблему пользователя.
 Добавь в ответ наиболее подходящий заголовок статьи.
-Шаг 4. Сгенерируй {samples_per_generation} поисковых фраз на русском языке для поиска ответа на вопрос в базе знаний.
+Шаг 4. Сгенерируй 4 поисковых фраз на русском языке для поиска ответа на вопрос в базе знаний.
 
 Ответь в JSON формате {{ "samples": [
     "расширенный вопрос",
@@ -458,10 +458,10 @@ const REPHRASE_PROMPT = `Ты - поисковый ассистент Почты
     "поисковая фраза 2",
     ...
   ]
-}} где ПЕРВЫЙ элемент в списке samples всегда расширенный вопрос, второй цель пользователя в вопросе, третий заголовок статьи, а дальше идут примеры поисковых фраз.
+}} где ПЕРВЫЙ элемент в списке samples всегда расширенный вопрос, второй цель пользователя в вопросе, третий заголовок статьи, а дальше идут 4 примера поисковых фраз.
 
 ## КРИТИЧЕСКИ ВАЖНО: ПЕРВЫЙ ЭЛЕМЕНТ = РАСШИРЕННЫЙ ВОПРОС!
-Если запрос "Не приходят письма", то:
+Если запрос "Не приходят письма", то расширенный вопрос:
 ✓ ПРАВИЛЬНО: "Как найти письма, которые не приходят ко мне? Где можно проверить их статус доставки?"
 ✗ НЕПРАВИЛЬНО: "Не приходят письма где найти"
 
@@ -508,12 +508,7 @@ const REPHRASE_PROMPT = `Ты - поисковый ассистент Почты
 
 Пример поисковых фраз для вопроса "Письмо отправили мне я не знаю номера":
 - "узнать номер отправления"
-- "получить номер письма"
-- "отслеживание без номера"
-- "найти отправление по адресу"
-- "номер почтового отправления"
 - "как найти письмо без номера"
-- "поиск отправления получателем"
 - "информация о получении письма"
 - "уточнить детали отправления"
 
@@ -524,198 +519,238 @@ const MESSAGE_WHILE_WAITING_ERROR = `Чтобы обеспечить качес�
 ::
 [Прервать](type:action action:cancel color:negative)
 \`\`\`
-`;
+`
 const ITEM_TYPES = {
 	function: "function",
 	commit: "commit",
-};
-
-const ROLE = agentSettings.roles;
-const API = agentSettings.api;
-const URL_CONTEXT_SEARCH = new URL("/search", API.url_context_search).href;
-const URL_CONTEXT_SEARCH_SCENARIOS = new URL(
-	"/search_in_scenarios",
-	API.url_context_search,
-).href;
-const URL_LLM = new URL("/context_query", API.url_llm).href;
-const URL_LLM_SMALLTALK = new URL("/query", API.url_llm).href;
-const URL_LLM_REPHRASE = new URL("/rephrase", API.url_llm).href;
-const URL_LLM_COMMIT_TOOL_RESPONSES = new URL("/tool_responses", API.url_llm)
-	.href;
-const CUSTOMER_ID = agentSettings.customer_id;
-const CONTEXT_SETTINGS = agentSettings.context_settings;
-const KEYS = agentSettings.keys;
-const AGENT_SLOTS = agentSettings.agent_slots;
-const WAIT_FOR_SCENARIO_TTL = 60 * 60 * 24; // 24 hours
-const PROXY = agentSettings.proxy;
-const AGENT = new https.Agent({ rejectUnauthorized: false });
-const ARTICLES = agentSettings.articles;
-const LLM_SETTINGS = agentSettings.llm_settings;
-const STANDARD_MESSAGES = agentSettings.standard_messages;
-const AGENT_PARAMETERS = agentSettings.agent_parameters;
-const USER_SLOTS = agentSettings.user_slots;
-const TRANS_MAP = agentSettings.trans_map;
-const AGENT_NAME = agentSettings.agent_name;
-const ROUTE_TO_SELF_AGENT = `/switchredirect ${AGENT_NAME}`;
-if (AGENT_PARAMETERS.ENABLE_THINKING_RAG) {
-	RAG_TEMPLATE += AGENT_PARAMETERS.THINK;
-} else {
-	RAG_TEMPLATE += AGENT_PARAMETERS.NO_THINK;
 }
-const IS_QUERY_REPORT = message?.meta?.isQueryReport;
+
+const ROLE = agentSettings.roles
+const API = agentSettings.api
+const URL_CONTEXT_SEARCH = new URL('/search', API.url_context_search).href
+const URL_CONTEXT_SEARCH_SCENARIOS = new URL('/search_in_scenarios', API.url_context_search).href;
+const URL_LLM = new URL('/context_query', API.url_llm).href
+const URL_LLM_SMALLTALK= new URL('/query', API.url_llm).href
+const URL_LLM_REPHRASE = new URL('/rephrase', API.url_llm).href
+const URL_LLM_COMMIT_TOOL_RESPONSES = new URL('/tool_responses', API.url_llm).href
+const CUSTOMER_ID = agentSettings.customer_id
+const CONTEXT_SETTINGS = agentSettings.context_settings
+const KEYS = agentSettings.keys
+const AGENT_SLOTS = agentSettings.agent_slots
+const WAIT_FOR_SCENARIO_TTL = 60 * 60 * 24  // 24 hours
+const PROXY = agentSettings.proxy
+const AGENT = new https.Agent({ rejectUnauthorized: false })
+const ARTICLES = agentSettings.articles
+const LLM_SETTINGS = agentSettings.llm_settings
+const STANDARD_MESSAGES = agentSettings.standard_messages
+const AGENT_PARAMETERS = agentSettings.agent_parameters
+const USER_SLOTS = agentSettings.user_slots
+const TRANS_MAP = agentSettings.trans_map
+const AGENT_NAME = agentSettings.agent_name
+const ROUTE_TO_SELF_AGENT = `/switchredirect ${AGENT_NAME}`
+if (AGENT_PARAMETERS.ENABLE_THINKING_RAG) {
+	RAG_TEMPLATE += AGENT_PARAMETERS.THINK
+} else {
+	RAG_TEMPLATE += AGENT_PARAMETERS.NO_THINK
+}
+const IS_QUERY_REPORT = message?.meta?.isQueryReport
 // Объединяем все кириллические символы в один регэксп
-const CYRILLIC_REGEX = new RegExp(`[${Object.keys(TRANS_MAP).join("")}]`, "g");
+const CYRILLIC_REGEX = new RegExp(`[${Object.keys(TRANS_MAP).join('')}]`, 'g')
 
 function translit(text) {
 	return text
 		.toLowerCase()
-		.replace(CYRILLIC_REGEX, (match) => TRANS_MAP[match] || "")
-		.replace(/\s+/g, "_") // заменяем пробелы на _
-		.replace(/[^a-z0-9_]/g, ""); // удаляем всё, кроме латиницы, цифр и _
+		.replace(CYRILLIC_REGEX, match => TRANS_MAP[match] || '')
+		.replace(/\s+/g, '_')  // заменяем пробелы на _
+		.replace(/[^a-z0-9_]/g, ''); // удаляем всё, кроме латиницы, цифр и _
 }
 
-function getSlotValue(slotId) {
-	return message.slot_context.filled_slots.find(
-		(slot) => slot.slot_id === slotId,
-	)?.value;
+function getSlotValue (slotId) {
+	return message.slot_context.filled_slots.find((slot) => slot.slot_id === slotId)?.value
 }
 
 function scenario(scenarioName) {
-	return function (originalFunction) {
-		const wrapped = async function (...args) {
+	return function(originalFunction) {
+		const wrapped = async function(...args) {
 			// Вызываем оригинальную функцию
-			return await originalFunction.apply(this, args);
-		};
-
-		// Помечаем как сценарную
-		wrapped.isScenario = true;
-		wrapped.returnsResult = true;
-		// Ожидаем, что результат сценария будет записан в слот с именем scenarioName
-		if (scenarioName === undefined) {
-			wrapped.scenarioName = AGENT_SLOTS.SCENARIO_RESULT;
-		} else if (scenarioName === null) {
-			wrapped.scenarioName = null;
-			wrapped.returnsResult = false;
-		} else {
-			wrapped.scenarioName = scenarioName;
+			return await originalFunction.apply(this, args)
 		}
 
-		return wrapped;
-	};
+		// Помечаем как сценарную
+		wrapped.isScenario = true
+		wrapped.returnsResult = true
+		// Ожидаем, что результат сценария будет записан в слот с именем scenarioName
+		if (scenarioName === undefined) {
+			wrapped.scenarioName = AGENT_SLOTS.SCENARIO_RESULT
+		} else if (scenarioName === null) {
+			wrapped.scenarioName = null
+			wrapped.returnsResult = false
+		} else {
+			wrapped.scenarioName = scenarioName
+		}
+
+		return wrapped
+	}
+}
+
+function setScenariosForTransfer(scenarios) {
+	availableFunctions["transfer_to_scenario"] = scenario(null)(function ({id}) {
+		const scenarios_ = scenarios;
+		logger.error(`ERROR. call scenarion. scenarios:\n${JSON.stringify(scenarios)}`)
+		if (scenarios_[id] === undefined) {
+			logger.error(`ERROR. scenario ${id} is not defined.`)
+			return `ERROR: scenario ${id} is not defined`
+		}
+		logger.error(`ERROR. call scenarion. id: ${id} .`)
+		return switchredirect(scenarios_[id]);
+	})
 }
 
 const slotRecording = (slot, value) => {
-	_sendReply.slots = _sendReply.slots || {};
-	_sendReply.slots[slot] = value;
-};
+	_sendReply.slots = _sendReply.slots || {}
+	_sendReply.slots[slot] = value
+}
 
 const transfer_to_operator = scenario(null)(function () {
-	return switchredirect(ARTICLES.TRANSFER_FOR_OPERATOR.ID);
-});
+	return switchredirect(ARTICLES.TRANSFER_FOR_OPERATOR.ID)
+})
 
-const transfer_to_tracking_scenario = scenario(AGENT_SLOTS.SCENARIO_RESULT)(
-	function ({ track_number }) {
-		slotRecording(AGENT_SLOTS.SCENARIO_SOURCE, "true");
-		slotRecording(AGENT_SLOTS.TRACK_NUMBER, track_number);
-		return switchredirect(ARTICLES.START_RUPOST_TRACKING.ID);
-	},
-);
+// Для примера. Значения(функция) по умолчанию.
+const transfer_to_scenario = scenario(null)(function ({ id }) {
+	const scenarios = {
+		[translit("Test Scenario")]: "article-5ce41239-a4d5-48c7-8c11-7df100ba1685",
+		[translit("Проверить код активации")]: "article-d948bdd4-4a8f-460a-b285-c10fae33c67d",
+	};
+	if (scenarios[id] === undefined) {
+		return `ERROR: scenario ${id} is not defined`
+	}
+	return switchredirect(scenarios[id]);
+})
 
-const transfer_to_ops_search_scenario = scenario(AGENT_SLOTS.SCENARIO_RESULT)(
-	function ({ ops_index }) {
-		slotRecording(AGENT_SLOTS.SCENARIO_SOURCE, "true");
-		slotRecording(AGENT_SLOTS.INDEX_OPS, ops_index);
-		return switchredirect(ARTICLES.START_OPS_SEARCH.ID);
-	},
-);
+const transfer_to_tracking_scenario = scenario(AGENT_SLOTS.SCENARIO_RESULT)(function ({track_number}) {
+	slotRecording(AGENT_SLOTS.SCENARIO_SOURCE, "true")
+	slotRecording(AGENT_SLOTS.TRACK_NUMBER, track_number)
+	return switchredirect(ARTICLES.START_RUPOST_TRACKING.ID)
+})
+
+const transfer_to_ops_search_scenario = scenario(AGENT_SLOTS.SCENARIO_RESULT)(function ({ops_index}) {
+	slotRecording(AGENT_SLOTS.SCENARIO_SOURCE, "true")
+	slotRecording(AGENT_SLOTS.INDEX_OPS, ops_index)
+	return switchredirect(ARTICLES.START_OPS_SEARCH.ID)
+})
 
 function switchredirect(intent_id) {
-	return `/switchredirect aiassist2 intent_id="${intent_id}"`;
+	return `/switchredirect aiassist2 intent_id="${intent_id}"`
 }
 
 const availableFunctions = {
 	transfer_to_operator,
+	transfer_to_scenario,
 	transfer_to_tracking_scenario,
-	transfer_to_ops_search_scenario,
-};
+	transfer_to_ops_search_scenario
+}
 
-TOOLS = [
+let TOOLS = [
 	{
-		type: ITEM_TYPES.function,
-		function: {
-			name: "transfer_to_operator",
-			description:
-				"Переводит диалог на оператора. Вызывай, если не нашел ответа, не можешь самостоятельно решить проблему пользователя и уже предлагал переформулировать вопрос или если пользователь явно попросил тебя соединить его с оператором или живым человеком. После выполнения сценария спроси остались ли еще вопросы.",
-			parameters: {
-				type: "object",
-				properties: {},
-				required: [],
+		"type": ITEM_TYPES.function,
+		"function": {
+			"name": "transfer_to_operator",
+			"description": "Переводит диалог на оператора. Вызывай, если не нашел ответа, не можешь самостоятельно решить проблему пользователя или если пользователь явно попросил тебя соединить его с оператором. После выполнения сценария спроси остались ли еще вопросы.",
+			"parameters": {
+				"type": "object",
+				"properties": {},
+				"required": [],
 			},
 		},
 	},
 	{
-		type: ITEM_TYPES.function,
-		function: {
-			name: "transfer_to_tracking_scenario",
-			description:
-				"Инструмент отслеживания статуса посылок, писем, отправлений. Вызывай этот инструмент при любом вопросе пользователя о посылках, письмах, отправлениях, бандеролях, если в слотах или истории отсутствует информация об отслеживании. Так же используй этот инструмент если с момента последнего отслеживания прошло больше 4 часов. Не используй если с момента последнего отслеживания прошло меньше 4 часов даже если часть слотов не заполнена. Для запуска инструмента необходим трек-номер, если он отсутствует в вопросе пользователя, то сначала уточни трек-номер. Даже если вопрос не точный — проверяй по смыслу и ключевым словам. После выполнения сценария спроси остались ли еще вопросы.",
-			parameters: {
-				type: "object",
-				properties: {
-					track_number: {
-						type: "string",
-						description:
-							"Для внутренних отправлений номер состоит из 14 цифр, для международных из 4 латинских букв и 9 цифр. Вот регулярное выражение для определения трек номера (\\d{14})|([A-z]{2}\\d{9}[A-z]{2})",
-					},
+		"type": ITEM_TYPES.function,
+		"function": {
+			"name": "transfer_to_tracking_scenario",
+			"description": "Вызывай этот инструмент, если пользователь хочет ОТСЛЕДИТЬ ПОСЫЛКУ. Даже если вопрос не точный — проверяй по смыслу и ключевым словам. После выполнения сценария спроси остались ли еще вопросы.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"track_number": {
+						"type": "string",
+						"description": "Для внутренних отправлений номер состоит из 14 цифр, для международных из 4 латинских букв и 9 цифр. Вот регулярное выражение для определения трек номера (\\d{14})|([A-z]{2}\\d{9}[A-z]{2})",
+					}
 				},
-				required: ["track_number"],
+				"required": ["track_number"],
 			},
 		},
 	},
 	{
-		type: ITEM_TYPES.function,
-		function: {
-			name: "transfer_to_ops_search_scenario",
-			description:
-				"Вызывай этот инструмент, если пользователь хочет НАЙТИ ОТДЕЛЕНИЕ, вводит 6 значный индес (номер ОПС) или хочет узнать информацию о почтовых отделениях (например график работы). Даже если вопрос не точный — проверяй по смыслу и ключевым словам. После выполнения сценария спроси остались ли еще вопросы.",
-			parameters: {
-				type: "object",
-				properties: {
-					ops_index: {
-						type: "string",
-						description:
-							"Для отделени=� ОПС индекс состоит из 6 цифр. Вот регулярное выражение для определения индекса ОПС (/\\b\\d{6}\\b)",
-					},
+		"type": ITEM_TYPES.function,
+		"function": {
+			"name": "transfer_to_ops_search_scenario",
+			"description": "Вызывай этот инструмент, если пользователь хочет НАЙТИ ОТДЕЛЕНИЕ или узнать информацию о почтовых отделениях. Даже если вопрос не точный — проверяй по смыслу и ключевым словам. После выполнения сценария спроси остались ли еще вопросы.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"ops_index": {
+						"type": "string",
+						"description": "Для отделений ОПС индекс состоит из 6 цифр. Вот регулярное выражение для определения индекса ОПС (/\\b\\d{6}\\b)",
+					}
 				},
-				required: ["ops_index"],
+				"required": ["ops_index"],
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "transfer_to_scenario",
+			"description": `
+Переводит диалог на выбранный сценарий. Вызывай сценарий, если он подходит в текущей ситуации или если сообщение пользователя похоже на один из примеров вопросов для сценария.
+Доступные сценарии перечислены в формате \`- <id сценария> <Описание сценария (может отсутствовать)> Примеры вопросов <примеры сообщений, на которые нужно ответить этим сценарием через запятую> \`.
+После выполнения сценария (Done) спроси 'У вас остались еще вопросы?'`,
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						// заполняется в реалтайме. Это пример, который будет перезаписан
+						"description": `Идентификатор сценария, на который выполняешь перевод. Доступные значения и примеры вопросов (вызывай этот сценарий, если сообщение пользователя похоже на один из примеров вопросов):
+- ${translit("Test Scenario")} Примеры вопросов: тест, Тест, test, пройти тест
+- ${translit("Проверить код активации")} Вызывайте этот сценарий, когда пользователь:
+        Просит проверить код активации (например, вводит код или задает вопрос о его проверке).
+        Вводит код, но получает ошибку (например, «код неверный»).
+        Столкнулся с проблемами активации (например, не может войти в личный кабинет, связанные с кодом).
+        Не уверен в корректности кода и хочет уточнить правила проверки.
+        Примеры вопросов: проверь код активации, код 123 верный?, код активации пробить.
+`,
+						// заполняется в реалтайме. Это пример, который будет перезаписан
+						"enum": [translit("Test Scenario"), translit("Проверить код активации")]
+					}
+				},
+				"required": ["id"],
 			},
 		},
 	},
-];
+]
 
 class ScenarioNotReadyError extends Error {
 	constructor(scenarioName) {
-		super(
-			`Unexpected run of the tools agent during waiting for ${scenarioName}`,
-		);
-		this.name = "ScenarioNotReadyError";
+		super(`Unexpected run of the tools agent during waiting for ${scenarioName}`);
+		this.name = "ScenarioNotReadyError"
 	}
 }
 
 class SwitchRedirectPropagate extends Error {
 	constructor(switchredirect) {
 		super("switchredirect call");
-		this.name = "SwitchRedirectPropagate";
-		this.switchredirect = switchredirect;
+		this.name = "SwitchRedirectPropagate"
+		this.switchredirect = switchredirect
 	}
 }
 
 class RedisQueue {
 	constructor(redisClient, deleteSlotFn, debugLogFn, commitFcResults) {
-		this.redis = redisClient;
-		this.deleteSlot = deleteSlotFn;
-		this.debugReply = debugLogFn;
-		this.commitFcResults = commitFcResults;
+		this.redis = redisClient
+		this.deleteSlot = deleteSlotFn
+		this.debugReply = debugLogFn
+		this.commitFcResults = commitFcResults
 	}
 
 	// Добавление задачи в очередь
@@ -730,9 +765,9 @@ class RedisQueue {
 			scenario: null,
 			result: null,
 			// ид сообщения пользователя, на которое вызвалась тулза
-			replyGptToMessageId: messageId,
+			replyGptToMessageId: messageId
 		};
-		queue.push(newItem);
+		queue.push(newItem)
 	}
 
 	// Добавление коммита
@@ -740,115 +775,96 @@ class RedisQueue {
 		queue.push({
 			type: ITEM_TYPES.commit,
 			availableTools: availableTools,
-		});
+		})
 	}
 
 	// Получение и обработка очереди
-	async processQueue(replies) {
-		// -> {answer, tool_calls, log_id} | undefined
-		const queue = await this.getQueue();
+	async processQueue(replies) {  // -> {answer, tool_calls, log_id} | undefined
+		const queue = await this.getQueue()
 
 		for (let i = 0; i < queue.length; i++) {
-			const item = queue[i];
+			const item = queue[i]
 
 			// пропустим выполненные функции
 			if (item.type === ITEM_TYPES.function && item.executed) {
-				continue;
+				continue
 			}
 			// Обработка невыполненной функции
 			if (item.type === ITEM_TYPES.function) {
 				if (item.started) {
 					// запущенные сценарии
-					let scenarioResult;
+					let scenarioResult
 					if (item.scenario !== null) {
 						// scenario that returns a result
-						scenarioResult = this.getScenarioAnswer(item.scenario);
-						logger.debug(`scenarioResult ${scenarioResult}`);
+						scenarioResult = this.getScenarioAnswer(item.scenario)
+						logger.debug(`scenarioResult ${scenarioResult}`)
 						if (scenarioResult === undefined) {
-							throw new ScenarioNotReadyError(item.scenario);
+							throw new ScenarioNotReadyError(item.scenario)
 						}
 						if (
 							item.name === "transfer_to_tracking_scenario" ||
 							item.name === "transfer_to_ops_search_scenario"
 						) {
-							await replies.markdownReply(scenarioResult);
+							await replies.markdownReply(scenarioResult)
 						}
-						this.deleteSlot(item.scenario);
+						this.deleteSlot(item.scenario)
 					}
-					await this.markAsExecuted(queue, i, scenarioResult);
+					await this.markAsExecuted(queue, i, scenarioResult)
 				} else {
 					// Запускаем функции
-					const func = availableFunctions[item.name];
+					const func = availableFunctions[item.name]
 					this.debugReply(
-						`Calling ${item.name}(${JSON.stringify(item.args)})`,
-					);
+						`Calling ${item.name}(${JSON.stringify(item.args)})`
+					)
 					if (func.isScenario) {
-						await this.markAsStartedScenario(
-							queue,
-							i,
-							func.scenarioName,
-						);
-						const res = await func(item.args, replies);
+						await this.markAsStartedScenario(queue, i, func.scenarioName)
+						const res = await func(item.args, replies)
 
-						if (res?.[0] === "/") {
-							// /switchredirect as expected
-							throw new SwitchRedirectPropagate(res);
+						if (res?.[0] === "/") {  // /switchredirect as expected
+							throw new SwitchRedirectPropagate(res)
 						}
 						// else it is probably an error, so return it as result
-						await this.markAsExecuted(queue, i, res);
+						await this.markAsExecuted(queue, i, res)
 					} else {
-						const res = await func(item.args);
-						await this.markAsExecuted(queue, i, res);
+						const res = await func(item.args)
+						await this.markAsExecuted(queue, i, res)
 					}
 				}
-				continue;
+				continue
 			}
 
 			// Обработка коммита
 			if (item.type === ITEM_TYPES.commit) {
 				// n_cycles ++
-				const functionsToCommit = [];
-				let commitIndex = i;
+				const functionsToCommit = []
+				let commitIndex = i
 
 				// Сбор выполненных функций до коммита
 				for (let j = 0; j < commitIndex; j++) {
-					const tool = queue[j];
-					if (
-						(tool.type === ITEM_TYPES.function ||
-							tool.type === ITEM_TYPES.commit) &&
-						tool.executed
-					) {
-						functionsToCommit.push(tool);
+					const tool = queue[j]
+					if ((tool.type === ITEM_TYPES.function || tool.type === ITEM_TYPES.commit) && tool.executed) {
+						functionsToCommit.push(tool)
 					} else {
-						logger.warn(
-							`Unexpected item before commit: ${JSON.stringify(queue[j])}`,
-						);
-						this.debugReply(
-							`Unexpected item before commit: ${JSON.stringify(queue[j])}`,
-						);
+						logger.warn(`Unexpected item before commit: ${JSON.stringify(queue[j])}`)
+						this.debugReply(`Unexpected item before commit: ${JSON.stringify(queue[j])}`)
 					}
 				}
 				// Нужно для того, чтобы разделять по коммиту группы тулзов
-				functionsToCommit.push(item);
-				this.debugReply(
-					`Comitting ${JSON.stringify(functionsToCommit, null, 2)}`,
-				);
+				functionsToCommit.push(item)
+				this.debugReply(`Comitting ${JSON.stringify(functionsToCommit, null, 2)}`)
 				// Вызов коммит-функции
-				const n_cycles = await this.incNCycles(); // равно тому, сколько раз уже вызывались тулзы
-				this.debugReply(
-					`Cycle ${n_cycles} / ${AGENT_PARAMETERS.MAX_CYCLES}`,
-				);
-				const tool_choice =
-					n_cycles >= AGENT_PARAMETERS.MAX_CYCLES ? "none" : "auto";
-				// Если коммит не был обработан, то отпрd�вляем на ллм(вместе с ранее обработанными коммитами)
+				const n_cycles = await this.incNCycles()  // равно тому, сколько раз уже вызывались тулзы
+				this.debugReply(`Cycle ${n_cycles} / ${AGENT_PARAMETERS.MAX_CYCLES}`)
+				const tool_choice = n_cycles >= AGENT_PARAMETERS.MAX_CYCLES ? "none": "auto"
+				// Если коммит не был обработан, то отправляем на ллм(вместе с ранее обработанными коммитами)
 				if (!item.executed) {
-					await this.markAsExecuted(queue, commitIndex);
+					await this.markAsExecuted(queue, commitIndex)
 					const llm_res = await this.commitFcResults(
 						functionsToCommit,
 						// item.availableTools,
-						tool_choice,
-					);
-					return llm_res;
+						tool_choice
+					)
+					return llm_res
 				}
 				// // Удаление обработанных элементов
 				// queue.splice(0, commitIndex + 1)
@@ -862,61 +878,55 @@ class RedisQueue {
 		// Сценарий запишет результат в слот, который мы захардкодили в
 		// соответствующей функции
 		if (scenarioName === null) {
-			return null;
+			return null
 		}
-		return getSlotValue(scenarioName);
+		return getSlotValue(scenarioName)
 	}
 
 	// Пометить функцию как запущенную
 	async markAsStartedScenario(queue, i, scenarioName) {
-		const item = queue[i];
-		item.started = true;
-		item.scenario = scenarioName;
-		await this.saveQueue(queue);
+		const item = queue[i]
+		item.started = true
+		item.scenario = scenarioName
+		await this.saveQueue(queue)
 	}
 
 	// Пометить функцию как выполненную
 	async markAsExecuted(queue, i, result) {
-		const item = queue[i];
-		item.executed = true;
-		item.result = result;
-		await this.saveQueue(queue);
-		this.debugReply(`${item.name} finished with ${result}`);
+		const item = queue[i]
+		item.executed = true
+		item.result = result
+		await this.saveQueue(queue)
+		this.debugReply(`${item.name} finished with ${result}`)
 	}
 
-	async clearQueue() {
+	async clearQueue()  {
 		for (const item of await this.getQueue()) {
 			if (item.scenario !== null && item.scenario !== undefined) {
-				this.deleteSlot(item.scenario);
+				this.deleteSlot(item.scenario)
 			}
 		}
-		this.debugReply(JSON.stringify(await this.saveQueue([])));
-		this.debugReply(await this.getQueue());
-		await this.resetNCycles();
+		this.debugReply(JSON.stringify(
+			await this.saveQueue([])
+		))
+		this.debugReply(await this.getQueue())
+		await this.resetNCycles()
 	}
 
 	async getQueue() {
-		const data = await this.redis.get(KEYS.QUEUE_KEY);
-		this.debugReply(`Get queue: ${JSON.stringify(data)}`);
-		return data ? JSON.parse(data) : [];
+		const data = await this.redis.get(KEYS.QUEUE_KEY)
+		this.debugReply(`Get queue: ${JSON.stringify(data)}`)
+		return data ? JSON.parse(data) : []
 	}
 
 	async saveQueue(queue) {
-		return await this.redis.set(
-			KEYS.QUEUE_KEY,
-			JSON.stringify(queue),
-			WAIT_FOR_SCENARIO_TTL,
-		);
+		return await this.redis.set(KEYS.QUEUE_KEY, JSON.stringify(queue), WAIT_FOR_SCENARIO_TTL)
 	}
 
 	async incNCycles() {
-		let n_cycles = (await this.redis.get(KEYS.N_CYCLES_KEY)) ?? 0;
+		let n_cycles = await this.redis.get(KEYS.N_CYCLES_KEY) ?? 0;
 		n_cycles++;
-		await this.redis.set(
-			KEYS.N_CYCLES_KEY,
-			n_cycles,
-			WAIT_FOR_SCENARIO_TTL,
-		);
+		await this.redis.set(KEYS.N_CYCLES_KEY, n_cycles, WAIT_FOR_SCENARIO_TTL);
 		return n_cycles;
 	}
 
@@ -927,118 +937,105 @@ class RedisQueue {
 
 function updateAccumulatedSlot(slotId, newText, slotsStore) {
 	if (slotsStore[slotId] === undefined) {
-		const oldValue = getSlotValue(slotId);
+		const oldValue = getSlotValue(slotId)
 		if (oldValue) {
-			slotsStore[slotId] = oldValue;
+			slotsStore[slotId] = oldValue
 		}
 	}
 
-	const current = slotsStore[slotId] ?? "";
-	slotsStore[slotId] = current ? `${current};${newText}` : newText;
-	return slotsStore;
+	const current = slotsStore[slotId] ?? ""
+	slotsStore[slotId] = current ? `${current};${newText}` : newText
+	return slotsStore
 }
 
 function _sendReply(text, slots, meta = {}) {
 	if (_sendReply.slots === undefined) {
-		_sendReply.slots = {};
+		_sendReply.slots = {}
 	}
-	const reply = agentApi.makeMarkdownReply(text);
+	const reply = agentApi.makeMarkdownReply(text)
 
-	updateAccumulatedSlot(
-		AGENT_SLOTS.LLM_ANSWER_HISTORY,
-		text,
-		_sendReply.slots,
-	);
+	updateAccumulatedSlot(AGENT_SLOTS.LLM_ANSWER_HISTORY, text, _sendReply.slots)
 
-	Object.assign(_sendReply.slots, slots ?? {});
+	Object.assign(_sendReply.slots, slots ?? {})
 
-	logger.debug(JSON.stringify(reply.message.text));
+	logger.debug(JSON.stringify(reply.message.text))
 
-	return agentApi
-		.sendMessage(
-			{
-				MessageMarkdown: reply.message.text,
-				SendMessageParams: {
-					ProjectId: reply.customer_id,
-					OmniUserId: reply.omni_user_id,
-					Sender: {},
-					FilledSlots: _sendReply.slots,
-					Meta: meta,
-				},
-			},
-			logger,
-		)
-		.then((result) => {
+	return agentApi.sendMessage({
+		MessageMarkdown: reply.message.text,
+		SendMessageParams: {
+			ProjectId: reply.customer_id,
+			OmniUserId: reply.omni_user_id,
+			Sender: {},
+			FilledSlots: _sendReply.slots,
+			Meta: meta
+		}
+	}, logger)
+		.then(result => {
 			if (!result.Ok) {
-				const errMsg = `${JSON.stringify(result.Errors)} during sending ${JSON.stringify(reply)}`;
+				const errMsg = `${JSON.stringify(result.Errors)} during sending ${JSON.stringify(reply)}`
 				logger.error(errMsg);
 				if (AGENT_PARAMETERS.DEBUG) {
-					agentApi.sendMessage(
-						{
-							MessageMarkdown: errMsg,
-							SendMessageParams: {
-								ProjectId: reply.customer_id,
-								OmniUserId: reply.omni_user_id,
-								Sender: {},
-								FilledSlots: _sendReply.slots,
-							},
-						},
-						logger,
-					);
+					agentApi.sendMessage({
+						MessageMarkdown: errMsg,
+						SendMessageParams: {
+							ProjectId: reply.customer_id,
+							OmniUserId: reply.omni_user_id,
+							Sender: {},
+							FilledSlots: _sendReply.slots
+						}
+					}, logger)
 				}
 			}
 		})
-		.catch((e) => logger.error(`Error sending reply: ${e}.`));
+		.catch(e => logger.error(`Error sending reply: ${e}.`))
 	// don't block, return Promise
 }
 
 function getArrayFromInsertPosition(arr, index) {
-	const insertIndex = arr.findIndex((el) => el >= index);
+	const insertIndex = arr.findIndex(el => el >= index)
 	if (insertIndex === -1) {
-		return [index];
+		return [index]
 	}
 
-	return [index, ...arr.slice(insertIndex)];
+	return [index, ...arr.slice(insertIndex)]
 }
 
 function getScenarioMessages(indices, history, inputIndex) {
 	// Получаем индекс из массива индексов
-	const currentIndex = indices[inputIndex];
+	const currentIndex = indices[inputIndex]
 
 	if (currentIndex === undefined) {
-		return [];
+		return []
 	}
 
 	// Получаем следующий индекс
-	const nextIndex = indices[inputIndex + 1];
+	const nextIndex = indices[inputIndex + 1]
 
-	let messages;
+	let messages
 	if (nextIndex === undefined) {
 		// Если следующего индекса нет, возвращаем все сообщения после currentIndex
-		messages = history.slice(currentIndex + 1);
+		messages = history.slice(currentIndex+1)
 	} else {
 		// Иначе возвращаем сообщения между currentIndex и nextIndex (не включая края)
-		messages = history.slice(currentIndex + 1, nextIndex);
+		messages = history.slice(currentIndex+1, nextIndex)
 	}
-	const reduced = messages.reduce(
-		(acc, mes) => {
+	const reduced = messages
+		.reduce((acc, mes) => {
 			if (mes.type !== 30) {
 				acc.messages.push({
 					actor: mes.role,
-					utterance: mes.content,
-				});
-				acc.ids.push(mes.id);
+					utterance: mes.content
+				})
+				acc.ids.push(mes.id)
 			}
-			return acc;
-		},
-		{ messages: [], ids: [] },
-	);
-	return [{ scenario_dialogue: reduced.messages }, reduced.ids];
+			return acc
+		}, { messages: [], ids: [] })
+	return [{ scenario_dialogue: reduced.messages }, reduced.ids]
 }
 
 function wrapInMarkdownCodeBlock(str) {
 	// Экранируем только неэкранированные тройные кавычки
-	const escapedStr = str.replace(/(?<!\\)```/g, "\\```");
+	const escapedStr = str.replace(/(?<!\\)```/g, '\\```');
 	// Оборачиваем в markdown code block
 	return `\`\`\`
 ${escapedStr}
@@ -1050,8 +1047,8 @@ function escapeHTML(text) {
 }
 
 function extractThinkContent(input) {
-	const openTag = "<think>";
-	const closeTag = "</think>";
+	const openTag = '<think>';
+	const closeTag = '</think>';
 
 	const startIdx = input.indexOf(openTag);
 	const endIdx = input.indexOf(closeTag);
@@ -1059,20 +1056,19 @@ function extractThinkContent(input) {
 	if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
 		return {
 			cleanedText: input,
-			thought: "",
+			thought: ''
 		};
 	}
 
 	const thoughtContent = input.substring(startIdx + openTag.length, endIdx);
-	const cleanedText = escapeHTML(
-		input.substring(0, startIdx) +
-		input.substring(endIdx + closeTag.length),
-	).trim();
+	const cleanedText =
+		escapeHTML(
+			input.substring(0, startIdx) +
+			input.substring(endIdx + closeTag.length)
+		).trim()
 	return {
 		cleanedText: cleanedText,
-		thought: thoughtContent
-			? "*Мои размышления:* \n\n" + escapeHTML(thoughtContent)
-			: thoughtContent,
+		thought: thoughtContent ? '*Мои размышления:* \n\n' + escapeHTML(thoughtContent) : thoughtContent
 	};
 }
 
@@ -1080,42 +1076,41 @@ function addUrlToContextTitle(fullContext) {
 	fullContext.symbol_code.forEach((intentId, idx) => {
 		const title = fullContext.context[idx].title;
 		fullContext.context[idx].title = getTitleWithUrl(intentId, title);
-	});
+	})
 }
 
 function getTitleWithUrl(intentId, title) {
 	const url = `https://${API.base_url}/app/project/${CUSTOMER_ID}/knowledge-base/article/view/${intentId}`;
-	return `[${title}](${url})`;
+	return `[${title}](${url})`
 }
 
 function prepareHistory(rawHistory, excludeIds) {
-	let history = rawHistory.filter(
-		(mes) => mes.type !== 30 && !excludeIds.includes(mes.id),
-	);
-	return history.map((mes) => ({
+	let history = rawHistory.filter(mes => mes.type !== 30 && !excludeIds.includes(mes.id))
+	return history.map(mes => ({
 		role: mes.role === ROLE.OPERATOR ? ROLE.BOT : mes.role, // страхующая замена Оператора на Бота. Т.к. ЛЛМ не поддерживает Оператора
 		message: mes.content ?? mes.message,
 		tool_calls: mes.tool_calls,
-		tool_call_id: mes.tool_call_id,
-	}));
+		tool_call_id: mes.tool_call_id }))
 }
 
 async function main() {
-	let replies = {};
-	let response;
-	function textReply(text, meta = {}, wrapCodeBlock = false) {
+	let replies = {}
+	let response
+	function textReply(text, meta = {}, wrapCodeBlock=false) {
 		if (!IS_QUERY_REPORT) {
-			let reply;
+			let reply
 			if (wrapCodeBlock) {
-				reply = wrapInMarkdownCodeBlock(String(text));
+				reply = wrapInMarkdownCodeBlock(String(text))
 			} else {
-				reply = String(text);
+				reply = String(text)
 			}
-			return _sendReply(reply, undefined, meta);
+			return _sendReply(reply, undefined, meta)
 		}
 	}
 	function markdownReply(text) {
-		if (!IS_QUERY_REPORT) return _sendReply(String(text));
+		logger.debug(`Message for user: ${text}`)
+		if (!IS_QUERY_REPORT)
+			return _sendReply(String(text));
 	}
 	function debugReply(text) {
 		// never await debugReply
@@ -1129,45 +1124,47 @@ async function main() {
 		}
 		_sendReply.slots[slot] = null;
 	}
-	replies.textReply = textReply;
-	replies.markdownReply = markdownReply;
-	replies.debugReply = debugReply;
-	replies.deleteSlot = deleteSlot;
+	replies.textReply = textReply
+	replies.markdownReply = markdownReply
+	replies.debugReply = debugReply
+	replies.deleteSlot = deleteSlot
 
 	try {
 		response = await _main(replies);
 	} catch (e) {
 		if (e instanceof SwitchRedirectPropagate) {
 			if (IS_QUERY_REPORT) {
-				return e.switchredirect;
+				return e.switchredirect
 			}
 			await replies.markdownReply(e.switchredirect);
-			return response;
+			return response
 		}
-		logger.error(`main error ${e}`);
-		if (e.code === "ECONNABORTED") {
+		logger.error(`main error ${e}`)
+		logger.error(JSON.stringify(e.stack))
+		logger.error(JSON.stringify(e.cause))
+		if (e.code === 'ECONNABORTED') {
 			if (IS_QUERY_REPORT) {
-				return STANDARD_MESSAGES.TIMEOUT_ERROR_MSG;
+				return STANDARD_MESSAGES.TIMEOUT_ERROR_MSG
 			}
-			await replies.textReply(STANDARD_MESSAGES.TIMEOUT_ERROR_MSG);
+			await replies.textReply(STANDARD_MESSAGES.TIMEOUT_ERROR_MSG)
 		} else {
 			if (IS_QUERY_REPORT) {
-				return STANDARD_MESSAGES.DEFAULT_ERROR_MSG;
+				return STANDARD_MESSAGES.DEFAULT_ERROR_MSG
 			}
-			await replies.textReply(STANDARD_MESSAGES.DEFAULT_ERROR_MSG);
+			await replies.textReply(STANDARD_MESSAGES.DEFAULT_ERROR_MSG)
 		}
 		if (AGENT_PARAMETERS.DEBUG) {
-			replies.debugReply(e.stack);
+			replies.debugReply(e.stack)
 		}
 	}
 
-	return response;
+	return response
 }
 
 async function _main(replies) {
 	// Main code
-	let question = message.message.text;
-	logger.info(`question ${question}`);
+	let question = message.message.text
+	logger.info(`question ${question}`)
 
 	// addTrackOrIndexSlot(replies, question)
 
@@ -1175,322 +1172,248 @@ async function _main(replies) {
 	// replies.debugReply(JSON.stringify(message.message, null, 2));
 
 	// Get dialog_id
-	let dialog_id = null;
-	let history = null;
+	let dialog_id = null
+	let history = null
 	if (AGENT_PARAMETERS.USE_HISTORY) {
 		if (IS_QUERY_REPORT) {
-			dialog_id = message.meta?.dialog_id;
-			history = message.meta?.history;
+			dialog_id = message.meta?.dialog_id
+			history = message.meta?.history
 		} else {
 			const dialog_response = await agentApi.getDialogId(
 				message.user.omni_user_id,
-				message.user.customer_id,
-			);
+				message.user.customer_id
+			)
 
-			dialog_id = dialog_response.Response;
+			dialog_id = dialog_response.Response
 
-			history = await getDialog(dialog_id);
+			history = await getDialog(dialog_id)
 		}
 	}
 
-	logger.info(`ID диалога клиента: ${JSON.stringify(dialog_id)}`);
-	logger.info(`История диалога клиента: ${JSON.stringify(history)}`);
+	logger.info(`ID диалога клиента: ${JSON.stringify(dialog_id)}`)
+	logger.info(`История диалога клиента: ${JSON.stringify(history)}`)
 
 	// create a commit function with a single argument
-	const commitFcResults = async function (fcResults, tool_choice) {
-		const done = "Done";
-		const functionsToCommit = [];
-		logger.debug("fcResults " + JSON.stringify(fcResults));
-		let isScenarioStartIndex = 0;
+	const commitFcResults = async function (
+		fcResults, tool_choice
+	) {
+		const done = "Done"
+		const functionsToCommit = []
+		logger.debug("fcResults " + JSON.stringify(fcResults))
+		let isScenarioStartIndex = 0
 		// индексы сообщений переводов на текущего агента в истории
 		// вместе с isScenarioStartIndex нужны для того, чтобы, если было несколько последовательных вызовов тулзов,
 		// то мы знали между какими вызовами история принадлежит тулзе
 		const routesToSelfAgent = history.reduce((acc, message, index) => {
-			if (
-				message.type === 30 &&
-				message.content === ROUTE_TO_SELF_AGENT
-			) {
-				acc.push(index);
+			if (message.type === 30 && message.content === ROUTE_TO_SELF_AGENT) {
+				acc.push(index)
 			}
-			return acc;
-		}, []);
-		let excludeIds = [];
-		let messagesToInsert = [];
+			return acc
+		}, [])
+		let excludeIds = []
+		let messagesToInsert = []
 		for (let tool of fcResults) {
 			// Т.к. isScenarioStartIndex(смещение) отвечает за группу сообщений сценария в рамках одной группы тулзов,
 			// то при обнаружении коммита требуется его сбросить
 			if (tool.type === ITEM_TYPES.commit) {
-				isScenarioStartIndex = 0;
-				continue;
+				isScenarioStartIndex = 0
+				continue
 			}
-			const func = availableFunctions[tool.name];
+			const func = availableFunctions[tool.name]
 			const resultTool = {
-				role: ITEM_TYPES.function,
-				content: tool.result ?? done,
-				tool_call_id: tool.toolCallId,
-			};
+				"role": ITEM_TYPES.function,
+				"content": tool.result ?? done,
+				"tool_call_id": tool.toolCallId
+			}
 			if (func.isScenario) {
-				const replyGptToMessageIndex = history.findIndex(
-					(mes) =>
-						mes.replyGptToMessageId === tool.replyGptToMessageId,
-				);
-				const origMesIndex = history.findIndex(
-					(mes) => mes.id === tool.replyGptToMessageId,
-				);
+				const replyGptToMessageIndex = history.findIndex(mes => mes.replyGptToMessageId === tool.replyGptToMessageId)
+				const origMesIndex = history.findIndex(mes => mes.id === tool.replyGptToMessageId)
 				// Если сообщение "обдумывания" гпт существует. То прикрепляем к нему вызванные тулзы
 				if (replyGptToMessageIndex !== -1) {
 					// те же индексы переводов, но начиная с индекса !сообщения гпт!, на которое была вызвана тулза
-					const routesIndices = getArrayFromInsertPosition(
-						routesToSelfAgent,
-						replyGptToMessageIndex,
-					);
+					const routesIndices = getArrayFromInsertPosition(routesToSelfAgent, replyGptToMessageIndex)
 					// получение истории сценария
-					const [scenarioMessages, ids] = getScenarioMessages(
-						routesIndices,
-						history,
-						isScenarioStartIndex,
-					);
-					excludeIds = excludeIds.concat(ids);
-					resultTool.content = scenarioMessages
-						? JSON.stringify(scenarioMessages)
-						: resultTool.content;
+					const [scenarioMessages, ids] = getScenarioMessages(routesIndices, history, isScenarioStartIndex)
+					excludeIds = excludeIds.concat(ids)
+					resultTool.content = scenarioMessages ? JSON.stringify(scenarioMessages) : resultTool.content
 					const _tool = {
-						id: tool.toolCallId,
-						type: tool.type,
-						function: {
-							name: tool.name,
-							arguments: JSON.stringify(tool.args),
-						},
-					};
-					let origMes = history[replyGptToMessageIndex];
+						"id": tool.toolCallId,
+						"type": tool.type,
+						"function": {
+							"name": tool.name,
+							"arguments": JSON.stringify(tool.args)
+						}
+					}
+					let origMes = history[replyGptToMessageIndex]
 					let emptyMes = {
 						role: origMes.role,
 						content: "",
-						tool_calls: origMes.tool_calls
-							? origMes.tool_calls.push(_tool)
-							: [_tool],
-					};
-					messagesToInsert.push({
-						index: replyGptToMessageIndex,
-						data: emptyMes,
-						isReplace: true,
-					});
-					messagesToInsert.push({
-						index: replyGptToMessageIndex + 1,
-						data: resultTool,
-						isReplace: false,
-					});
+						tool_calls: origMes.tool_calls ? origMes.tool_calls.push(_tool) : [ _tool]
+					}
+					messagesToInsert.push({index: replyGptToMessageIndex, data: emptyMes, isReplace: true})
+					messagesToInsert.push({index: replyGptToMessageIndex+1, data: resultTool, isReplace: false})
 					// Если нет, то проверяем есть ли в истории оригинальное сообщение, чтобы после него вставить пустое сообщение с тулзами
 					// Иначе ничего не подставляем
 				} else if (origMesIndex !== -1) {
 					// те же индексы переводов, но начиная с индекса !сообщения пользователя!, на которое была вызвана тулза
-					const routesIndices = getArrayFromInsertPosition(
-						routesToSelfAgent,
-						origMesIndex,
-					);
+					const routesIndices = getArrayFromInsertPosition(routesToSelfAgent, origMesIndex)
 					// получение истории сценария
-					const [scenarioMessages, ids] = getScenarioMessages(
-						routesIndices,
-						history,
-						isScenarioStartIndex,
-					);
-					excludeIds = excludeIds.concat(ids);
-					resultTool.content = scenarioMessages
-						? JSON.stringify(scenarioMessages)
-						: resultTool.content;
+					const [scenarioMessages, ids] = getScenarioMessages(routesIndices, history, isScenarioStartIndex)
+					excludeIds = excludeIds.concat(ids)
+					resultTool.content = scenarioMessages ? JSON.stringify(scenarioMessages) : resultTool.content
 					let emptyMes = {
 						role: "assistant",
 						content: "",
-						tool_calls: [
-							{
-								id: tool.toolCallId,
-								type: tool.type,
-								function: {
-									name: tool.name,
-									arguments: JSON.stringify(tool.args),
-								},
-							},
-						],
-					};
-					messagesToInsert.push({
-						index: origMesIndex + 1,
-						data: emptyMes,
-						isReplace: false,
-					});
-					messagesToInsert.push({
-						index: origMesIndex + 2,
-						data: resultTool,
-						isReplace: false,
-					});
+						tool_calls: [{
+							"id": tool.toolCallId,
+							"type": tool.type,
+							"function": {
+								"name": tool.name,
+								"arguments": JSON.stringify(tool.args)
+							}
+						}]
+					}
+					messagesToInsert.push({index: origMesIndex+1, data: emptyMes, isReplace: false})
+					messagesToInsert.push({index: origMesIndex+2, data: resultTool, isReplace: false})
 				}
-				isScenarioStartIndex += 1;
+				isScenarioStartIndex += 1
 			}
-			functionsToCommit.push(resultTool);
+			functionsToCommit.push(resultTool)
 		}
 		// после каждой вставки индексы смещаются на 1, нужно корректировать
-		let correctiveOffset = 0;
+		let correctiveOffset = 0
 		messagesToInsert.forEach((message) => {
 			if (message.isReplace) {
-				history.splice(
-					message.index + correctiveOffset,
-					1,
-					message.data,
-				);
+				history.splice(message.index + correctiveOffset,1,message.data)
 			} else {
-				history.splice(
-					message.index + correctiveOffset,
-					0,
-					message.data,
-				);
+				history.splice(message.index + correctiveOffset,0,message.data)
 			}
-			correctiveOffset += 1;
-		});
+			correctiveOffset += 1
+		})
 		return await commitToolResponses(
-			functionsToCommit,
-			dialog_id,
-			prepareHistory(history, excludeIds),
-			replies,
-			tool_choice,
-		);
-	};
+			functionsToCommit, dialog_id, prepareHistory(history,excludeIds), replies, tool_choice
+		)
+	}
 
 	// get task queue from redis storage
 	const redisClient = new RedisQueue(
 		agentStorage.dialogStorage,
 		replies.deleteSlot,
 		replies.debugReply,
-		commitFcResults,
-	);
+		commitFcResults
+	)
 
 	// check whether we want to erase the queue
-	if (
-		question.toLowerCase() === "прервать" ||
-		message.message.action === "cancel"
-	) {
-		replies.debugReply("Cancelling all tool calls");
+	if (question.toLowerCase() === "прервать" || message.message.action === "cancel") {
+		replies.debugReply("Cancelling all tool calls")
 		await Promise.all([
 			redisClient.clearQueue(),
-			replies.markdownReply(STANDARD_MESSAGES.MESSAGE_CANCEL_WAITING),
-		]);
-		return;
+			replies.markdownReply(STANDARD_MESSAGES.MESSAGE_CANCEL_WAITING)
+		])
+		return
 	}
 
-	let response;
+	let response
 	// Ответ, который мы вернём из скрипта, если был запрос только с текстом. Для отчетов
-	let finalAnswer;
-	let responsePrinted = false;
+	let finalAnswer
+	let responsePrinted = false
 	try {
-		response = await redisClient.processQueue(replies);
+		response = await redisClient.processQueue(replies)
 	} catch (error) {
 		if (error instanceof ScenarioNotReadyError) {
 			if (question) {
-				await replies.markdownReply(MESSAGE_WHILE_WAITING_ERROR);
-				replies.debugReply(error.message);
-				return;
+				await replies.markdownReply(MESSAGE_WHILE_WAITING_ERROR)
+				replies.debugReply(error.message)
+				return
 			}
 		}
-		throw error;
+		throw error
 	}
 
 	// Если не было обработки тулзов, то отправляем сообщение пользователя на ллмку
 	if (response === undefined) {
-		response = await sendMessageToLLM(
-			question,
-			dialog_id,
-			history,
-			replies,
-		);
-		responsePrinted = true;
+		response = await sendMessageToLLM(question, dialog_id, history, replies)
+		responsePrinted = true
 		// logger.error(`Debug error: response LLM: ${JSON.stringify(response)}; is query: ${IS_QUERY_REPORT}`)
-		finalAnswer = response.answer;
+		finalAnswer = response.answer
 	} else if (question) {
-		logger.warn(
-			`Both tools handling and user's question (${question}) have gotten. The user's question will be ignored.`,
-		);
-		replies.debugReply(
-			`Both tools handling and user's question (${question}) have gotten. The user's question will be ignored.`,
-		);
+		logger.warn(`Both tools handling and user's question (${question}) have gotten. The user's question will be ignored.`)
+		replies.debugReply(`Both tools handling and user's question (${question}) have gotten. The user's question will be ignored.`)
 	}
 
 	// отсекаем тут пустые сообщения. Т.к. они нужны, чтобы вызвать завершение тулзов в самом верхнем вызове processQueue,
 	// но не нужны тут, чтобы не зацикливаться
 	while (response !== undefined) {
-		let functionAdded = false;
+		let functionAdded = false
 		if (response.answer && !responsePrinted) {
-			await _printResponse(response, replies, true);
+			await _printResponse(response, replies, true)
 		}
 		// Если вопрос пустой, то не вызываем вызов тулзов. Т.к. может привести к зацикливанию
-		if (question === "") break;
-		const taskQueue = await redisClient.getQueue();
+		if (question === "") break
+		const taskQueue = await redisClient.getQueue()
 		for (const call of response.tool_calls) {
 			if (!call.function || !call.function.name) {
-				continue;
+				continue
 			}
-			const funcName = call.function.name;
-			const funcArgs = JSON.parse(call.function.arguments);
-			const toolCallId = call.id;
+			const funcName = call.function.name
+			const funcArgs = JSON.parse(call.function.arguments)
+			const toolCallId = call.id
 
 			if (availableFunctions[funcName]) {
-				replies.debugReply(
-					`Enqueuing tool ${funcName}(${JSON.stringify(funcArgs, null, 2)})`,
-				);
-				await redisClient.addFunction(
-					taskQueue,
-					funcName,
-					funcArgs,
-					toolCallId,
-					message.id,
-				);
-				functionAdded = true;
+				replies.debugReply(`Enqueuing tool ${funcName}(${JSON.stringify(funcArgs, null, 2)})`)
+				await redisClient.addFunction(taskQueue, funcName, funcArgs, toolCallId, message.id)
+				functionAdded = true
 			} else {
-				throw new Error(`Функция ${funcName} не найдена`);
+				throw new Error(`Функция ${funcName} не найдена`)
 			}
 		}
 
 		if (functionAdded) {
-			await redisClient.addCommit(taskQueue);
-			await redisClient.saveQueue(taskQueue);
+			await redisClient.addCommit(taskQueue)
+			await redisClient.saveQueue(taskQueue)
 		} else {
 			// got final answer => n_cycles = 0
-			await redisClient.resetNCycles();
+			await redisClient.resetNCycles()
 		}
-		response = await redisClient.processQueue(replies);
-		responsePrinted = false;
+		response = await redisClient.processQueue(replies)
+		responsePrinted = false
 	}
-	replies.debugReply("Finish");
+	replies.debugReply("Finish")
 
 	// Учитывается только в случае, когда явно пришел запрос на скрипт только с текстом. Для отчетов
 	if (IS_QUERY_REPORT) {
-		const { cleanedText } = extractThinkContent(finalAnswer);
-		finalAnswer = cleanedText;
-		return finalAnswer;
+		const { cleanedText } = extractThinkContent(finalAnswer)
+		finalAnswer = cleanedText
+		return finalAnswer
 	}
 }
 
+
 async function _printResponse(response, replies, isReplyGptToMessageId) {
 	if (IS_QUERY_REPORT) {
-		return;
+		return
 	}
 
-	const { thought, cleanedText } = extractThinkContent(response.answer);
-	logger.debug(
-		`User question: ${message.message.text}. Thinking content ${JSON.stringify(thought)}`,
-	);
+	const { thought, cleanedText } = extractThinkContent(
+		response.answer
+	)
+	logger.debug(`User question: ${message.message.text}. Thinking content ${JSON.stringify(thought)}`)
 	if (AGENT_PARAMETERS.SHOW_THINKING && thought) {
 		if (isReplyGptToMessageId) {
 			const meta = {
-				replyGptToMessageId: message.id,
-			};
-			await replies.textReply(thought, meta);
+				// id оригинального сообщений, с которым связано сообщения "обдумывания" ллм
+				"replyGptToMessageId": message.id
+			}
+			await replies.textReply(thought, meta)
 		} else {
-			await replies.textReply(thought);
+			await replies.textReply(thought)
 		}
 		// wait to ensure that reasonong will be sent at first
 	} else {
-		replies.debugReply(thought);
+		replies.debugReply(thought)
 	}
 	if (cleanedText) {
-		await replies.markdownReply(cleanedText);
+		await replies.markdownReply(cleanedText)
 	}
 }
 
@@ -1498,19 +1421,14 @@ async function getBotMediatorDialogHistoryResponse(dialogId) {
 	try {
 		const config = {
 			headers: {
-				"Content-Type": "application/json",
+				'Content-Type': 'application/json'
 			},
-			httpsAgent: AGENT,
-		};
-		const response = await axios.get(
-			`${API.url_mediator_service}?dialog_id=${dialogId}`,
-			config,
-		);
-		return response.data;
+			httpsAgent: AGENT
+		}
+		const response = await axios.get(`${API.url_mediator_service}?dialog_id=${dialogId}`, config)
+		return response.data
 	} catch (error) {
-		logger.error(
-			"Ошибка при вызове API opbot-botmediator: " + error.message,
-		);
+		logger.error("Ошибка при вызове API opbot-botmediator: " + error.message)
 	}
 }
 
@@ -1522,37 +1440,36 @@ function createMessageItem(id, type, message, role, replyGptToMessageId) {
 		content: message,
 		role: role,
 		// id сообщения пользователя, на которое вызвалась тулза
-		replyGptToMessageId: replyGptToMessageId,
-	};
+		replyGptToMessageId: replyGptToMessageId
+	}
 }
 
 function addTrackOrIndexSlot(replies, question) {
-	const trackPattern = /(\d{14})|([A-Za-z]{2}\d{9}[A-Za-z]{2})/g;
-	const indexPattern = /\b\d{6}\b/g;
+	const trackPattern = /(\d{14})|([A-Za-z]{2}\d{9}[A-Za-z]{2})/g
+	const indexPattern = /\b\d{6}\b/g
 
-	const trackMatches = question.match(trackPattern);
-	const indexMatches = question.match(indexPattern);
+	const trackMatches = question.match(trackPattern)
+	const indexMatches = question.match(indexPattern)
 
 	if (trackMatches || indexMatches) {
-		let lastTrack = null;
-		let lastOps = null;
+		let lastTrack = null
+		let lastOps = null
 
 		if (trackMatches) {
-			lastTrack = trackMatches[trackMatches.length - 1];
+			lastTrack = trackMatches[trackMatches.length - 1]
 		}
 
 		if (indexMatches) {
-			lastOps = indexMatches[indexMatches.length - 1];
+			lastOps = indexMatches[indexMatches.length - 1]
 		}
 
 		if (replies) {
-			_sendReply.slots = _sendReply.slots || {};
+			_sendReply.slots = _sendReply.slots || {}
 			if (lastTrack) {
-				_sendReply.slots[AGENT_SLOTS.TRACK_NUMBER] =
-					lastTrack.toString();
+				_sendReply.slots[AGENT_SLOTS.TRACK_NUMBER] = lastTrack.toString()
 			}
 			if (lastOps) {
-				_sendReply.slots[AGENT_SLOTS.INDEX_OPS] = lastOps.toString();
+				_sendReply.slots[AGENT_SLOTS.INDEX_OPS] = lastOps.toString()
 			}
 		}
 	}
@@ -1560,133 +1477,122 @@ function addTrackOrIndexSlot(replies, question) {
 
 async function getDialog(dialog_id) {
 	try {
-		let clientDialogHistory =
-			await getBotMediatorDialogHistoryResponse(dialog_id);
+		let clientDialogHistory = await getBotMediatorDialogHistoryResponse(dialog_id)
 		if (clientDialogHistory) {
 			return clientDialogHistory.reduce((acc, message) => {
-				const isUserMessage = !!message.msg;
-				const source = isUserMessage ? message.msg : message.reply;
-				const type = source?.message_type;
-				const text = source?.message?.text;
-				const msgId = source.id;
-				const meta = source.meta;
+				const isUserMessage = !!message.msg
+				const source = isUserMessage ? message.msg : message.reply
+				const type = source?.message_type
+				const text = source?.message?.text
+				const msgId = source.id
+				const meta = source.meta
 				if (type === 1 || type === 19 || type === 30) {
 					if (isUserMessage) {
-						acc.push(
-							createMessageItem(
-								msgId,
-								type,
-								text,
-								ROLE.USER,
-								meta?.replyGptToMessageId,
-							),
-						);
+						acc.push(createMessageItem(msgId, type, text, ROLE.USER, meta?.replyGptToMessageId))
 					} else {
 						// должно по смыслу быть сообщение оператора, но ллм не съедает его
-						const role = ROLE.BOT; // message.reply?.operator?.operator_id === "__SYSTEM__" ? ROLE.BOT : ROLE.OPERATOR
-						acc.push(
-							createMessageItem(
-								msgId,
-								type,
-								text,
-								role,
-								meta?.replyGptToMessageId,
-							),
-						);
+						const role = ROLE.BOT // message.reply?.operator?.operator_id === "__SYSTEM__" ? ROLE.BOT : ROLE.OPERATOR
+						acc.push(createMessageItem(msgId, type, text, role, meta?.replyGptToMessageId))
 					}
 				}
 
-				return acc;
-			}, []);
+				return acc
+			}, [])
 		} else {
-			return [];
+			return []
 		}
 	} catch (e) {
-		logger.error(`Error getDialog: ${e.message}; ${JSON.stringify(e)}.`);
+		logger.error(`Error getDialog: ${e.message}; ${JSON.stringify(e)}.`)
 	}
 }
 
 function getSlots(slots) {
-	if (!slots || !Array.isArray(slots)) return [];
+	if (!slots || !Array.isArray(slots)) return []
 
-	const filledSlots = message.slot_context.filled_slots;
+	const filledSlots = message.slot_context.filled_slots
 
-	return slots.map((slot) => {
-		const filledSlot = filledSlots.find(
-			(filled) => filled.slot_id === slot.id,
-		);
-		let slotValue = null;
+	return slots.map(slot => {
+		const filledSlot = filledSlots.find(filled => filled.slot_id === slot.id)
+		let slotValue = null
 
 		if (filledSlot?.value) {
-			const values = filledSlot.value.split(";");
-			slotValue = values.length > 0 ? values[values.length - 1] : null;
+			const values = filledSlot.value.split(';')
+			slotValue = values.length > 0 ? values[values.length - 1] : null
 		}
 
 		return {
 			slotId: slot.id,
 			slotDescription: slot.description,
-			slotValue: slotValue,
-		};
-	});
+			slotValue: slotValue
+		}
+	})
 }
 
 async function sendMessageToLLM(question, dialog_id, rawHistory, replies) {
-	const history = prepareHistory(rawHistory, []);
+	const history = prepareHistory(rawHistory,[])
 
-	let contextsearch_texts = question;
+	let contextsearch_texts = question
 
-	const userSlots = getSlots(USER_SLOTS);
+	const userSlots = getSlots(USER_SLOTS)
 
-	const slotsBlock =
-		userSlots.length > 0
-			? userSlots
-				.map(
-					(s) =>
-						`- ${s.slotId}. - ${s.slotDescription}: **${s.slotValue ?? "не заполнено"}**`,
-				)
-				.join("\n")
-			: "- Нет заполненных слотов";
+	const slotsBlock = userSlots.length > 0
+		? userSlots.map(s => `- ${s.slotId}. - ${s.slotDescription}: **${s.slotValue ?? 'не заполнено'}**`).join('\n')
+		: '- Нет заполненных слотов'
 
-	logger.info(`Слоты клиента: ${JSON.stringify(slotsBlock)}`);
+	logger.info(`Слоты клиента: ${JSON.stringify(slotsBlock)}`)
 
 	SYSTEM_WITH_SLOTS = LLM_SYSTEM_TEMPLATE.replace(
-		"## Слоты:",
-		`## Слоты:\n${slotsBlock}`,
-	);
+		'## Слоты:',
+		`## Слоты:\n${slotsBlock}`
+	)
 	SMALLTALK_WITH_SLOTS = LLM_SYSTEM_TEMPLATE_SMALLTALK.replace(
-		"## Слоты:",
-		`## Слоты:\n${slotsBlock}`,
-	);
+		'## Слоты:',
+		`## Слоты:\n${slotsBlock}`
+	)
 
 	// Generate rephrases of user question
 	if (AGENT_PARAMETERS.DO_REPHRASE) {
 		// rephrases1 = await rephrase(question, REPHRASE_PROMPT_1, dialog_id, replies)
-		rephrases2 = await rephrase(
-			question,
-			REPHRASE_PROMPT,
-			dialog_id,
-			history,
-			replies,
-		);
-		logger.info(`rephrases2 значение: ${rephrases2}`);
-		contextsearch_texts = [question];
+		rephrases2 = await rephrase(question, REPHRASE_PROMPT, dialog_id, history, replies)
+		logger.info(`rephrases2 значение: ${rephrases2}`)
+		contextsearch_texts = [question]
 		// contextsearch_texts = contextsearch_texts.concat(rephrases1)
-		contextsearch_texts = contextsearch_texts.concat(rephrases2);
+		contextsearch_texts = contextsearch_texts.concat(rephrases2)
 		logger.info(`contextsearch_texts значение: ${contextsearch_texts}`);
 	}
 
 	// Search for relevant context
-	let context; // [{doc_id: str, title: str, content: str},...]
-	let fullContext; // response from classical intent search
+	let context; // [{doc_id: str, title: str, content: str, symbol_code?: str},...]
+	let fullContext;  // response from classical intent search
 	let scenariosContext; // response from scenario intent search
 	if (CONTEXT_SETTINGS.CONTEXT_FROM_SCENARIOS) {
-		scenariosContext = await getContextFromScenarios(
-			contextsearch_texts,
-			replies,
-		);
+		scenariosContext = await getContextFromScenarios(contextsearch_texts, replies);
 		context = convertScenariosToContext(scenariosContext.simple);
-		if (CONTEXT_SETTINGS.ADD_COMPLEX_SCENARIOS_TO_TOOLS) {
-			// TODO: implement adding
+		// Если нашелся сложный сценарий
+		if (CONTEXT_SETTINGS.ADD_COMPLEX_SCENARIOS_TO_TOOLS && scenariosContext.complex) {
+			const complexContext = convertScenariosToTools(scenariosContext.complex)
+			TOOLS = TOOLS.map(tool => {
+				if (tool.function.name === "transfer_to_scenario") {
+					let content = complexContext.map(ctx => {
+						return `- ${translit(ctx.title)} Примеры вопросов: ${ctx.content}`
+					})
+					content = content.join('\n')
+					let enum_ = complexContext.map(ctx => {
+						return translit(ctx.title)
+					})
+					tool.function.parameters.properties.id.description =
+						`Идентификатор сценария, на который выполняешь перевод. Доступные значения и примеры вопросов (вызывай этот сценарий, если сообщение пользователя похоже на один из примеров вопросов):\n${content}`
+					tool.function.parameters.properties.id.enum = enum_
+					return tool
+				}
+				return tool
+			})
+			const scenarios = complexContext.reduce((dict, ctx) => {
+				dict[translit(ctx.title)] = ctx.symbol_code
+				return dict
+			}, {})
+			logger.info(`Formatted scenarions for tool 'transfer_to_scenario'. ${JSON.stringify(scenarios)}`)
+			setScenariosForTransfer(scenarios)
 		}
 	} else {
 		fullContext = await getContext(contextsearch_texts, replies);
@@ -1694,115 +1600,113 @@ async function sendMessageToLLM(question, dialog_id, rawHistory, replies) {
 		context = fullContext.context;
 	}
 
-	let response;
+	let response
 	// Context not found
 	if (context?.length === 0) {
-		logger.info(`Context not found for question "${question}"`);
-		replies.debugReply(`Context not found for question "${question}"`);
+		logger.info(`Context not found for question "${question}"`)
+		replies.debugReply(`Context not found for question "${question}"`)
 
 		if (AGENT_PARAMETERS.SMALLTALK_IF_NO_CONTEXT) {
-			response = await smalltalk(question, dialog_id, history, replies);
-			await _printResponse(response, replies);
-			return response;
+			response = await smalltalk(question, dialog_id, history, replies)
+			await _printResponse(response, replies)
+			return response
 		} else {
-			replies.markdownReply(STANDARD_MESSAGES.NO_CONTEXT_TEXT);
-			return { answer: "", tool_calls: [], log_id: null };
+			replies.markdownReply(STANDARD_MESSAGES.NO_CONTEXT_TEXT)
+			return {answer: "", tool_calls: [], log_id: null}
 		}
 	}
 
 	// Answer with context (RAG)
-	response = await rag(question, context, dialog_id, history, replies);
+	response = await rag(question, context, dialog_id, history, replies)
 
 	// References to articles
-	let references = "";
-	if (
-		AGENT_PARAMETERS.SHOW_REFERENCES &&
-		!CONTEXT_SETTINGS.CONTEXT_FROM_SCENARIOS
-	) {
+	let references = ''
+	if (AGENT_PARAMETERS.SHOW_REFERENCES && !CONTEXT_SETTINGS.CONTEXT_FROM_SCENARIOS) {
 		// TODO: implement for scenarios
-		references = getReferences(fullContext);
+		references = getReferences(fullContext)
 	}
 
 	// Final answers
-	await _printResponse(response, replies);
+	await _printResponse(response, replies)
 
-	if (
-		AGENT_PARAMETERS.SHOW_REFERENCES &&
-		!CONTEXT_SETTINGS.CONTEXT_FROM_SCENARIOS
-	) {
-		replies.markdownReply(references);
+	if (AGENT_PARAMETERS.SHOW_REFERENCES && !CONTEXT_SETTINGS.CONTEXT_FROM_SCENARIOS) {
+		replies.markdownReply(references)
 	}
 
-	if (AGENT_PARAMETERS.SHOW_CONTEXT) {
-		const contextToShow = CONTEXT_SETTINGS.CONTEXT_FROM_SCENARIOS
-			? scenariosContext
-			: fullContext;
+	if (AGENT_PARAMETERS.SHOW_CONTEXT)
+	{
+		const contextToShow = CONTEXT_SETTINGS.CONTEXT_FROM_SCENARIOS ? scenariosContext : fullContext;
 		replies.textReply(
 			"<h3>Контекст</h3>" + JSON.stringify(contextToShow, null, 2),
 			{},
-			true,
+			true
 		);
 	}
-	return response;
+	return response
 }
 
 function _debugAxiosError(error, replies) {
 	if (error.response) {
-		replies.debugReply(JSON.stringify(error.response.data, null, 2));
-		replies.debugReply(error.response.status);
-		replies.debugReply(error.response.headers);
+		replies.debugReply(JSON.stringify(error.response.data, null, 2))
+		replies.debugReply(error.response.status)
+		replies.debugReply(error.response.headers)
 	} else if (error.request) {
-		replies.debugReply(error.request);
+		replies.debugReply(error.request)
 	} else {
-		replies.debugReply("Error", error.message);
+		replies.debugReply('Error', error.message)
 	}
 }
 
 async function getContext(question, replies) {
-	replies.debugReply(JSON.stringify(question));
-	let response;
+	replies.debugReply(JSON.stringify(question))
+	logger.debug(`Call CONTEXT SEARCH service`)
+	let response
 	try {
-		response = await axios.post(URL_CONTEXT_SEARCH, {
-			text: question,
-			customer_id: CUSTOMER_ID,
-			record_type: AGENT_PARAMETERS.RECORD_TYPE,
-			output_format: "json-vikhr",
-			filters: CONTEXT_SETTINGS?.FILTERS,
-		});
+		response = await axios.post(
+			URL_CONTEXT_SEARCH,
+			{
+				text: question,
+				customer_id: CUSTOMER_ID,
+				record_type: AGENT_PARAMETERS.RECORD_TYPE,
+				output_format: "json-vikhr",
+				filters: CONTEXT_SETTINGS?.FILTERS
+			}
+		)
 
-		logger.info("Response:" + JSON.stringify(response.data));
-	} catch (e) {
+		logger.info("Response from CONTEXT SEARCH:" + JSON.stringify(response.data))
+	} catch(e) {
 		// Логика при ошибке запроса
-		logger.error(`Error requesting context search: ${e}.`);
-		replies.debugReply(`Error requesting context search: ${e}.`);
-		_debugAxiosError(e, replies);
-		throw e;
+		logger.error(`Error requesting context search: ${e}.`)
+		replies.debugReply(`Error requesting context search: ${e}.`)
+		_debugAxiosError(e, replies)
+		throw e
 	}
-	const fullContext = response.data;
+	const fullContext = response.data
 	if (CONTEXT_SETTINGS.MAX_CONTEXTS > -1) {
-		Object.keys(fullContext).forEach((key) => {
-			fullContext[key] = fullContext[key].slice(
-				0,
-				CONTEXT_SETTINGS.MAX_CONTEXTS,
-			);
-		});
+		Object.keys(fullContext).forEach(key => {
+			fullContext[key] = fullContext[key].slice(0, CONTEXT_SETTINGS.MAX_CONTEXTS)
+		})
 	}
-	return fullContext;
+	return fullContext
 }
 
 async function getContextFromScenarios(question, replies) {
-	replies.debugReply(JSON.stringify(question));
+	replies.debugReply(JSON.stringify(question))
+	logger.debug(`Call CONTEXT SEARCH service (scenarios)`)
 	let response;
 	try {
-		response = await axios.post(URL_CONTEXT_SEARCH_SCENARIOS, {
-			text: question,
-			customer_id: CUSTOMER_ID,
-			record_type: AGENT_PARAMETERS.RECORD_TYPE,
-			filters: CONTEXT_SETTINGS?.FILTERS,
-		});
+		response = await axios.post(
+			URL_CONTEXT_SEARCH_SCENARIOS,
+			{
+				text: question,
+				customer_id: CUSTOMER_ID,
+				record_type: AGENT_PARAMETERS.RECORD_TYPE,
+				filters: CONTEXT_SETTINGS?.FILTERS
+			}
+		)
 
-		logger.info("Response:" + JSON.stringify(response.data));
-	} catch (e) {
+		logger.info("Response from CONTEXT SEARCH (scenarios):" + JSON.stringify(response.data));
+	} catch(e) {
 		// Логика при ошибке запроса
 		logger.error(`Error requesting context search (scen.): ${e}.`);
 		replies.debugReply(`Error requesting context search (scen.): ${e}.`);
@@ -1811,47 +1715,97 @@ async function getContextFromScenarios(question, replies) {
 	}
 	const fullContext = response.data;
 	if (CONTEXT_SETTINGS.MAX_CONTEXTS > -1) {
-		fullContext.simple = fullContext.simple.slice(
-			0,
-			CONTEXT_SETTINGS.MAX_CONTEXTS,
-		);
+		fullContext.simple = fullContext.simple.slice(0, CONTEXT_SETTINGS.MAX_CONTEXTS);
 	}
 	if (CONTEXT_SETTINGS.MAX_COMPLEX_SCENARIOS > -1) {
-		fullContext.complex = fullContext.complex.slice(
-			0,
-			CONTEXT_SETTINGS.MAX_COMPLEX_SCENARIOS,
-		);
+		fullContext.complex = fullContext.complex.slice(0, CONTEXT_SETTINGS.MAX_COMPLEX_SCENARIOS);
 	}
 	return fullContext;
 }
 
-function convertScenariosToContext(chains) {
+// Не бойтесь менять обработчики сценариев под каждую модель\задачу
+function convertScenariosSimple(chains) {
 	let contexts = [];
 	let ctx;
 	let docId = 0;
 	for (const chain of chains) {
 		if (!chain?.blocks?.length) {
-			continue;
+			continue
 		}
-		const content = formatChain(chain);
+		const content = formatChainSimple(chain)
 		if (!content) {
-			continue;
+			continue
 		}
 		ctx = {
 			id: docId++,
-			title: extractTitleFromChain(chain),
-			content: content,
+			title: extractTitleFromChain(chain, ["start"], true),
+			content: content
 		};
 		contexts.push(ctx);
 	}
 	return contexts;
 }
 
-function extractTitleFromChain(chain) {
+function convertScenariosComplex(chains) {
+	let contexts = [];
+	let ctx;
+	let docId = 0;
+	for (const chain of chains) {
+		if (!chain?.blocks?.length) {
+			continue
+		}
+		// Если нет примеров вопросов, не учитываем
+		const content = formatChainComplex(chain)
+		if (!content) {
+			continue
+		}
+		// Если не symbol_code отсутствует
+		const symbol_code = extractSymbolCodeFromChain(chain, ["complex_scenario"])
+		if (!symbol_code) {
+			continue
+		}
+		// Если не title отсутствует
+		const title = extractTitleFromChain(chain, ["complex_scenario"], false)
+		if (!title) {
+			continue
+		}
+		ctx = {
+			id: docId++,
+			title: title,
+			content: content,
+			symbol_code: symbol_code,
+		};
+		contexts.push(ctx);
+	}
+	return contexts;
+}
+
+function convertScenariosToContext(chains) {
+	return convertScenariosSimple(chains)
+}
+
+function convertScenariosToTools(chains) {
+	return convertScenariosComplex(chains)
+}
+
+function extractTitleFromChain(chain, availableTypes, withUrl) {
 	// Find the Start node and convert it into the title
-	for (const block of chain.blocks ?? []) {
-		if (block.type === "start") {
-			return getTitleWithUrl(block.symbol_code, block.text);
+	for (const block of (chain.blocks ?? [])) {
+		if (availableTypes.includes(block.type)) { // "start", "complex_scenario"
+			if (withUrl)
+				return getTitleWithUrl(block.symbol_code, block.text);
+			else
+				return block.text
+		}
+	}
+	return "";
+}
+
+function extractSymbolCodeFromChain(chain, availableTypes) {
+	// Find the Start node and convert it into the title
+	for (const block of (chain.blocks ?? [])) {
+		if (availableTypes.includes(block.type)) { // "start", "complex_scenario"
+			return block.symbol_code
 		}
 	}
 	return "";
@@ -1876,8 +1830,8 @@ function extractTitleFromChain(chain) {
 /**
  * Блок сообщения
  * @typedef {Object} Block
- * @property {('start'|'message'|'button'|'condition'|'complex_scenario')} type - Тип блока
- * @property {string} text - Текст блока
+ * @property {('start'|'message'|'button'|'condition'|'questions'|'complex_scenario')} type - Тип блока
+ * @property {string|string[]} text - Текст блока. string[], если type = 'questions'
  * @property {number} position - Позиция в цепочке
  * @property {ConditionGroup[][]} [pos_conditions] - Позитивные условия (OR групп AND условий)
  * @property {ConditionGroup[][]} [neg_conditions] - Негативные условия (AND NOT <...>)
@@ -1890,7 +1844,7 @@ function extractTitleFromChain(chain) {
  * @property {string} value - Значение
  * @property {string} condition - Условие сравнения (В основном '=' и 'NOT IN', но могут быть и другие)
  */
-function formatChain(chain) {
+function formatChainSimple(chain) {
 	let ctxParts = [];
 	const blocks = chain.blocks || [];
 
@@ -1898,11 +1852,11 @@ function formatChain(chain) {
 		if (!block?.type) continue;
 
 		if (block.type === "message") {
-			ctxParts.push(block.text || "");
+			ctxParts.push(block.text || "")
 		} else if (block.type === "button") {
-			ctxParts.push(`\n### ${block.text || ""}`);
+			ctxParts.push(`\n### ${block.text || ""}`)
 		} else if (block.type === "start") {
-			ctxParts.push(`\n## ${block.text || ""}`);
+			ctxParts.push(`\n## ${block.text || ""}`)
 		} else if (block.type === "condition") {
 			// объединить все условия в строку типа
 			// ЕСЛИ ((<slot> <condition> <value> И <...>) ИЛИ (...))
@@ -1916,8 +1870,40 @@ function formatChain(chain) {
 			 */
 		}
 	}
+	return ctxParts.join("\n")
+}
+function isExceededLimitQuestions(ctxPartsLength, question) {
+	const possibleLength = ctxPartsLength + question.length
+	const maxLength = CONTEXT_SETTINGS.MAX_COMPLEX_QUESTION_EXAMPLES_LENGTH ?? 1000
+	const isExceeded = possibleLength > maxLength
+	if (isExceeded)
+		logger.debug(`Length context exceeded(max:${CONTEXT_SETTINGS.MAX_COMPLEX_QUESTION_EXAMPLES_LENGTH}, possible:${possibleLength}). Question example is deleted: '${question}'`)
+	return isExceeded
+}
 
-	return ctxParts.join("\n");
+function formatChainComplex(chain) {
+	let ctxParts = [];
+	let ctxPartsLength = 0;
+	const blocks = chain.blocks || [];
+	if (!isAvailableChain(["button", "condition"], chain))
+		return ""
+	for (const block of blocks) {
+		if (!block?.type) continue
+		if (block.type === "questions") {
+			block.text.forEach(question => {
+				if (question && !isExceededLimitQuestions(ctxPartsLength, question)) {
+					ctxPartsLength += question.length
+					ctxParts.push(question)
+				}
+			})
+		}
+	}
+	return ctxParts.join(",")
+}
+// Исключает цепочки с недопустимыми типами
+function isAvailableChain(excludedTypes, chain) {
+	const types = chain.blocks?.map(b => b.type) || []
+	return !types.some(type => excludedTypes.includes(type))
 }
 
 /**
@@ -1935,11 +1921,11 @@ function formatChain(chain) {
  */
 function formatConditionsToString(posConditions, negConditions, options = {}) {
 	const {
-		ifPrefix = "ЕСЛИ",
-		andNotPrefix = "И НЕ",
-		notPrefix = "НЕ",
-		andOperator = "И",
-		orOperator = "ИЛИ",
+		ifPrefix = 'ЕСЛИ',
+		andNotPrefix = 'И НЕ',
+		notPrefix = 'НЕ',
+		andOperator = 'И',
+		orOperator = 'ИЛИ'
 	} = options;
 
 	const formatCondition = (group) => {
@@ -1947,22 +1933,24 @@ function formatConditionsToString(posConditions, negConditions, options = {}) {
 	};
 
 	const formatAndGroup = (andGroups) => {
-		if (!andGroups || andGroups.length === 0) return "";
+		if (!andGroups || andGroups.length === 0) return '';
 
-		return andGroups.map(formatCondition).join(` ${andOperator} `);
+		return andGroups
+			.map(formatCondition)
+			.join(` ${andOperator} `);
 	};
 
 	const formatOrGroups = (conditions) => {
-		if (!conditions || conditions.length === 0) return "";
+		if (!conditions || conditions.length === 0) return '';
 
 		const formattedGroups = conditions
-			.map((andGroups) => {
+			.map(andGroups => {
 				const andString = formatAndGroup(andGroups);
-				return andString ? `(${andString})` : "";
+				return andString ? `(${andString})` : '';
 			})
-			.filter((str) => str);
+			.filter(str => str);
 
-		if (formattedGroups.length === 0) return "";
+		if (formattedGroups.length === 0) return '';
 		if (formattedGroups.length === 1) return formattedGroups[0];
 
 		return `(${formattedGroups.join(` ${orOperator} `)})`;
@@ -1971,7 +1959,7 @@ function formatConditionsToString(posConditions, negConditions, options = {}) {
 	const posString = formatOrGroups(posConditions);
 	const negString = formatOrGroups(negConditions);
 
-	let result = "";
+	let result = '';
 
 	if (posString) {
 		result = `${ifPrefix} ${posString}`;
@@ -1991,43 +1979,42 @@ function formatConditionsToString(posConditions, negConditions, options = {}) {
 async function _callLLM(url, data, replies, extraErrorHandling = null) {
 	try {
 		// logger.error(`Debug error: data LLM: ${JSON.stringify(data)}; is query: ${IS_QUERY_REPORT}`)
+		logger.debug(`Call LLM`)
 		const config = {
 			timeout: LLM_SETTINGS.timeout * 1000,
 			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${API.llm_auth_token}`,
-				Connection: "keep-alive",
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${API.llm_auth_token}`,
+				'Connection': 'keep-alive',
 			},
-			httpsAgent: AGENT,
-		};
+			httpsAgent: AGENT
+		}
 
 		if (PROXY.USE_PROXY) {
 			config.proxy = {
-				protocol: "http",
+				protocol: 'http',
 				host: PROXY.url,
-				port: PROXY.port,
-			};
+				port: PROXY.port
+			}
 		}
 
-		const response = await axios.post(url, data, config);
-
-		return response.data;
+		const response = await axios.post(url, data, config)
+		logger.debug(`Response from LLM: ${JSON.stringify(response.data)}`)
+		return response.data
 	} catch (e) {
-		const errorMsg = `Error requesting LLM (POST ${url}): ${e}.`;
-		logger.error(errorMsg);
-		replies.debugReply(errorMsg);
-		_debugAxiosError(e, replies);
+		const errorMsg = `Error requesting LLM (POST ${url}): ${e}.`
+		logger.error(errorMsg)
+		replies.debugReply(errorMsg)
+		_debugAxiosError(e, replies)
 		if (extraErrorHandling) {
-			extraErrorHandling(e);
+			extraErrorHandling(e)
 		}
-		throw e;
+		throw e
 	}
 }
 
 async function smalltalk(question, dialogId, dialogHistory, replies) {
-	const thinkingPrompt = AGENT_PARAMETERS.ENABLE_THINKING_SMALLTALK
-		? AGENT_PARAMETERS.THINK
-		: AGENT_PARAMETERS.NO_THINK;
+	const thinkingPrompt = AGENT_PARAMETERS.ENABLE_THINKING_SMALLTALK ? AGENT_PARAMETERS.THINK : AGENT_PARAMETERS.NO_THINK
 	const requestData = {
 		question: question + thinkingPrompt,
 		dialog_id: dialogId,
@@ -2040,10 +2027,14 @@ async function smalltalk(question, dialogId, dialogHistory, replies) {
 		tools: TOOLS,
 		last_context_price: CONTEXT_SETTINGS.LAST_CONTEXT_PRICE,
 		other_context_price: CONTEXT_SETTINGS.OTHER_CONTEXT_PRICE,
-		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT,
-	};
+		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT
+	}
 
-	return await _callLLM(URL_LLM_SMALLTALK, requestData, replies);
+	return await _callLLM(
+		URL_LLM_SMALLTALK,
+		requestData,
+		replies
+	)
 }
 
 async function rag(question, context, dialogId, dialogHistory, replies) {
@@ -2063,14 +2054,19 @@ async function rag(question, context, dialogId, dialogHistory, replies) {
 		tools: TOOLS,
 		last_context_price: CONTEXT_SETTINGS.LAST_CONTEXT_PRICE,
 		other_context_price: CONTEXT_SETTINGS.OTHER_CONTEXT_PRICE,
-		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT,
-	};
+		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT
+	}
 
-	return await _callLLM(URL_LLM, requestData, replies, (e) => {
-		replies.debugReply(
-			"<h3>Контекст</h3>" + JSON.stringify(context, null, 2),
-		);
-	});
+	return await _callLLM(
+		URL_LLM,
+		requestData,
+		replies,
+		(e) => {
+			replies.debugReply(
+				"<h3>Контекст</h3>" + JSON.stringify(context, null, 2)
+			)
+		}
+	)
 }
 
 async function rephrase(question, prompt, dialogId, dialogHistory, replies) {
@@ -2080,23 +2076,22 @@ async function rephrase(question, prompt, dialogId, dialogHistory, replies) {
 		dialog_id: dialogId,
 		history: dialogHistory,
 		n_generations: AGENT_PARAMETERS.REPHRASE_N_GENERATIONS,
-		samples_per_generation:
-		AGENT_PARAMETERS.REPHRASE_SAMPLES_PER_GENERATION,
+		samples_per_generation: AGENT_PARAMETERS.REPHRASE_SAMPLES_PER_GENERATION,
 		last_context_price: CONTEXT_SETTINGS.LAST_CONTEXT_PRICE,
 		other_context_price: CONTEXT_SETTINGS.OTHER_CONTEXT_PRICE,
-		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT,
-	};
+		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT
+	}
 
-	const response = await _callLLM(URL_LLM_REPHRASE, requestData, replies);
-	return response.texts;
+	const response = await _callLLM(
+		URL_LLM_REPHRASE,
+		requestData,
+		replies
+	)
+	return response.texts
 }
 
 async function commitToolResponses(
-	tool_responses,
-	dialogId,
-	dialogHistory,
-	replies,
-	tool_choice,
+	tool_responses, dialogId, dialogHistory, replies, tool_choice
 ) {
 	const requestData = {
 		tool_responses: tool_responses,
@@ -2110,63 +2105,64 @@ async function commitToolResponses(
 		tool_choice: tool_choice,
 		last_context_price: CONTEXT_SETTINGS.LAST_CONTEXT_PRICE,
 		other_context_price: CONTEXT_SETTINGS.OTHER_CONTEXT_PRICE,
-		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT,
-	};
+		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT
+	}
 
-	logger.debug(
-		`User question ${message.message.text}. Commit tool responses: ${JSON.stringify(tool_responses)}`,
-	);
-	return await _callLLM(URL_LLM_COMMIT_TOOL_RESPONSES, requestData, replies); // answer, tool_calls, log_id
+	logger.debug(`User question ${message.message.text}. Commit tool responses: ${JSON.stringify(tool_responses)}`)
+	return await _callLLM(
+		URL_LLM_COMMIT_TOOL_RESPONSES,
+		requestData,
+		replies
+	)  // answer, tool_calls, log_id
 }
 
 function getReferences(full_context) {
-	let references = "";
-	const articles_counts = new Map();
-	const articles_titles = new Map();
+	let references = ""
+	const articles_counts = new Map()
+	const articles_titles = new Map()
 	// Count unique articles
 	full_context.symbol_code.forEach((intent_id, idx) => {
-		const prev_count = articles_counts.get(intent_id) || 0;
-		articles_counts.set(intent_id, prev_count + 1);
-		articles_titles.set(intent_id, full_context.title[idx]);
-	});
+		const prev_count = articles_counts.get(intent_id) || 0
+		articles_counts.set(intent_id, prev_count + 1)
+		articles_titles.set(intent_id, full_context.title[idx])
+	})
 
 	// Sort by counts (desc)
-	const sorted_counts = Array.from(articles_counts.entries()).sort(
-		(a, b) => b[1] - a[1],
-	);
+	const sorted_counts = Array.from(articles_counts.entries())
+		.sort((a, b) => b[1] - a[1])
 
 	// Add refs to the message
 	sorted_counts.forEach(([intent_id, cnt]) => {
-		let url = `https://${API.base_url}/app/project/${CUSTOMER_ID}/knowledge-base/article/view/${intent_id}`;
+		let url = `https://${API.base_url}/app/project/${CUSTOMER_ID}/knowledge-base/article/view/${intent_id}`
 		// references += `\n\n[${cnt}.
-		references += `\n\n*  [${articles_titles.get(intent_id)}](${url})`;
-	});
+		references += `\n\n*  [${articles_titles.get(intent_id)}](${url})`
+	})
 
 	if (references !== "")
-		references = "### Ссылки для информации:" + references;
-	return references;
+		references = "### Ссылки для информации:" + references
+	return references
 }
 
 // Entrypoint
 if (message.message_type === 1 && !IS_QUERY_REPORT) {
 	main()
-		.then((_) => {
-			resolve([]);
+		.then(_ => {
+			resolve([])
 		})
-		.catch((error) => {
-			logger.error(`Error: ${error}`);
-			resolve([agentApi.makeMarkdownReply(error)]);
-		});
+		.catch(error => {
+			logger.error(`Error: ${error}`)
+			resolve([agentApi.makeMarkdownReply(error)])
+		})
 } else if (IS_QUERY_REPORT) {
 	main()
-		.then((res) => {
-			resolve({ answer: res });
+		.then(res => {
+			resolve({ answer: res })
 		})
-		.catch((error) => {
-			logger.error(`Error: ${error}`);
-			resolve(error);
-		});
+		.catch(error => {
+			logger.error(`Error: ${error}`)
+			resolve(error)
+		})
 } else {
-	logger.info(`Message type: ${message.message_type}. Skip.`);
-	resolve([]); // SKIP
+	logger.info(`Message type: ${message.message_type}. Skip.`)
+	resolve([]) // SKIP
 }
