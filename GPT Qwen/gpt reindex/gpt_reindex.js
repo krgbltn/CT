@@ -1,3 +1,4 @@
+//gpt_reindex
 const URL_REINDEX = new URL('/make_index', agentSettings.url_context_search_indexer || "http://contextsearch:8802").href;
 
 
