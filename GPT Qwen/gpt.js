@@ -5,7 +5,7 @@ const CATALOG_ID = agentSettings.catalog_id;
 const RECORD_TYPE = agentSettings.record_type;
 
 const SHOW_CONTEXT = false;
-const SMALLTALK_IF_NO_CONTEXT = true;
+const SMALLTALK_IF_NO_CONTEXT = agentSettings.enable_smalltalk;
 const SHOW_REFERENCES = false;
 
 const USE_HISTORY = true;
