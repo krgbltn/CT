@@ -2056,7 +2056,7 @@ async function rag(question, context, dialogId, dialogHistory, replies) {
 		other_context_price: CONTEXT_SETTINGS.OTHER_CONTEXT_PRICE,
 		add_other_context: CONTEXT_SETTINGS.ADD_OTHER_CONTEXT
 	}
-
+	logger.debug(`Prompt set: ${JSON.stringify(requestData.system_template)}`)
 	return await _callLLM(
 		URL_LLM,
 		requestData,
