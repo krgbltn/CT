@@ -2,6 +2,8 @@ const FILE_STORAGE_API = agentSettings.fileStorageApi
 const INTERNAL_API = agentSettings.internalApi
 const FILE_NAME = `${agentSettings.fileName ?? "Без названия"}.xlsx`
 const CHANNELS_IDS = agentSettings.channelIds
+const TEXT = agentSettings.text
+const ROLES = agentSettings.roles
 
 const AUTHOR = {
 	BOT: "assistant",
@@ -31,7 +33,8 @@ const REPORT_PREFIX = "DIALOG_LLM_ANALYSIS"
 const METHODS = {
 	CREATE_REPORT: "create",
 	GET_REPORTS: "get",
-	GET_CHANNELS_IDS: "get_channels_ids"
+	GET_CHANNELS_AND_TEXT: "get_channels_and_text",
+	GET_ROLES: "get_roles"
 }
 
 const AGENT = new https.Agent({ rejectUnauthorized: false })
@@ -79,8 +82,10 @@ async function main() {
 			return await createReport(id, dateRange, projectId, dialogsCountLimit, agent, mask, dialogs)
 		case METHODS.GET_REPORTS:
 			return await getReports()
-		case METHODS.GET_CHANNELS_IDS:
-			return CHANNELS_IDS
+		case METHODS.GET_CHANNELS_AND_TEXT:
+			return { channels: CHANNELS_IDS, text: TEXT }
+		case METHODS.GET_ROLES:
+			return ROLES
 		default:
 			logger.warn(`Unknown method ${method}. Return`)
 			return {}

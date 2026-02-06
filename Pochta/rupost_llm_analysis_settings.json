@@ -15,7 +15,7 @@
     "uploadB64": "/file/upload-b64"
   },
   "fileName": "Отчет по анализу диалогов",
-  "static_files_link": "/file/rupost/0907b89d-389d-42c7-8a7e-d8111184e32b-69c5e153-8e8b-4e68-b9ee-29f6f515545d.zip?v=3",
+  "static_files_link": "/file/rupost/3582d36e-07c1-4e2b-9bdd-a0f3fa27cd23-ce92b135-d05e-46fe-800b-75134329d734.zip?v=7",
   "channelIds": [
     "mobile_mprupost",
     "webchat_rupost",
@@ -33,5 +33,9 @@
     "channel_08tg27v",
     "channel_35f378e",
     "channel_133540d"
+  ],
+  "text": "Не совсем понял Ваш вопрос",
+  "roles": [
+    "rupost___1068bd3d-8a80-4018-bc03-41a10271f8ab"
   ]
 }
