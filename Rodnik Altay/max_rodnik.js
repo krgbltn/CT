@@ -64,7 +64,7 @@ function formatAttachments(attachments) {
 		}))
 }
 
-function buildMessageResponse(
+async function buildMessageResponse(
 	{
 		mid = "",
 		text = "",
@@ -78,6 +78,39 @@ function buildMessageResponse(
 	const {user_id, first_name = "", last_name = "", name = ""} = sender
 
 	const isScore = action?.includes("__#score__")
+
+
+	const slots = [
+		{id: SLOTS.maxChatId, value: String(chatId)},
+		{id: SLOTS.maxUserId, value: String(user_id)},
+		{id: SLOTS.maxLastName, value: last_name},
+		{id: SLOTS.maxUserName, value: name}
+	]
+
+
+	let existingFirstName = null;
+	try {
+		existingFirstName = await agentStorage.globalStorage.get(SLOTS.maxFirstName);
+		logger.info(`Existing first_name in slot: ${existingFirstName}`);
+	} catch (error) {
+		logger.error(`Error getting slot ${SLOTS.maxFirstName}: ${error}`);
+	}
+
+	if ((!existingFirstName || existingFirstName.trim() === "") &&
+		first_name && first_name.trim() !== "") {
+
+		slots.splice(2, 0, {id: SLOTS.maxFirstName, value: first_name});
+
+
+		try {
+			await agentStorage.globalStorage.set(SLOTS.maxFirstName, first_name);
+			logger.info(`Saved first_name to storage for future use: ${first_name}`);
+		} catch (error) {
+			logger.error(`Error saving slot ${SLOTS.maxFirstName}: ${error}`);
+		}
+	}
+
+
 	return {
 		id: mid,
 		content: {
@@ -96,13 +129,7 @@ function buildMessageResponse(
 			first_name,
 			last_name
 		},
-		slots: [
-			{id: SLOTS.maxChatId, value: String(chatId)},
-			{id: SLOTS.maxUserId, value: String(user_id)},
-			{id: SLOTS.maxFirstName, value: first_name},
-			{id: SLOTS.maxLastName, value: last_name},
-			{id: SLOTS.maxUserName, value: name}
-		]
+		slots: slots
 	}
 }
 
@@ -177,7 +204,7 @@ async function preprocessMessage() {
 			result = processDefault(messageData)
 	}
 
-	return buildMessageResponse({
+	return await buildMessageResponse({
 		...result,
 		text
 	})

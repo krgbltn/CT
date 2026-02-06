@@ -1,0 +1,37 @@
+{
+  "__declaration__": [
+    {
+      "id": "fileName",
+      "type": "string",
+      "name": "Имя файла"
+    }
+  ],
+  "internalApi": {
+    "agentAddress": "http://opbot-jsagent:3366/workplace",
+    "agentTimeout": 90000
+  },
+  "fileStorageApi": {
+    "baseAddress": "http://opbot-filestorage:8100",
+    "uploadB64": "/file/upload-b64"
+  },
+  "fileName": "Отчет по анализу диалогов",
+  "static_files_link": "/file/rupost/0907b89d-389d-42c7-8a7e-d8111184e32b-69c5e153-8e8b-4e68-b9ee-29f6f515545d.zip?v=3",
+  "channelIds": [
+    "mobile_mprupost",
+    "webchat_rupost",
+    "channel_2cf554e",
+    "channel_43a8739",
+    "channel_559e91",
+    "channel_3e990cc",
+    "channel_53c3eae",
+    "channel_46a5630",
+    "channel_5218637",
+    "channel_23d6c2c",
+    "channel_3289790",
+    "channel_26df929",
+    "channel_482c71d",
+    "channel_08tg27v",
+    "channel_35f378e",
+    "channel_133540d"
+  ]
+}
