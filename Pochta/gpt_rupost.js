@@ -982,6 +982,10 @@ function _sendReply(text, slots, meta = {}) {
 		SendMessageParams: {
 			ProjectId: reply.customer_id,
 			OmniUserId: reply.omni_user_id,
+			DestinationChannel: {
+				ChannelId: reply.channel_id,
+				ChannelUserId: message.user.channel_id,
+			},
 			Sender: {},
 			FilledSlots: _sendReply.slots,
 			Meta: meta
@@ -997,6 +1001,10 @@ function _sendReply(text, slots, meta = {}) {
 						SendMessageParams: {
 							ProjectId: reply.customer_id,
 							OmniUserId: reply.omni_user_id,
+							DestinationChannel: {
+								ChannelId: reply.channel_id,
+								ChannelUserId: message.user.channel_id,
+							},
 							Sender: {},
 							FilledSlots: _sendReply.slots
 						}
@@ -1215,7 +1223,7 @@ async function _main(replies) {
 		fcResults, tool_choice
 	) {
 		const done = "Done"
-		const functionsToCommit = []
+		let functionsToCommit = []
 		logger.debug("fcResults " + JSON.stringify(fcResults))
 		let isScenarioStartIndex = 0
 		// индексы сообщений переводов на текущего агента в истории
@@ -1234,6 +1242,7 @@ async function _main(replies) {
 			// то при обнаружении коммита требуется его сбросить
 			if (tool.type === ITEM_TYPES.commit) {
 				isScenarioStartIndex = 0
+				functionsToCommit = []
 				continue
 			}
 			const func = availableFunctions[tool.name]
@@ -1297,15 +1306,12 @@ async function _main(replies) {
 			}
 			functionsToCommit.push(resultTool)
 		}
-		// после каждой вставки индексы смещаются на 1, нужно корректировать
-		let correctiveOffset = 0
-		messagesToInsert.forEach((message) => {
+		messagesToInsert.reverse().forEach((message) => {
 			if (message.isReplace) {
-				history.splice(message.index + correctiveOffset,1,message.data)
+				history.splice(message.index, 1, message.data)
 			} else {
-				history.splice(message.index + correctiveOffset,0,message.data)
+				history.splice(message.index, 0, message.data)
 			}
-			correctiveOffset += 1
 		})
 		return await commitToolResponses(
 			functionsToCommit, dialog_id, prepareHistory(history,excludeIds), replies, tool_choice
