@@ -1,0 +1,33 @@
+{
+  "edit_message": true,
+  "delete_message": true,
+  "request_settings": [
+    {
+      "name": "customer_id",
+      "type": "string",
+      "value": "medisimo_prod"
+    },
+    {
+      "name": "outgoing_agent_id",
+      "type": "string",
+      "value": "outgoing_jsagent_max_medisimo_prod"
+    },
+    {
+      "name": "file_storage_webhook",
+      "type": "string",
+      "value": "http://opbot-filestorage:8100"
+    }
+  ],
+  "general_settings": [
+    {
+      "name": "customer_id",
+      "type": "string",
+      "value": "medisimo_prod"
+    },
+    {
+      "name": "outgoing_agent_id",
+      "type": "string",
+      "value": "outgoing_jsagent_max_medisimo_prod"
+    }
+  ]
+}
