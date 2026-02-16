@@ -5,29 +5,29 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "medisimo_prod"
+      "value": "zdrav"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "outgoing_jsagent_max_medisimo_prod"
+      "value": "outgoing_jsagent_max_zdrav"
     },
     {
       "name": "file_storage_webhook",
       "type": "string",
-      "value": "http://opbot-filestorage:8100"
+      "value": "http://localhost:8100"
     }
   ],
   "general_settings": [
     {
       "name": "customer_id",
       "type": "string",
-      "value": "medisimo_prod"
+      "value": "zdrav"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "outgoing_jsagent_max_medisimo_prod"
+      "value": "outgoing_jsagent_max_zdrav"
     }
   ]
 }
