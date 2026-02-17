@@ -1,0 +1,56 @@
+{
+  "__declaration__": [
+    {
+      "id": "fileName",
+      "type": "string",
+      "name": "Имя файла"
+    },
+    {
+      "id": "llmApi",
+      "type": "object",
+      "name": "Конфигурация LLM сервиса"
+    },
+    {
+      "id": "channelTypes",
+      "type": "object",
+      "name": "Типы каналов",
+      "description": "Ключ - тип канала, который будет отображаться в отчете. Значение - список id каналов, которые относятся к данному типу"
+    }
+  ],
+  "externalApi": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoia25vdmlrb3ZAY3JhZnR0YWxrLnJ1In0.ZmVwA3xfPLxGfPYwLR2NMl-QhmaQb9jAq9xpFRp5ZgY",
+    "baseAddress": "https://cloud-dev-5.craft-talk.com/api/external",
+    "messageHistory": "/history/messages",
+    "dialogsSearch": "/dialogs/search",
+    "getByOmniUserId": "/chat-users/get-by-omni-user-id"
+  },
+  "llmApi": {
+    "baseAddress": "http://craftgpt:3020",
+    "query": "/query",
+    "timeout": 60,
+    "temperature": 0,
+    "token": "gwPT5yXQy_83Z8xqvzCuTWTPYtY1XXeB4PGVDXiVQRg"
+  },
+  "fileStorageApi": {
+    "baseAddress": "http://opbot-filestorage:8100",
+    "uploadB64": "/file/upload-b64"
+  },
+  "channelTypes": {
+    "Все вебчаты": [
+      "webchat_test",
+      "channel_535c5c4",
+      "channel_5f2ac23"
+    ],
+    "Телеграм": [
+      "channel_5439f27"
+    ],
+    "ВК": [
+      "channel_54027b"
+    ]
+  },
+  "internalApi": {
+    "agentAddress": "http://opbot-jsagent:3366/workplace"
+  },
+  "fileName": "Отчет по анализу диалогов",
+  "static_files_link": "/file/dodopizza_demo/21a1cd40-26a0-4dd4-bfa9-2db0dd9018a9-1ca90a43-3e44-4d74-9a98-775b973d2226.zip?v=8"
+}
