@@ -3,7 +3,9 @@ const LLM_API = agentSettings.llmApi
 const CHANNEL_TYPES = agentSettings.channelTypes
 const FILE_STORAGE_API = agentSettings.fileStorageApi
 const FILE_NAME = `${agentSettings.fileName ?? "Без названия"}.xlsx`
-
+const IS_THINKING = LLM_API.isThinking ?? false
+const THINK = " /think"
+const NO_THINK = " /no_think"
 const AUTH_TYPE = {
 	BEARER: "Bearer"
 }
@@ -63,6 +65,23 @@ const externalApiInstance = axios.create({
 	}
 })
 
+function extractThinkContent(input) {
+	const openTag = '<think>';
+	const closeTag = '</think>';
+
+	const startIdx = input.indexOf(openTag);
+	const endIdx = input.indexOf(closeTag);
+
+	if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
+		return input;
+	}
+		const cleanedText = input.substring(0, startIdx) +
+		input.substring(endIdx + closeTag.length);
+
+	return cleanedText.trim();
+}
+
+
 function successResponse(data) {
 	return {
 		success: true,
@@ -120,21 +139,20 @@ async function createReport(id, dateRange, projectId, dialogsCountLimit, prompt,
 
 	logger.info(`Dialogs count: ${dialogs.length}`)
 
-	const dialogsInfo = await extractDialogInfo(dialogs, projectId, prompt, mask.toLowerCase())
+	const dialogsLimited = dialogs.slice(0, dialogsCountLimit)
+	logger.info(`Dialogs limited count: ${dialogsLimited.length}`)
+
+	const dialogsInfo = await extractDialogInfo(dialogsLimited, projectId, prompt, mask.toLowerCase())
 
 	logger.info(`Dialogs info count: ${dialogsInfo.length}`)
 	logger.info(`Dialogs info first: ${JSON.stringify(dialogsInfo[0])}`)
 
-	const dialogsLimitedInfo = dialogsInfo.slice(0, dialogsCountLimit)
-
-	logger.info(`Dialogs info limited count: ${dialogsLimitedInfo.length}`)
-
-	const dialogsInfoInExelFormat = transformDialogsInfoToExelFormat(dialogsLimitedInfo)
+	const dialogsInfoInExelFormat = transformDialogsInfoToExelFormat(dialogsInfo)
 
 	const exelFile = saveToExelFormat(dialogsInfoInExelFormat)
 	const fileLink = await uploadFileToStorage(exelFile)
 
-	if (dialogsLimitedInfo.length > 0 && fileLink) {
+	if (dialogsInfo.length > 0 && fileLink) {
 		await updateReportRecord(REPORT_STATUSES.DONE, fileLink, id, projectId)
 	} else {
 		await updateReportRecord(REPORT_STATUSES.ERROR, "", id, projectId)
@@ -228,7 +246,7 @@ async function extractDialogInfo(dialogs, projectId, prompt, mask) {
 
 		const requestTextWithPrompt = addPromptToAiRequestText(prompt, requestText)
 
-		const llmRate = await getLlmRate(requestTextWithPrompt)
+		const llmRate = extractThinkContent (await getLlmRate(requestTextWithPrompt))
 
 		const isRateMatchToMask = !mask || (mask && llmRate.toLowerCase().includes(mask))
 
@@ -325,7 +343,7 @@ function transformDialogMessagesToAiRequestText(messages, operatorFio) {
 }
 
 function addPromptToAiRequestText(prompt, text) {
-	return prompt + text
+	return prompt + `${IS_THINKING ? THINK : NO_THINK}` + text
 }
 
 async function getUserByOmniId(omniUserId) {
