@@ -29,7 +29,8 @@
     "query": "/query",
     "timeout": 60,
     "temperature": 0,
-    "token": "gwPT5yXQy_83Z8xqvzCuTWTPYtY1XXeB4PGVDXiVQRg"
+    "token": "gwPT5yXQy_83Z8xqvzCuTWTPYtY1XXeB4PGVDXiVQRg",
+    "isThinking": false
   },
   "fileStorageApi": {
     "baseAddress": "http://opbot-filestorage:8100",
