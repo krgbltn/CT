@@ -10,7 +10,7 @@ let LLM_AUTH_TOKEN = agentSettings.llm_auth_token;
 const LLM_TIMEOUT = agentSettings.llm_timeout ?? 60;
 const LLM_TEMPERATURE = agentSettings.llm_temperature ?? 0.0;
 const NOTFOUND = "notfound"; // intent, that will be returned if context was not found
-const IS_THINKING = isThinking ?? false;
+const IS_THINKING = agentSettings.isThinking ?? false;
 const THINK = " /think";
 const NO_THINK = " /no_think";
 
