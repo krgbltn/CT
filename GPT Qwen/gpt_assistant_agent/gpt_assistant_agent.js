@@ -1,5 +1,6 @@
 //gpt_assistant_agent
 const CUSTOMER_ID = agentSettings.customer_id;
+const BASE_URL = agentSettings.base_url;
 const RECORD_TYPE = agentSettings.record_type;
 const URL_CONTEXT_SEARCH = new URL("/search", agentSettings.url_context_search)
 	.href;
@@ -9,47 +10,52 @@ let LLM_AUTH_TOKEN = agentSettings.llm_auth_token;
 const LLM_TIMEOUT = agentSettings.llm_timeout ?? 60;
 const LLM_TEMPERATURE = agentSettings.llm_temperature ?? 0.0;
 const NOTFOUND = "notfound"; // intent, that will be returned if context was not found
+const IS_THINKING = isThinking ?? false;
+const THINK = " /think";
+const NO_THINK = " /no_think";
+
+function buildInstruction(baseTemplate) {
+	return `${baseTemplate} ${IS_THINKING ? THINK : NO_THINK}`;
+};
+function cleanResponse(text) {
+	if (!text) return "";
+	// Удаляем блоки <think>...</think>
+	return text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+};
+
 const LLM_SYSTEM_TEMPLATE = `
 Ты - помощник оператора "Название компании", который работает с клиентами. 
 Ты помогаешь оператору вежливо общаться с клиентами и находить ответы на их вопросы.
 
 Ты получаешь на вход найденную информацию и на основании только этой информации формируешь точный ответ с цитатой длиной до 200 символов.
 Если в найденной информации нет подходящего ответа на вопрос, то попроси пользователя задать более конкретный вопрос.
-/no_think
 `;
 
 const LLM_SYSTEM_TEMPLATE_SMALLTALK = `
 Ты - помощник оператора "Название компании", который работает с клиентами. Ты помогаешь оператору вежливо общаться с клиентами и находить ответы на их вопросы.
 Подготовь вежливый ответ для клиента и задай встречный вопрос.
-/no_think
 
 `;
 
 const LLM_TEMPLATE_ENG_TRANSLATE = `
 Ты - переводчик текста на английский язык. Отвечай только переведенной фразой. Не ссылайся на входные данные.
-/no_think
 `;
 
 const LLM_TEMPLATE_CHI_TRANSLATE = `
 Ты - переводчик текста на китайский язык. Отвечай только переведенной фразой. Не ссылайся на входные данные.
-/no_think
 `;
 
 const LLM_TEMPLATE_UZ_TRANSLATE = `
 Ты - переводчик текста на узбекский язык. Отвечай только переведенной фразой. Не ссылайся на входные данные.
-/no_think
 `;
 const LLM_TEMPLATE_KG_TRANSLATE = `
 Ты - переводчик текста на киргизский язык. Отвечай только переведенной фразой. Не ссылайся на входные данные.
-/no_think
 `;
 const LLM_TEMPLATE_TJ_TRANSLATE = `
 Ты - переводчик текста на таджикский язык. Отвечай только переведенной фразой. Не ссылайся на входные данные.
-/no_think
 `;
 const LLM_TEMPLATE_RU_TRANSLATE = `
 Ты - переводчик текста на русский язык. Отвечай только переведенной фразой. Не ссылайся на входные данные.
-/no_think
 `;
 
 const LLM_TEMPLATE_FIX_SYNTAX = `
@@ -58,31 +64,25 @@ const LLM_TEMPLATE_FIX_SYNTAX = `
 Например:
 Фраза: заказз 1593 не прошел 
 Результат: Уважаемый клиент, сожалеем, но заказ №1593 не был выполнен. Помочь Вам решить проблему?
-/no_think
 `;
 
 const LLM_TEMPLATE_SELL = `
 Ты помогаешь оператору продать услугу или товар клиенту. Сформируй продающую фразу на основе фразы оператора.  
-/no_think
 `;
 const LLM_TEMPLATE_REJECT = `
 Ты помогаешь оператору мягко отказать клиенту в его просьбе. Сформируй аккуратную вежливую фразу на основе фразы оператора.  
-/no_think
 `;
 
 const LLM_TEMPLATE_EMPATHY = `
 Ты определяешь вежливость, корректность ии профессиональность ответов оператора в диалога чата. 
-/no_think
 `;
 
 const LLM_TEMPLATE_SUGGEST_OUTGOING = `
 Ты - помогаешь оператору, предлагая вариант сообщения, которым можно начать новый диалог с клиентом. Предлагай на русском языке, 1 или 2 предложения. 
-/no_think
 `;
 
 const LLM_TEMPLATE_SUMMARY = `
 Ты - помогаешь оператору, создавая краткий реферат диалога. Отвечай на русском языке, 1 или 2 предложения. 
-/no_think
 `;
 
 if (Buffer.isBuffer(message)) {
@@ -97,7 +97,6 @@ if (Buffer.isBuffer(message)) {
 async function gptReplicas(detailedAnswer=false) {
 	let response = null;
 	let question = PrepareQuestionToken(message);
-	let record_type = null;
 
 	try {
 		response = await axios.post(URL_CONTEXT_SEARCH, {
@@ -126,7 +125,7 @@ async function gptReplicas(detailedAnswer=false) {
 			{
 				question,
 				temperature: 0.5,
-				instruction: LLM_SYSTEM_TEMPLATE_SMALLTALK
+				instruction: buildInstruction(LLM_SYSTEM_TEMPLATE_SMALLTALK)
 			},
 			{
 				timeout: LLM_TIMEOUT * 1000,
@@ -138,9 +137,8 @@ async function gptReplicas(detailedAnswer=false) {
 		);
 
 		logger.info(response);
-		const message = response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-		return ResponseWrapper(message);
+		return ResponseWrapper(cleanResponse(response.data.answer));
 	}
 
 	if (detailedAnswer === true)
@@ -154,7 +152,7 @@ async function gptReplicas(detailedAnswer=false) {
 				question,
 				context,
 				temperature: LLM_TEMPERATURE,
-				system_template: LLM_SYSTEM_TEMPLATE
+				system_template: buildInstruction(LLM_SYSTEM_TEMPLATE)
 			},
 			{
 				timeout: LLM_TIMEOUT * 1000,
@@ -176,7 +174,7 @@ async function gptReplicas(detailedAnswer=false) {
 	full_context.symbol_code.forEach(intent_id => {
 		if (!(intent_id in articles_map)) {
 			supportArticles.push({
-				ref: `https://cloud-dev-5.craft-talk.com/app/project/dodopizza_demo/knowledge-base/article/view/${intent_id}`,
+				ref: `${BASE_URL}/app/project/${CUSTOMER_ID}/knowledge-base/article/view/${intent_id}`,
 				title: full_context.title[idx]
 			});
 
@@ -188,7 +186,7 @@ async function gptReplicas(detailedAnswer=false) {
 	});
 
 	return ResponseWrapper(
-		response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim(),
+		cleanResponse(response.data.answer),
 		//supportArticles
 		[]
 	);
@@ -217,7 +215,7 @@ async function translate(lang_title, template) {
 			question,
 			template
 		);
-		return ResponseWrapper(response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim(), []);
+		return ResponseWrapper(cleanResponse(response.data.answer), []);
 	} catch (e) {
 		return ResponseWrapper("Что-то пошло не так при переводе");
 	}
@@ -241,7 +239,7 @@ async function fix_syntax() {
 			LLM_TEMPLATE_FIX_SYNTAX
 		);
 
-		return ResponseWrapper(response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim(), []);
+		return ResponseWrapper(cleanResponse(response.data.answer), []);
 	} catch (e) {
 		return ResponseWrapper("Что-то пошло не так при исправлении ошибок");
 	}
@@ -260,10 +258,10 @@ async function sell() {
 	try {
 		const response = await commandGeneric(
 			question,
-			LLM_TEMPLATE_FIX_SYNTAX
+			LLM_TEMPLATE_SELL
 		);
 
-		return ResponseWrapper(response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim(), []);
+		return ResponseWrapper(cleanResponse(response.data.answer), []);
 	} catch (e) {
 		return ResponseWrapper("Что-то пошло не так при продаже");
 	}
@@ -282,10 +280,10 @@ async function reject() {
 	try {
 		const response = await commandGeneric(
 			question,
-			LLM_TEMPLATE_FIX_SYNTAX
+			LLM_TEMPLATE_REJECT
 		);
 
-		return ResponseWrapper(response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim(), []);
+		return ResponseWrapper(cleanResponse(response.data.answer), []);
 	} catch (e) {
 		return ResponseWrapper("Что-то пошло не так при отказе");
 	}
@@ -306,7 +304,7 @@ async function summary_intl() {
 			question,
 			LLM_TEMPLATE_SUMMARY
 		);
-		return "🔖 " + response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+		return "🔖 " + cleanResponse(response.data.answer);
 	} catch (e) {
 		return "Что-то пошло не так при создании реферата";
 	}
@@ -324,7 +322,7 @@ async function empathy() {
 	const messagesStr =       message.messages.reverse().map(x => x.side + ": " + x.text + "\n").join("\n");
 
 	let question =
-		"Определи, есть ли в диалоге невежливое иили непрофессиональное обращение оператора контакт-центра к клиенту. Дай конкретную рекомендацию - какая фраза некорректная. Ответь \"да\" или \"нет\". Объясни причину своего ответа.  \n\nДиалог:\n" + messagesStr;
+		"Определи, есть ли в диалоге невежливое или непрофессиональное обращение оператора контакт-центра к клиенту. Дай конкретную рекомендацию - какая фраза некорректная. Ответь \"да\" или \"нет\". Объясни причину своего ответа.  \n\nДиалог:\n" + messagesStr;
 
 	try {
 		const response = await commandGeneric(
@@ -334,20 +332,19 @@ async function empathy() {
 
 		let alarm = false;
 		let answer = "Не удалось определить корректность общения";
-		if (response.data.answer.startsWith("Да")) {
-			answer = response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim().substring(3);
+		const cleaned = cleanResponse(response.data.answer);
+
+		if (cleaned.startsWith("Да")) {
+			answer = cleaned.replace(/^Да[:\s]*/i, '').trim();
 			alarm = true;
-		}
-		else {
-			answer = response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim().substring(2);
+		} else {
+			answer = cleaned.replace(/^Нет[:\s]*/i, '').trim();
 		}
 		return ResponseWrapper("🧐 " + answer, [], alarm);
 	} catch (e) {
 		return ResponseWrapper("Что-то пошло не так при определении корректности общения");
 	}
 }
-
-
 
 /**
  * command: nonActiveDialog
@@ -365,7 +362,7 @@ async function nonActiveDialog_intl() {
 			LLM_TEMPLATE_SUGGEST_OUTGOING
 		);
 
-		return "🔖 " + response.data.answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+		return "🔖 " + cleanResponse(response.data.answer);
 	} catch (e) {
 		return "Что-то пошло не так при создании реферата";
 	}
@@ -381,13 +378,13 @@ async function nonActiveDialog() {
 async function commandGeneric(question, instruction) {
 	logger.info(`question:${question}`);
 	logger.info(`instruction:${instruction}`);
-
+	const finalInstruction = buildInstruction(instruction);
 	try {
 		return axios.post(
 			URL_LLM_SMALLTALK,
 			{
 				question,
-				instruction,
+				instruction: finalInstruction,
 				temperature: LLM_TEMPERATURE
 			},
 			{

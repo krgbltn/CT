@@ -4,6 +4,8 @@
   "llm_auth_token": "ywqHdQ6ywrk-ZdsVEXFSmfH5uHdJWIgreoaPnhG7Mek",
   "llm_timeout": 200,
   "llm_temperature": 0,
+  "isThinking": false,
+  "base_url": "https://cloud.craft-talk.ru",
   "customer_id": "energy-team",
   "record_type": null
 }
