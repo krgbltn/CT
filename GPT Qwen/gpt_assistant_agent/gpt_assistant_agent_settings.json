@@ -1,11 +1,12 @@
 {
   "url_context_search": "http://contextsearch:8801",
   "url_llm": "http://craftgpt:3020",
-  "llm_auth_token": "ywqHdQ6ywrk-ZdsVEXFSmfH5uHdJWIgreoaPnhG7Mek",
+  "llm_auth_token": [token],
   "llm_timeout": 200,
-  "llm_temperature": 0,
+  "llm_temperature": 0.3,
   "isThinking": false,
-  "base_url": "https://cloud.craft-talk.ru",
-  "customer_id": "energy-team",
-  "record_type": null
+  "isSupport": false,
+  "base_url": [host],
+  "customer_id": [customer_id],
+  "record_type": [record_type]
 }

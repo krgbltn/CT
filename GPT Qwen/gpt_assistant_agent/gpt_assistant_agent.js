@@ -13,28 +13,27 @@ const NOTFOUND = "notfound"; // intent, that will be returned if context was not
 const IS_THINKING = agentSettings.isThinking ?? false;
 const THINK = " /think";
 const NO_THINK = " /no_think";
+const IS_SUPPORT = agentSettings.isSupport ?? false;
 
 function buildInstruction(baseTemplate) {
 	return `${baseTemplate} ${IS_THINKING ? THINK : NO_THINK}`;
 };
 function cleanResponse(text) {
 	if (!text) return "";
-	// Удаляем блоки <think>...</think>
 	return text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 };
 
 const LLM_SYSTEM_TEMPLATE = `
-Ты - помощник оператора "Название компании", который работает с клиентами. 
+Ты - помощник оператора, который работает с клиентами. 
 Ты помогаешь оператору вежливо общаться с клиентами и находить ответы на их вопросы.
 
-Ты получаешь на вход найденную информацию и на основании только этой информации формируешь точный ответ с цитатой длиной до 200 символов.
+Ты получаешь на вход найденную информацию и на основании только этой информации формируешь точный ответ с цитатой длиной до 200 символов. Не придумывай, отвечай только на основе информации из контекста.
 Если в найденной информации нет подходящего ответа на вопрос, то попроси пользователя задать более конкретный вопрос.
 `;
 
 const LLM_SYSTEM_TEMPLATE_SMALLTALK = `
-Ты - помощник оператора "Название компании", который работает с клиентами. Ты помогаешь оператору вежливо общаться с клиентами и находить ответы на их вопросы.
+Ты - помощник оператора магазина автозапчастей, который работает с клиентами. Ты помогаешь оператору вежливо общаться с клиентами и находить ответы на их вопросы.
 Подготовь вежливый ответ для клиента и задай встречный вопрос.
-
 `;
 
 const LLM_TEMPLATE_ENG_TRANSLATE = `
@@ -170,7 +169,7 @@ async function gptReplicas(detailedAnswer=false) {
 	let idx = 0;
 	let cnt = 1;
 	let articles_map = new Map();
-
+if (IS_SUPPORT) {
 	full_context.symbol_code.forEach(intent_id => {
 		if (!(intent_id in articles_map)) {
 			supportArticles.push({
@@ -183,12 +182,11 @@ async function gptReplicas(detailedAnswer=false) {
 		}
 
 		idx++;
-	});
+	})};
 
 	return ResponseWrapper(
 		cleanResponse(response.data.answer),
-		//supportArticles
-		[]
+		supportArticles
 	);
 }
 /**
