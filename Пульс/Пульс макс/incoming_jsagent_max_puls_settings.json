@@ -1,0 +1,11 @@
+{
+  "incoming_api": "http://opbot-channels:8082/webhooks/integration_channel/integration_channel_max_puls",
+  "authorization_token_incoming": "",
+  "slots": {
+    "maxChatId": "chat_id_max",
+    "maxUserId": "user_id_max",
+    "maxFirstName": "sys_firstname",
+    "maxLastName": "sys_lastname",
+    "maxUserName": "user_name_max"
+  }
+}
