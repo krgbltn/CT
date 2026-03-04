@@ -5,12 +5,12 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "twino"
+      "value": "sech"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "outgoing_jsagent_max_twino1"
+      "value": "outgoing_jsagent_max_sech"
     },
     {
       "name": "file_storage_webhook",
@@ -22,12 +22,12 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "twino"
+      "value": "sech"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "outgoing_jsagent_max_twino1"
+      "value": "outgoing_jsagent_max_sech"
     }
   ]
 }
