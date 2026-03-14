@@ -13,7 +13,8 @@ const {
 	incomingProcessor: INCOMING_PROCESSOR,
 	has_score: HAS_SCORE = false,
 	fileStorageUrl: FILE_STORAGE_URL,
-	has_combination_keyboards: HAS_COMBINATION_KEYBOARDS = false
+	has_combination_keyboards: HAS_COMBINATION_KEYBOARDS = false,
+	enableFinishMessage : ENABLE_FINISH_MESSAGE = false
 } = agentSettings
 
 function createFinishMessage() {
@@ -27,7 +28,6 @@ function createRatingMessage(isVertical = false) {
 
 	return `Оцените работу оператора\n\n\`\`\`buttons\n::\n${buttons}\n\`\`\``
 }
-const ENABLE_FINISH_MESSAGE = agentSettings.enableFinishMessage ?? false
 const MAX_COLUMNS = 7
 const MAX_ROWS = 30
 const SLOT_ID_OMNIUSER = "sys_omniuserid"
@@ -617,25 +617,23 @@ async function run() {
 					response = await handleSendMessage(message.data)
 					logger.info(`Message sent successfully: ${JSON.stringify(response)}`)
 					break
+
 				case MESSAGE_TYPES_SEND_MESSAGE.FINISH_DIALOG:
 					await agentStorage.globalStorage.del(getSlotValue(SLOTS.maxChatId))
-					if (!HAS_SCORE) {
-						if (ENABLE_FINISH_MESSAGE) {
-							message.data.content.text = createFinishMessage()
+
+					if (HAS_SCORE) {
+						message.data.content.text = createRatingMessage()
 						message.data.content.text_type = TEXT_FORMAT.markdown
 						await handleSendMessage(message.data)
-						}
-						break
 					}
-					message.data.content.text = createRatingMessage()
-					message.data.content.text_type = TEXT_FORMAT.markdown
-					await handleSendMessage(message.data)
+
 					if (ENABLE_FINISH_MESSAGE) {
 						message.data.content.text = createFinishMessage()
 						message.data.content.text_type = TEXT_FORMAT.markdown
 						await handleSendMessage(message.data)
 					}
 					break
+
 				case MESSAGE_TYPES_SEND_MESSAGE.EDITED_BY_OPERATOR:
 					response = await handleSendModifiedMessage(message.data)
 					logger.info(`Message sent Modified successfully: ${JSON.stringify(response)}`)
