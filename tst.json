@@ -5,12 +5,12 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "hiring_servispro"
+      "value": "alfa_2"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "outgoing_jsagent_max_hiring"
+      "value": "outgoing_jsagent_max_alfa_2"
     },
     {
       "name": "file_storage_webhook",
@@ -22,12 +22,12 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "hiring_servispro"
+      "value": "alfa_2"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "outgoing_jsagent_max_hiring"
+      "value": "outgoing_jsagent_max_alfa_2"
     }
   ]
 }

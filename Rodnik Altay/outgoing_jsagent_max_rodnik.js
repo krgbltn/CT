@@ -618,9 +618,10 @@ async function run() {
 					logger.info(`Message sent successfully: ${JSON.stringify(response)}`)
 					break
 				case MESSAGE_TYPES_SEND_MESSAGE.FINISH_DIALOG:
+					const skipScore = getSlotValue(SLOTS.skipScore)
 					await agentStorage.globalStorage.del(getSlotValue(SLOTS.maxChatId))
 
-					if (HAS_SCORE) {
+					if (HAS_SCORE && !skipScore) {
 						message.data.content.text = createRatingMessage()
 						message.data.content.text_type = TEXT_FORMAT.markdown
 						await handleSendMessage(message.data)
@@ -632,7 +633,6 @@ async function run() {
 						await handleSendMessage(message.data)
 					}
 					break
-
 				case MESSAGE_TYPES_SEND_MESSAGE.EDITED_BY_OPERATOR:
 					response = await handleSendModifiedMessage(message.data)
 					logger.info(`Message sent Modified successfully: ${JSON.stringify(response)}`)
