@@ -1,34 +1,38 @@
 {
-  "edit_message": true,
-  "delete_message": true,
-  "request_settings": [
-    {
-      "name": "customer_id",
-      "type": "string",
-      "value": "alfa_2"
-    },
-    {
-      "name": "outgoing_agent_id",
-      "type": "string",
-      "value": "outgoing_jsagent_max_alfa_2"
-    },
-    {
-      "name": "file_storage_webhook",
-      "type": "string",
-      "value": "http://localhost:8100"
-    }
-  ],
-  "general_settings": [
-    {
-      "name": "customer_id",
-      "type": "string",
-      "value": "alfa_2"
-    },
-    {
-      "name": "outgoing_agent_id",
-      "type": "string",
-      "value": "outgoing_jsagent_max_alfa_2"
-    }
-  ]
+  "working": {
+    "State": 1,
+    "Title": "Воркаю",
+    "IsOutgoingAvailable": true,
+    "Color": "#28a745"
+  },
+  "chill": {
+    "State": 0,
+    "Title": "Чилл",
+    "IsOutgoingAvailable": false,
+    "Color": "#eb8e39"
+  },
+  "learning_new": {
+    "State": 0,
+    "Title": "Познаю новое",
+    "IsOutgoingAvailable": false,
+    "Color": "#0eabdc"
+  },
+  "helper": {
+    "State": 0,
+    "Title": "Помогатор",
+    "IsOutgoingAvailable": false,
+    "Color": "#eb8e39"
+  },
+  "overtime": {
+    "State": 1,
+    "Title": "Тружусь х2",
+    "IsOutgoingAvailable": true,
+    "Color": "#6f42c1"
+  },
+  "going_home": {
+    "State": 0,
+    "Title": "Иду домой",
+    "IsOutgoingAvailable": false,
+    "Color": "#dc3545"
+  }
 }
-
