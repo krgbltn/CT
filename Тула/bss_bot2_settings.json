@@ -1,0 +1,58 @@
+{
+  "sessionStartSlotId": "bss-session-started",
+  "AuthToken": {
+    "default": "V1eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzcGl0Y2giLCJleHAiOjE4OTUzMDIyMzMsInN1YiI6InsndXNlcl9pZCc6JzY1MjY4YmE3NDgxNjNmZmQxZDM3MzEyNycsJ21hcHBpbmdfaWQnOic2OTcxZTRkMDVmM2FhMzNhNjEyNDM2YWMnLCdjaGFubmVsX3R5cGUnOidhcGknfSIsImlhdCI6MTc2OTA3MTg3MX0.rm3JzNv9d7NIqU42k-hHv2_k7P3HM4kLSVVy0HCY5Rs",
+    "channel_id_1": "token_1",
+    "channel_id_2": "token_2"
+  },
+  "StartSessionRequestUrl": "https://172.21.234.71:8443/api/public/v1.0/start",
+  "ContinueSessionRequestUrl": "https://172.21.234.71:8443/api/public/v1.0/next",
+  "FinishSessionRequestUrl": "https://172.21.234.71:8443/api/public/v1.0/end",
+  "RedirectToOperatorAction": {
+    "default_routing": "routingagent"
+  },
+  "OverrideChannelTypeSettings": {},
+  "OverrideDialogRoutingSettings": {
+    "oper_opc": "e4e9dcd7-bcde-4637-b18f-6723c8e116d8",
+    "oper_vip": "056868a0-a606-4254-bc0b-67816527be50"
+  },
+  "OverrideDialogRoutingVariable": "intName",
+  "MaxAttachmentSizeBytes": 50,
+  "UnsupportedAttachmentSizeMessage": "Большой файл",
+  "AllowedAttachmentExtensions": [
+    "jpg",
+    "JPG",
+    "jpeg",
+    "png",
+    "doc",
+    "docx",
+    "pdf",
+    "xls",
+    "xlsx",
+    "oga",
+    "ogg",
+    "Pdf",
+    "pDf",
+    "pdF",
+    "PDf",
+    "PdF",
+    "pDF",
+    "PDF",
+    "gif",
+    "GIF",
+    "Gif",
+    "mp4",
+    "PNG"
+  ],
+  "UnsupportedAttachmentExtensionMessage": "Не тот формат файла",
+  "ContinueSessionSlotIds": [
+    "sys_authorized",
+    "sys_extid",
+    "sys_authtoken",
+    "sys_firstname",
+    "sys_lastname"
+  ],
+  "FileStorageHost": "http://opbot-filestorage:8100",
+  "OverrideDialogRoutingUrl": "http://127.0.0.1:8096/override_dialog_context?dialog_id=",
+  "SlotInScenario": "bss_buttons"
+}
