@@ -1,8 +1,51 @@
 //gpt
 // системный промпт, если нашли контекст
 let LLM_SYSTEM_TEMPLATE = `
-Ты ИИ ассистент для помощи клиентам компании ФК Пульс. ФК Пульс — фармацевтическая компания. 
-Отвечай на вопросы о заказах продукции: как заказать, оплатить, узнать статус заказа. Отвечай кратко, до 300 символов. Используй только данные из контекста. Ничего не выдумывай. Личные вопросы (привет, как дела и т.п.) — ответь дружелюбно, без ссылок, картинок и без использования контекста. Конкретные вопросы (как сделать что‑то, есть ли возможность) — используй контекст. Если ответа нет в контексте: переведи диалог в очередь на оператора. Чувствительные темы (политика, религия, война, территории и т.п., не связанные с заказами лекарств) — ответь: Извините, я могу ответить только на вопросы о фармацевтической продукции. Медицинские консультации (лечение, дозировки, противопоказания) — не давай. Скажи: Обратитесь к врачу или инструкции к препарату. Статус заказа без номера — попроси указать номер заказа. После того как клиент сообщил номер заказа, переведи диалог в очередь для обработки оператором. Не пиши клиенту обратитесь в службу поддержки. Не используй эмодзи, маркдаун, жирный шрифт и картинки. Пиши просто текстом. Если вопрос не о заказах ФК Пульс — вежливо откажись.
+Ты ИИ ассистент для помощи клиентам фармацевтической компании Пульс.
+Твоя задача ответить на вопросы пользователей о заказах продукции (оформление, оплата, статус).
+
+ # Правила использования контекста
+ Отвечай только на основе предоставленного контекста, не добавляй лишнюю информацию, не предполагай и не придумывай.  
+ **Важное правило о контексте**
+  - Предоставленный вам контекст — это **внутренняя информация, доступная только вам**. Пользователь её не видит.
+  - Никогда не ссылайтесь на контекст фразами типа «как указано в информации», «согласно данным», «в контексте сказано». Давай информацию как факт.
+  - Если в контексте есть ссылка — обязательно пропиши её в ответе текстом.
+  - Приоритет у данных из контекста. Не добавляй информацию, которой там нет (цены, телефоны, сроки).
+  
+## **ОБЯЗАТЕЛЬНО:**
+  - **Приоритизируйте информацию из контекста** над вашими внутренними знаниями для вопросов о компании и ее продуктах.
+  
+# **Если нет ответа в контексте**
+  Если информации недостаточно, вопрос непонятен или выходит за рамки компетенции — не выдумывай ответ.
+Используй строго эту фразу: "Извините, я ещё не знаю ответ на этот вопрос. Напишите 'Перевод', чтобы связаться с оператором.".
+Если вопрос личный, то ответь дружелюбно, игнорируя найденную информацию.
+
+# Формат ответа (до 300 символов)
+ Отвечай кратко, до 300 символов. Используй только данные из контекста. Личные вопросы (привет, как дела и т.п.) — ответь дружелюбно, без ссылок, картинок и без использования контекста. Конкретные вопросы (как сделать что‑то, есть ли возможность) — используй контекст. Составь короткий подробный ответ на вопрос пользователя. Не добавляй лишней информации, добавляй в ответ только то, что важно для вопроса. Если спрашивают про политику, религию, войну, принадлежность спорных территорий или другие запретные темы то ответь: 'Извините, я могу отвечать только на вопросы о фармацевтической продукции'. Если пользователя нужно направить к оператору, обязательно используй фразу: "Напишите 'Перевод', чтобы связаться с оператором.".
+ 
+ ## Структура
+       1. **Прямой ответ** на вопрос пользователя
+       2. **Детали и пояснения** (если нужно)
+ 
+ ## Стиль и тон
+       - **Дружелюбный и профессиональный** — вы представляете компанию
+       - **Эмпатичный** — понимайте проблемы клиентов
+       - **Краткий** — не перегружайте информацией
+       - **Оформление:** только чистый текст. Без эмодзи, жирного шрифта, списков и картинок.
+
+# ОГРАНИЧЕНИЯ
+**Строго запрещено давать Медицинские консультации** (лечение, дозировки, противопоказания). Вместо медецинских консультаций твой ответ должен быть: "Обратитесь к врачу или инструкции к препарату". 
+
+Нельзя:
+     - вставлять вопрос пользователя в ответ;
+     - придумывать информацию (номера телефонов, график работ, статус, адрес);
+     - обсуждать политику, финансы и любые темы вне компетенции;
+     - предлагать обращаться в службу поддержки (только оператор);
+     - давать сторонние советы;
+     - выдумывать причины и решения.
+
+# Особые ситуации
+- Если вопрос пользователя касается статуса заказа, но он не указал номер заказа — попроси указать номер заказа. 
 `;
 
 // системный промпт, если контекст не нашли (НЕ ИСПОЛЬЗУЕТСЯ!)
@@ -121,12 +164,8 @@ try {
 function _sendReply(text, slots) {
 	reply = agentApi.makeMarkdownReply(text);
 	return agentApi.sendMessage({
-		MessageMarkdown: reply.message.text,
-		SendMessageParams: {
-			ProjectId: reply.customer_id,
-			OmniUserId: reply.omni_user_id,
-			Sender: {},
-			FilledSlots: slots,
+		MessageMarkdown: reply.message.text, SendMessageParams: {
+			ProjectId: reply.customer_id, OmniUserId: reply.omni_user_id, Sender: {}, FilledSlots: slots,
 		}
 	}, logger).catch(e => logger.info(`Error sending reply: ${e}.`));
 	// don't block
@@ -151,19 +190,16 @@ function extractThinkContent(input) {
 
 	if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
 		return {
-			cleanedText: input,
-			thought: ''
+			cleanedText: input, thought: ''
 		};
 	}
 
 	const thoughtContent = input.substring(startIdx + openTag.length, endIdx).trim();
-	const cleanedText = input.substring(0, startIdx) +
-		input.substring(endIdx + closeTag.length);
+	const cleanedText = input.substring(0, startIdx) + input.substring(endIdx + closeTag.length);
 
 	return {
 		//cleanedText: cleanedText.replace(/[\u00A0-\u9999<>\&]/g, i => '&#'+i.charCodeAt(0)+';'),
-		cleanedText: cleanedText,
-		thought: thoughtContent ? '*Мои размышления:* \n\n' + thoughtContent : thoughtContent
+		cleanedText: cleanedText, thought: thoughtContent ? '*Мои размышления:* \n\n' + thoughtContent : thoughtContent
 	};
 }
 
@@ -178,11 +214,11 @@ function addUrlToContextTitle(full_context) {
 }
 
 
-
 async function main() {
 	let replies = [];
+
 	// Helpers to add reply
-	function textReply(text, wrap_code_block=false) {
+	function textReply(text, wrap_code_block = false) {
 		let reply;
 		if (wrap_code_block) {
 			text = wrapInMarkdownCodeBlock(String(text));
@@ -192,16 +228,19 @@ async function main() {
 		// replies.push(agentApi.makeMarkdownReply(reply));
 		return _sendReply(text);
 	}
+
 	function markdownReply(text) {
 		// replies.push(agentApi.makeMarkdownReply(String(text)));
 		return _sendReply(String(text));
 	}
+
 	function debugReply(text) {
 		if (DEBUG) {
 			return _sendReply(String(text));
 		}
 		// DEBUG && replies.push(agentApi.makeMarkdownReply(wrapInMarkdownCodeBlock(String(text))));
 	}
+
 	replies.textReply = textReply
 	replies.markdownReply = markdownReply
 	replies.debugReply = debugReply
@@ -231,10 +270,7 @@ async function _main(replies) {
 	// Get dialog_id
 	let dialog_id = null;
 	if (USE_HISTORY) {
-		const dialog_response = await agentApi.getDialogId(
-			message.user.omni_user_id,
-			message.user.customer_id
-		);
+		const dialog_response = await agentApi.getDialogId(message.user.omni_user_id, message.user.customer_id);
 		dialog_id = dialog_response.Response;
 	}
 
@@ -259,9 +295,7 @@ async function _main(replies) {
 		replies.debugReply(`Context not found for question "${question}"`);
 
 		if (SMALLTALK_IF_NO_CONTEXT) {
-			const { thought, cleanedText } = extractThinkContent(
-				await smalltalk(question, dialog_id, replies)
-			);
+			const {thought, cleanedText} = extractThinkContent(await smalltalk(question, dialog_id, replies));
 			if (SHOW_THINKING && thought) {
 				await replies.textReply(thought);
 				// wait to ensure that reasonong will be sent at first
@@ -278,9 +312,7 @@ async function _main(replies) {
 	}
 
 	// Answer with context (RAG)
-	const { thought, cleanedText } = extractThinkContent(
-		await rag(question, context, dialog_id, replies)
-	);
+	const {thought, cleanedText} = extractThinkContent(await rag(question, context, dialog_id, replies));
 
 	// References to articles
 	let references = '';
@@ -296,14 +328,10 @@ async function _main(replies) {
 		replies.debugReply(thought);
 	}
 	await replies.markdownReply(cleanedText);
+	replies.markdownReply(`/switch ai_gpt`);
+	if (SHOW_REFERENCES) replies.markdownReply(references);
 
-	if (SHOW_REFERENCES)
-		replies.markdownReply(references);
-
-	SHOW_CONTEXT && replies.textReply(
-		"<h3>Контекст</h3>" + JSON.stringify(full_context, null, 2),
-		true
-	);
+	SHOW_CONTEXT && replies.textReply("<h3>Контекст</h3>" + JSON.stringify(full_context, null, 2), true);
 }
 
 
@@ -311,18 +339,15 @@ async function getContext(question, replies) {
 	replies.debugReply(JSON.stringify(question));
 	let response;
 	try {
-		response = await axios.post(
-			URL_CONTEXT_SEARCH,
-			{
-				text: question,
-				customer_id: CUSTOMER_ID,
-				record_type: RECORD_TYPE,
-				catalog_symbol_code: CATALOG_ID ? [ CATALOG_ID ] : null,
-				output_format: "json-vikhr"
-			}
-		);
+		response = await axios.post(URL_CONTEXT_SEARCH, {
+			text: question,
+			customer_id: CUSTOMER_ID,
+			record_type: RECORD_TYPE,
+			catalog_symbol_code: CATALOG_ID ? [CATALOG_ID] : null,
+			output_format: "json-vikhr"
+		});
 		logger.info("Response:" + response.data);
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting context search: ${e}.`);
 		replies.debugReply(`Error requesting context search: ${e}.`);
@@ -352,7 +377,7 @@ function _putDialogIdOrHistory(requestData, dialogOrHistory) {
 async function smalltalk(question, dialogOrHistory, replies) {
 	let response;
 	try {
-		if (ENABLE_THINKING_SMALLTALK){
+		if (ENABLE_THINKING_SMALLTALK) {
 			question += THINK;
 		} else {
 			question += NO_THINK;
@@ -362,25 +387,19 @@ async function smalltalk(question, dialogOrHistory, replies) {
 			temperature: LLM_TEMPERATURE_SMALLTALK,
 			top_p: LLM_TOP_P,
 			top_k: LLM_TOP_K,
-			min_p:LLM_MIN_P,
+			min_p: LLM_MIN_P,
 			instruction: LLM_SYSTEM_TEMPLATE_SMALLTALK,
 			last_context_price: LAST_CONTEXT_PRICE,
 			other_context_price: OTHER_CONTEXT_PRICE,
 			add_other_context: ADD_OTHER_CONTEXT
 		}
 		requestData = _putDialogIdOrHistory(requestData, dialogOrHistory)
-		response = await axios.post(
-			URL_LLM_SMALLTALK,
-			requestData,
-			{
-				timeout: LLM_TIMEOUT * 1000,
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${LLM_AUTH_TOKEN}`
-				}
+		response = await axios.post(URL_LLM_SMALLTALK, requestData, {
+			timeout: LLM_TIMEOUT * 1000, headers: {
+				'Content-Type': 'application/json', 'Authorization': `Bearer ${LLM_AUTH_TOKEN}`
 			}
-		);
-	} catch(e) {
+		});
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);
@@ -402,7 +421,7 @@ async function rag(question, context, dialogOrHistory, replies) {
 		temperature: LLM_TEMPERATURE,
 		top_p: LLM_TOP_P,
 		top_k: LLM_TOP_K,
-		min_p:LLM_MIN_P,
+		min_p: LLM_MIN_P,
 		system_template: LLM_SYSTEM_TEMPLATE,
 		user_template: RAG_TEMPLATE,
 		document_template: RAG_DOCUMENT_TEMPLATE,
@@ -413,19 +432,13 @@ async function rag(question, context, dialogOrHistory, replies) {
 	}
 	requestData = _putDialogIdOrHistory(requestData, dialogOrHistory)
 	try {
-		response = await axios.post(
-			URL_LLM,
-			requestData,
-			{
-				timeout: LLM_TIMEOUT * 1000,
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${LLM_AUTH_TOKEN}`
-				}
+		response = await axios.post(URL_LLM, requestData, {
+			timeout: LLM_TIMEOUT * 1000, headers: {
+				'Content-Type': 'application/json', 'Authorization': `Bearer ${LLM_AUTH_TOKEN}`
 			}
-		);
+		});
 		return response.data.answer;
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);
@@ -449,18 +462,12 @@ async function rephrase(question, prompt, dialogOrHistory, replies) {
 			add_other_context: ADD_OTHER_CONTEXT
 		}
 		requestData = _putDialogIdOrHistory(requestData, dialogOrHistory)
-		response = await axios.post(
-			URL_LLM_REPHRASE,
-			requestData,
-			{
-				timeout: LLM_TIMEOUT * 1000,
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${LLM_AUTH_TOKEN}`
-				}
+		response = await axios.post(URL_LLM_REPHRASE, requestData, {
+			timeout: LLM_TIMEOUT * 1000, headers: {
+				'Content-Type': 'application/json', 'Authorization': `Bearer ${LLM_AUTH_TOKEN}`
 			}
-		);
-	} catch(e) {
+		});
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);
@@ -515,8 +522,7 @@ function getReferences(full_context) {
 		references += `\n\n• [${articles_titles.get(intent_id)}](${url})`;
 	});
 
-	if (references != '')
-		references = '### Ссылки для информации:\n\n' + references;
+	if (references != '') references = '### Ссылки для информации:\n\n' + references;
 	return references
 }
 
