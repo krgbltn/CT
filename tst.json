@@ -12,13 +12,13 @@
     "Color": "#eb8e39"
   },
   "learning_new": {
-    "State": 0,
+    "State": 2,
     "Title": "Познаю новое",
     "IsOutgoingAvailable": false,
     "Color": "#0eabdc"
   },
   "helper": {
-    "State": 0,
+    "State": 2,
     "Title": "Помогатор",
     "IsOutgoingAvailable": false,
     "Color": "#eb8e39"

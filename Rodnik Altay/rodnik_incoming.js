@@ -3,13 +3,11 @@ const AUTHORIZATION_TOKEN_INCOMING = agentSettings.authorization_token_incoming
 const SLOTS = agentSettings.slots
 const MAX_BOT_HOST = agentSettings.maxBotHost
 const MAX_API_TOKEN = agentSettings.maxBotToken
-const EVALUATION_MESSAGE = agentSettings.evaluation_message || "Спасибо за вашу оценку:"
+const EVALUATION_MESSAGE = agentSettings.evaluation_message || "Благодарим за оценку 🌷:"
 const REMOVE_BUTTONS_AFTER_CLICK = agentSettings.removeButtonsAfterClick ?? true
-const UPDATE_SLOT_USER = agentSettings.update_slot_user ?? false
 const PROXY = agentSettings.proxy
 
 const indexScore = "__#score__"
-const postfix = "userDataSent"
 
 const getHttpsAgent = () => {
 	const baseAgent = new https.Agent({
@@ -169,52 +167,68 @@ async function buildMessageResponse(
 		type = MESSAGE_TYPES.MESSAGE
 	}
 ) {
-	const {user_id, first_name = "", last_name = "", name = ""} = sender
+	const {user_id, first_name: incomingFirstName = "", last_name = "", name = ""} = sender
 
 	const isScore = action?.includes(indexScore)
 	const score = action?.replace(indexScore, "")
 	if (isScore) {
 		await updatingButtonSelection(callbackId, score)
 	}
-	const apiMessage = {
+
+	const slots = [
+		{id: SLOTS.maxChatId, value: String(chatId)},
+		{id: SLOTS.maxUserId, value: String(user_id)},
+		{id: SLOTS.maxLastName, value: last_name},
+		{id: SLOTS.maxUserName, value: name}
+	]
+
+	// 🔑 Уникальный ключ для каждого пользователя
+	const firstNameKey = `${SLOTS.maxFirstName}_${user_id}`;
+
+	let storedFirstName = null;
+	try {
+		storedFirstName = await agentStorage.globalStorage.get(firstNameKey);
+		logger.info(`Stored first_name for user ${user_id}: "${storedFirstName}"`);
+	} catch (error) {
+		logger.error(`Error getting slot ${firstNameKey}: ${error}`);
+	}
+
+	const isStoredEmpty = !storedFirstName || storedFirstName.trim() === "";
+	const isIncomingValid = incomingFirstName?.trim();
+
+	if (isStoredEmpty && isIncomingValid) {
+		const nameToSave = incomingFirstName.trim();
+		slots.splice(2, 0, {id: SLOTS.maxFirstName, value: nameToSave});
+
+		try {
+			const setResult = await agentStorage.globalStorage.set(firstNameKey, nameToSave);
+			logger.info(`✅ globalStorage.set() result: ${setResult}, saved: "${nameToSave}"`);
+		} catch (error) {
+			logger.error(`Error saving slot ${firstNameKey}: ${error}`);
+		}
+	} else if (!isStoredEmpty) {
+		logger.info(`📦 Using existing first_name from storage: "${storedFirstName}"`);
+	}
+
+	// Для user.first_name используем сохранённое имя (если есть)
+	const finalFirstName = (!isStoredEmpty && storedFirstName) ? storedFirstName : incomingFirstName;
+
+	return {
 		id: mid,
 		content: {
 			text,
 			attachments: formatAttachments(attachments),
-			...(!isScore && action
-				? {action: action}
-				: {}),
-			...(isScore
-				? {score: +score}
-				: {}),
+			...(!isScore && action ? {action: action} : {}),
+			...(isScore ? {score: +score} : {}),
 		},
 		message_type: !isScore ? type : MESSAGE_TYPES.UPDATE_DIALOG_SCORE,
 		user: {
-			id: String(user_id)
+			id: String(user_id),
+			first_name: finalFirstName,
+			last_name
 		},
 		timestamp: Date.now(),
-		slots: [
-			{id: SLOTS.maxChatId, value: String(chatId)},
-			{id: SLOTS.maxUserId, value: String(user_id)},
-			{id: SLOTS.maxUserName, value: name}
-		]
-	}
-	if (!await agentStorage.globalStorage.get(user_id + postfix) || UPDATE_SLOT_USER) {
-		apiMessage.slots.push(
-			{id: SLOTS.maxFirstName, value: first_name},
-			{id: SLOTS.maxLastName, value: last_name},
-		)
-	}
-	await agentStorage.globalStorage.set(user_id + postfix, true)
-	return apiMessage
-}
-
-const processBotStarted = (chatId, sender) => {
-	return {
-		mid: MESSAGE_TYPES_MAX.BOT_STARTED,
-		sender,
-		chatId,
-		type: MESSAGE_TYPES.INITIAL
+		slots: slots
 	}
 }
 
