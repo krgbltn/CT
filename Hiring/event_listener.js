@@ -379,7 +379,7 @@ async function fillSlots(message) {
 	await extlogger(message, "fillSlots");
 	const channel_id = message.channel.channel_id;
 	let operatorId = "";
-	let queueId = getQueueId(channel_id);
+	let queueId = getSlot("routing_queue", message.slot_context.filled_slots) || getQueueId(channel_id);
 	let context = await agentStorage.omniUserStorage.getAll();
 	try {
 		if (context) {
