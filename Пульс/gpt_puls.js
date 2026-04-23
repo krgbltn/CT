@@ -305,8 +305,7 @@ async function _main(replies) {
 			replies.markdownReply(cleanedText);
 			return;
 		} else {
-			replies.markdownReply(`Подключаю оператора`);
-			replies.markdownReply(`/switchredirect routing_tst`);
+			replies.markdownReply(`/switchredirect aiassist2 intent_id="article-f56520f8-6e24-4a02-93d2-0860ad6bb24f`);
 			return;
 		}
 	}
