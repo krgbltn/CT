@@ -14,6 +14,206 @@ const cityMapping = {
 	"Чехов": "article-a0d262d4-415e-4c17-bb90-a5110ad85509"
 };
 
+const CITY_ROLES = {
+	// ========== МОСКВА ==========
+	"Москва": {
+		"Водитель СБ": "role_moscow_driver_sb",
+		"Водитель-логист на корпоративном авто": "role_moscow_logist_corp",
+		"Водитель-логист на своем авто": "role_moscow_logist_self",
+		"Ремонтник": "role_moscow_repair",
+		"Мувер": "role_moscow_mover",
+		"Скаут": "role_moscow_scout",
+		"Мастер смены": "role_moscow_shift_master",
+		"Мастер смены склад": "role_moscow_shift_master_warehouse",
+		"Энерджайзер": "role_moscow_energizer",
+		"Техник-монтажник (Энергошкафы)": "role_moscow_tech_mount",
+		"Техник-сборщик (Энергошкафы)": "role_moscow_tech_assembler",
+		"Техник обслуживания (Энергошкафы)": "role_moscow_tech_service",
+		"Курьер пеший БЕРИ ЗАРЯД": "role_moscow_courier_pesh_beri",
+		"Автокурьер на своем авто БЕРИ ЗАРЯД": "role_moscow_autocourier_beri",
+		"Полевой инженер БЕРИ ЗАРЯД": "role_moscow_field_engineer",
+		"Авточарджер на своем авто ВЕЛОБАЙК": "role_moscow_autocharger_velo",
+		"Велочарджер ВЕЛОБАЙК": "role_moscow_velocharger",
+		"Скаут ВЕЛОБАЙК": "role_moscow_scout_velo",
+		"Ремонтник Я.Еда": "role_moscow_repair_yae",
+		"Водитель СБ (Яндекс.Еда)": "role_moscow_driver_sb_yae",
+		"Мойщик": "role_moscow_washer",
+		"Перегонщик на мойку": "role_moscow_transfer_wash",
+		"Срочный ШМ": "role_moscow_urgent_tire",
+		"Стационарный шиномонтажник": "role_moscow_stat_tire",
+		"Перегонщик на СТО (Делимобиль)": "role_moscow_transfer_sto_deli",
+		"Перегонщик на СТО (TopDoer)": "role_moscow_transfer_sto_top",
+		"Перегонщик на СТО (Яндекс)": "role_moscow_transfer_sto_yandex",
+		"Перегонщик на СШМ": "role_moscow_transfer_sshm",
+		"Замена АКБ в авто": "role_moscow_battery",
+		"Водитель-курьер (Яндекс.Еда)": "role_moscow_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_moscow_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_moscow_courier_yae_pesh",
+		"Водитель-курьер (Магнит)": "role_moscow_courier_magnit_auto",
+		"Курьер (Магнит)": "role_moscow_courier_magnit_pesh",
+		"Велокурьер (Магнит)": "role_moscow_courier_magnit_bike",
+		"Электровелокурьер (Магнит)": "role_moscow_courier_magnit_ebike",
+		"Другая роль": "role_moscow_other"
+	},
+
+	// ========== СОЧИ ==========
+	"Сочи": {
+		"Мойщик": "role_sochi_washer",
+		"Перегонщик на мойку": "role_sochi_transfer_wash",
+		"Водитель-курьер (Яндекс.Еда)": "role_sochi_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_sochi_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_sochi_courier_yae_pesh",
+		"Другая роль": "role_sochi_other"
+	},
+
+	// ========== САНКТ-ПЕТЕРБУРГ ==========
+	"Санкт-Петербург": {
+		"Водитель СБ": "role_spb_driver_sb",
+		"Водитель-логист на корпоративном авто": "role_spb_logist_corp",
+		"Водитель-логист на своем авто": "role_spb_logist_self",
+		"Ремонтник": "role_spb_repair",
+		"Мувер": "role_spb_mover",
+		"Кладовщик": "role_spb_storekeeper",
+		"Хэлпер": "role_spb_helper",
+		"Скаут": "role_spb_scout",
+		"Мастер смены": "role_spb_shift_master",
+		"Мастер смены склад": "role_spb_shift_master_warehouse",
+		"Энерджайзер": "role_spb_energizer",
+		"Курьер пеший БЕРИ ЗАРЯД": "role_spb_courier_pesh_beri",
+		"Мойщик": "role_spb_washer",
+		"Перегонщик на мойку": "role_spb_transfer_wash",
+		"Срочный ШМ": "role_spb_urgent_tire",
+		"Стационарный шиномонтажник": "role_spb_stat_tire",
+		"Перегонщик на СТО (Делимобиль)": "role_spb_transfer_sto_deli",
+		"Перегонщик на СШМ": "role_spb_transfer_sshm",
+		"Водитель-курьер (Яндекс.Еда)": "role_spb_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_spb_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_spb_courier_yae_pesh",
+		"Водитель-курьер (Магнит)": "role_spb_courier_magnit_auto",
+		"Курьер (Магнит)": "role_spb_courier_magnit_pesh",
+		"Велокурьер (Магнит)": "role_spb_courier_magnit_bike",
+		"Электровелокурьер (Магнит)": "role_spb_courier_magnit_ebike",
+		"Другая роль": "role_spb_other"
+	},
+
+	// ========== ВИДНОЕ ==========
+	"Видное": {
+		"Электронщик (ТШ)": "role_vidnoye_electron",
+		"Ремонтник (ТШ)": "role_vidnoye_repair",
+		"Кладовщик (ТШ)": "role_vidnoye_storekeeper",
+		"Аккумуляторщик (ТШ)": "role_vidnoye_battery",
+		"Водитель-курьер (Яндекс.Еда)": "role_vidnoye_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_vidnoye_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_vidnoye_courier_yae_pesh",
+		"Другая роль": "role_vidnoye_other"
+	},
+
+	// ========== КАЛУГА ==========
+	"Калуга": {
+		"Водитель-логист на корп.авто (ТШ)": "role_kaluga_logist_corp",
+		"Водитель-курьер (Яндекс.Еда)": "role_kaluga_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_kaluga_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_kaluga_courier_yae_pesh",
+		"Другая роль": "role_kaluga_other"
+	},
+
+	// ========== МОСКОВСКИЙ ==========
+	"Московский": {
+		"Водитель-логист на корп.авто (ТШ)": "role_moskovsky_logist_corp",
+		"Другая роль": "role_moskovsky_other"
+	},
+
+	// ========== ПОДОЛЬСК ==========
+	"Подольск": {
+		"Водитель-логист на своем авто (ТШ)": "role_podolsk_logist_self",
+		"Скаут (ТШ)": "role_podolsk_scout",
+		"Водитель-курьер (Яндекс.Еда)": "role_podolsk_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_podolsk_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_podolsk_courier_yae_pesh",
+		"Другая роль": "role_podolsk_other"
+	},
+
+	// ========== ОРЕХОВО-ЗУЕВО ==========
+	"Орехово-Зуево": {
+		"Водитель-логист на корп.авто (ТШ)": "role_orekhovo_logist_corp",
+		"Водитель-курьер (Яндекс.Еда)": "role_orekhovo_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_orekhovo_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_orekhovo_courier_yae_pesh",
+		"Другая роль": "role_orekhovo_other"
+	},
+
+	// ========== ЭЛЕКТРОСТАЛЬ ==========
+	"Электросталь": {
+		"Водитель-логист на корп.авто (ТШ)": "role_elst_logist_corp",
+		"Водитель-логист на своем авто (ТШ)": "role_elst_logist_self",
+		"Скаут (ТШ)": "role_elst_scout",
+		"Водитель-курьер (Яндекс.Еда)": "role_elst_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_elst_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_elst_courier_yae_pesh",
+		"Другая роль": "role_elst_other"
+	},
+
+	// ========== НОГИНСК ==========
+	"Ногинск": {
+		"Водитель-логист на корп.авто (ТШ)": "role_noginsk_logist_corp",
+		"Водитель-логист на своем авто (ТШ)": "role_noginsk_logist_self",
+		"Скаут (ТШ)": "role_noginsk_scout",
+		"Водитель-курьер (Яндекс.Еда)": "role_noginsk_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_noginsk_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_noginsk_courier_yae_pesh",
+		"Другая роль": "role_noginsk_other"
+	},
+
+	// ========== СЕРПУХОВ ==========
+	"Серпухов": {
+		"Водитель-логист на корп.авто (ТШ)": "role_serpukhov_logist_corp",
+		"Водитель-логист на своем авто (ТШ)": "role_serpukhov_logist_self",
+		"Скаут (ТШ)": "role_serpukhov_scout",
+		"Водитель-курьер (Яндекс.Еда)": "role_serpukhov_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_serpukhov_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_serpukhov_courier_yae_pesh",
+		"Другая роль": "role_serpukhov_other"
+	},
+
+	// ========== ЧЕХОВ ==========
+	"Чехов": {
+		"Водитель-логист на корп.авто (ТШ)": "role_chekhov_logist_corp",
+		"Водитель-логист на своем авто (ТШ)": "role_chekhov_logist_self",
+		"Скаут (ТШ)": "role_chekhov_scout",
+		"Водитель-курьер (Яндекс.Еда)": "role_chekhov_courier_yae_auto",
+		"Велокурьер (Яндекс.Еда)": "role_chekhov_courier_yae_bike",
+		"Пеший курьер (Яндекс.Еда)": "role_chekhov_courier_yae_pesh",
+		"Другая роль": "role_chekhov_other"
+	},
+
+	// ========== ДРУГОЙ ГОРОД ==========
+	"Другой город": {
+		"Пеший курьер (Яндекс.Еда)": "role_othercity_courier_yae_pesh",
+		"Велокурьер (Яндекс.Еда)": "role_othercity_courier_yae_bike",
+		"Автокурьер (Яндекс.Еда)": "role_othercity_courier_yae_auto",
+		"Водитель-курьер (Магнит)": "role_othercity_courier_magnit_auto",
+		"Курьер (Магнит)": "role_othercity_courier_magnit_pesh",
+		"Велокурьер (Магнит)": "role_othercity_courier_magnit_bike",
+		"Электровелокурьер (Магнит)": "role_othercity_courier_magnit_ebike",
+		"Другая роль": "role_othercity_other"
+	}
+}
+//список id слотов ролей по городам
+const CITY_TO_ROLE_SLOT = {
+	"Москва": "role_moscow",
+	"Сочи": "role_sochi",
+	"Санкт-Петербург": "role_spb",
+	"Видное": "role_vidnoye",
+	"Калуга": "role_kaluga",
+	"Московский": "role_moskovsky",
+	"Подольск": "role_podolsk",
+	"Орехово-Зуево": "role_orekhovo",
+	"Электросталь": "role_elst",
+	"Ногинск": "role_noginsk",
+	"Серпухов": "role_serpukhov",
+	"Чехов": "role_chekhov",
+	"Другой город": "role_othercity"
+}
 const nationalityMapping = {
 	РФ: "ru",
 	Беларусь: "by",
@@ -192,206 +392,7 @@ async function run(message) {
 		//Маппинг ролей по городам
 		if (data.role_BD && data.city) {
 			newSlots.role = data.role_BD
-			const CITY_ROLES = {
-				// ========== МОСКВА ==========
-				"Москва": {
-					"Водитель СБ": "role_moscow_driver_sb",
-					"Водитель-логист на корпоративном авто": "role_moscow_logist_corp",
-					"Водитель-логист на своем авто": "role_moscow_logist_self",
-					"Ремонтник": "role_moscow_repair",
-					"Мувер": "role_moscow_mover",
-					"Скаут": "role_moscow_scout",
-					"Мастер смены": "role_moscow_shift_master",
-					"Мастер смены склад": "role_moscow_shift_master_warehouse",
-					"Энерджайзер": "role_moscow_energizer",
-					"Техник-монтажник (Энергошкафы)": "role_moscow_tech_mount",
-					"Техник-сборщик (Энергошкафы)": "role_moscow_tech_assembler",
-					"Техник обслуживания (Энергошкафы)": "role_moscow_tech_service",
-					"Курьер пеший БЕРИ ЗАРЯД": "role_moscow_courier_pesh_beri",
-					"Автокурьер на своем авто БЕРИ ЗАРЯД": "role_moscow_autocourier_beri",
-					"Полевой инженер БЕРИ ЗАРЯД": "role_moscow_field_engineer",
-					"Авточарджер на своем авто ВЕЛОБАЙК": "role_moscow_autocharger_velo",
-					"Велочарджер ВЕЛОБАЙК": "role_moscow_velocharger",
-					"Скаут ВЕЛОБАЙК": "role_moscow_scout_velo",
-					"Ремонтник Я.Еда": "role_moscow_repair_yae",
-					"Водитель СБ (Яндекс.Еда)": "role_moscow_driver_sb_yae",
-					"Мойщик": "role_moscow_washer",
-					"Перегонщик на мойку": "role_moscow_transfer_wash",
-					"Срочный ШМ": "role_moscow_urgent_tire",
-					"Стационарный шиномонтажник": "role_moscow_stat_tire",
-					"Перегонщик на СТО (Делимобиль)": "role_moscow_transfer_sto_deli",
-					"Перегонщик на СТО (TopDoer)": "role_moscow_transfer_sto_top",
-					"Перегонщик на СТО (Яндекс)": "role_moscow_transfer_sto_yandex",
-					"Перегонщик на СШМ": "role_moscow_transfer_sshm",
-					"Замена АКБ в авто": "role_moscow_battery",
-					"Водитель-курьер (Яндекс.Еда)": "role_moscow_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_moscow_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_moscow_courier_yae_pesh",
-					"Водитель-курьер (Магнит)": "role_moscow_courier_magnit_auto",
-					"Курьер (Магнит)": "role_moscow_courier_magnit_pesh",
-					"Велокурьер (Магнит)": "role_moscow_courier_magnit_bike",
-					"Электровелокурьер (Магнит)": "role_moscow_courier_magnit_ebike",
-					"Другая роль": "role_moscow_other"
-				},
 
-				// ========== СОЧИ ==========
-				"Сочи": {
-					"Мойщик": "role_sochi_washer",
-					"Перегонщик на мойку": "role_sochi_transfer_wash",
-					"Водитель-курьер (Яндекс.Еда)": "role_sochi_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_sochi_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_sochi_courier_yae_pesh",
-					"Другая роль": "role_sochi_other"
-				},
-
-				// ========== САНКТ-ПЕТЕРБУРГ ==========
-				"Санкт-Петербург": {
-					"Водитель СБ": "role_spb_driver_sb",
-					"Водитель-логист на корпоративном авто": "role_spb_logist_corp",
-					"Водитель-логист на своем авто": "role_spb_logist_self",
-					"Ремонтник": "role_spb_repair",
-					"Мувер": "role_spb_mover",
-					"Кладовщик": "role_spb_storekeeper",
-					"Хэлпер": "role_spb_helper",
-					"Скаут": "role_spb_scout",
-					"Мастер смены": "role_spb_shift_master",
-					"Мастер смены склад": "role_spb_shift_master_warehouse",
-					"Энерджайзер": "role_spb_energizer",
-					"Курьер пеший БЕРИ ЗАРЯД": "role_spb_courier_pesh_beri",
-					"Мойщик": "role_spb_washer",
-					"Перегонщик на мойку": "role_spb_transfer_wash",
-					"Срочный ШМ": "role_spb_urgent_tire",
-					"Стационарный шиномонтажник": "role_spb_stat_tire",
-					"Перегонщик на СТО (Делимобиль)": "role_spb_transfer_sto_deli",
-					"Перегонщик на СШМ": "role_spb_transfer_sshm",
-					"Водитель-курьер (Яндекс.Еда)": "role_spb_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_spb_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_spb_courier_yae_pesh",
-					"Водитель-курьер (Магнит)": "role_spb_courier_magnit_auto",
-					"Курьер (Магнит)": "role_spb_courier_magnit_pesh",
-					"Велокурьер (Магнит)": "role_spb_courier_magnit_bike",
-					"Электровелокурьер (Магнит)": "role_spb_courier_magnit_ebike",
-					"Другая роль": "role_spb_other"
-				},
-
-				// ========== ВИДНОЕ ==========
-				"Видное": {
-					"Электронщик (ТШ)": "role_vidnoye_electron",
-					"Ремонтник (ТШ)": "role_vidnoye_repair",
-					"Кладовщик (ТШ)": "role_vidnoye_storekeeper",
-					"Аккумуляторщик (ТШ)": "role_vidnoye_battery",
-					"Водитель-курьер (Яндекс.Еда)": "role_vidnoye_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_vidnoye_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_vidnoye_courier_yae_pesh",
-					"Другая роль": "role_vidnoye_other"
-				},
-
-				// ========== КАЛУГА ==========
-				"Калуга": {
-					"Водитель-логист на корп.авто (ТШ)": "role_kaluga_logist_corp",
-					"Водитель-курьер (Яндекс.Еда)": "role_kaluga_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_kaluga_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_kaluga_courier_yae_pesh",
-					"Другая роль": "role_kaluga_other"
-				},
-
-				// ========== МОСКОВСКИЙ ==========
-				"Московский": {
-					"Водитель-логист на корп.авто (ТШ)": "role_moskovsky_logist_corp",
-					"Другая роль": "role_moskovsky_other"
-				},
-
-				// ========== ПОДОЛЬСК ==========
-				"Подольск": {
-					"Водитель-логист на своем авто (ТШ)": "role_podolsk_logist_self",
-					"Скаут (ТШ)": "role_podolsk_scout",
-					"Водитель-курьер (Яндекс.Еда)": "role_podolsk_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_podolsk_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_podolsk_courier_yae_pesh",
-					"Другая роль": "role_podolsk_other"
-				},
-
-				// ========== ОРЕХОВО-ЗУЕВО ==========
-				"Орехово-Зуево": {
-					"Водитель-логист на корп.авто (ТШ)": "role_orekhovo_logist_corp",
-					"Водитель-курьер (Яндекс.Еда)": "role_orekhovo_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_orekhovo_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_orekhovo_courier_yae_pesh",
-					"Другая роль": "role_orekhovo_other"
-				},
-
-				// ========== ЭЛЕКТРОСТАЛЬ ==========
-				"Электросталь": {
-					"Водитель-логист на корп.авто (ТШ)": "role_elst_logist_corp",
-					"Водитель-логист на своем авто (ТШ)": "role_elst_logist_self",
-					"Скаут (ТШ)": "role_elst_scout",
-					"Водитель-курьер (Яндекс.Еда)": "role_elst_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_elst_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_elst_courier_yae_pesh",
-					"Другая роль": "role_elst_other"
-				},
-
-				// ========== НОГИНСК ==========
-				"Ногинск": {
-					"Водитель-логист на корп.авто (ТШ)": "role_noginsk_logist_corp",
-					"Водитель-логист на своем авто (ТШ)": "role_noginsk_logist_self",
-					"Скаут (ТШ)": "role_noginsk_scout",
-					"Водитель-курьер (Яндекс.Еда)": "role_noginsk_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_noginsk_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_noginsk_courier_yae_pesh",
-					"Другая роль": "role_noginsk_other"
-				},
-
-				// ========== СЕРПУХОВ ==========
-				"Серпухов": {
-					"Водитель-логист на корп.авто (ТШ)": "role_serpukhov_logist_corp",
-					"Водитель-логист на своем авто (ТШ)": "role_serpukhov_logist_self",
-					"Скаут (ТШ)": "role_serpukhov_scout",
-					"Водитель-курьер (Яндекс.Еда)": "role_serpukhov_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_serpukhov_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_serpukhov_courier_yae_pesh",
-					"Другая роль": "role_serpukhov_other"
-				},
-
-				// ========== ЧЕХОВ ==========
-				"Чехов": {
-					"Водитель-логист на корп.авто (ТШ)": "role_chekhov_logist_corp",
-					"Водитель-логист на своем авто (ТШ)": "role_chekhov_logist_self",
-					"Скаут (ТШ)": "role_chekhov_scout",
-					"Водитель-курьер (Яндекс.Еда)": "role_chekhov_courier_yae_auto",
-					"Велокурьер (Яндекс.Еда)": "role_chekhov_courier_yae_bike",
-					"Пеший курьер (Яндекс.Еда)": "role_chekhov_courier_yae_pesh",
-					"Другая роль": "role_chekhov_other"
-				},
-
-				// ========== ДРУГОЙ ГОРОД ==========
-				"Другой город": {
-					"Пеший курьер (Яндекс.Еда)": "role_othercity_courier_yae_pesh",
-					"Велокурьер (Яндекс.Еда)": "role_othercity_courier_yae_bike",
-					"Автокурьер (Яндекс.Еда)": "role_othercity_courier_yae_auto",
-					"Водитель-курьер (Магнит)": "role_othercity_courier_magnit_auto",
-					"Курьер (Магнит)": "role_othercity_courier_magnit_pesh",
-					"Велокурьер (Магнит)": "role_othercity_courier_magnit_bike",
-					"Электровелокурьер (Магнит)": "role_othercity_courier_magnit_ebike",
-					"Другая роль": "role_othercity_other"
-				}
-			}
-			//список id слотов ролей по городам
-			const CITY_TO_ROLE_SLOT = {
-				"Москва": "role_moscow",
-				"Сочи": "role_sochi",
-				"Санкт-Петербург": "role_spb",
-				"Видное": "role_vidnoye",
-				"Калуга": "role_kaluga",
-				"Московский": "role_moskovsky",
-				"Подольск": "role_podolsk",
-				"Орехово-Зуево": "role_orekhovo",
-				"Электросталь": "role_elst",
-				"Ногинск": "role_noginsk",
-				"Серпухов": "role_serpukhov",
-				"Чехов": "role_chekhov",
-				"Другой город": "role_othercity"
-			}
 			// Получаем id слота для города
 			const citySlotName = CITY_TO_ROLE_SLOT[data.city]
 			// Получаем объект ролей для города
