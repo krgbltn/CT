@@ -14,7 +14,7 @@ if (message.message.text !== "/start") {
 	if (channelId === "channel_0a6583b") {
 		logger.info("Incoming message on js_aiassist2_proxy in second if")
 		resolve([
-			agentApi.makeTextReply('/redirect routingagent', undefined, undefined, {sys_phone: channelId}),
+			agentApi.makeTextReply('/redirect routingagent', undefined, undefined, {sys_phone: message.user.channel_user_id}),
 		])
 	} else {
 		resolve([
