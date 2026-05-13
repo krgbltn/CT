@@ -1,0 +1,12 @@
+{
+  "url": "http://localhost:3366/test",
+  "nextArticle": "next_intent",
+  "slotsMapping": [
+    { "slotId": "date_end", "path": "disconnection.date_end" },
+    { "slotId": "debt", "path": "debt" }
+  ],
+  "requestBody": {
+    "user_id": "{{slots.ls}}"
+
+  }
+}

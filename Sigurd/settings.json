@@ -1,0 +1,18 @@
+{
+  "url": "http://localhost:3366/test",
+  "nextArticle": "next_intent",
+  "slotsMapping": [
+    { "slotId": "call_id", "path": "callId" },
+    { "slotId": "arr_first", "path": "arr[1]" },
+    { "slotId": "ext_user_id", "path": "user.id", "defaultValue": "" },
+    { "slotId": "user_meta", "path": "user.meta", "defaultValue": "ччччччччччччч" },
+    { "slotId": "channel_id", "path": "user.zzz", "defaultValue": "Дефолтное значение" }
+  ],
+  "requestBody": {
+    "user": "{{message.user.omni_user_id}}",
+    "field_1": 122,
+    "field_2": "Тестовое значение",
+    "field_3": "{{slots.sys_firstname}} || {{Имя}}",
+    "field_4": "{{slots.dialog_short_id}} || {{Диалог иддддддддддд}}"
+  }
+}
