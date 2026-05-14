@@ -170,14 +170,14 @@ const main = async () => {
 	let filledSlots = fillSlotsFromRequest(responseData)
 	logger.info(`Filled slots: ${JSON.stringify(filledSlots)}`)
 
-	let finalAnswer = 'default'
+	let finalAnswer = '3'
 	const disconnection = responseData?.disconnection
 	const debt = responseData?.debt
 
 	if (disconnection) {
-		finalAnswer = 'disconnection'
+		finalAnswer = '1'
 	} else if (debt) {
-		finalAnswer = 'debt'
+		finalAnswer = '2'
 	}
 
 	filledSlots = {
