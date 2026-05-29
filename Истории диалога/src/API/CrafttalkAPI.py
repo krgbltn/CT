@@ -24,8 +24,9 @@ class CrafttalkAPI():
             "CurrentCustomerId": f"{self.PROJECT_ID}",
             "CraftTalk.Auth": f"{self.ACCESS_TOKEN}",
         }
-
+        print(f"[WARN] get_dialog_info failed: {payload}")
         response = requests.post(url, json=payload, cookies=cookies, timeout=30, verify=self.IS_SSL)
+        print(f"[WARN] get_dialog_info failed: { response.json()}")
         return response.json()
 
     def get_dialog_info(self, dialog_id: str) -> dict:
