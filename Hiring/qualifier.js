@@ -410,7 +410,7 @@ async function run(message) {
 
 
 		if (nationalityMapping[data.nationality]) newSlots.nationality = nationalityMapping[data.nationality];
-		if (data.city) {
+		if (data?.city) {
 			if (cityMapping[data.city]) {
 				newSlots.city_26 = cityMapping[data.city];
 			} else {
@@ -418,7 +418,7 @@ async function run(message) {
 				newSlots.city_26 = cityMapping["Другой город"];
 			}
 		}
-		if (data.driving_experience) newSlots.driving_experience = data.driving_experience;
+		if (data?.driving_experience) newSlots.driving_experience = data.driving_experience;
 		if (utm) newSlots.utm = utm;
 
 		logger.info(`Mapped slots - name: ${newSlots.name}, phone: ${newSlots.phone_numer}, age: ${newSlots.age}, role: ${newSlots.role}, city: ${newSlots.city_26}`);
@@ -445,7 +445,9 @@ async function run(message) {
 }
 
 run(message)
-	.then((res) => resolve(res))
+	.then((res) => {
+		logger.info({Result:res})
+		resolve(res)})
 	.catch((e) => {
 		logger.error(`Qualifier fatal error: ${e.message}`);
 		resolve([agentApi.makeTextReply("/switchredirect initialmsgagent")]);
