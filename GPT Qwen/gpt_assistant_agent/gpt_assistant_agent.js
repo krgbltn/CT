@@ -194,7 +194,7 @@ if (IS_SUPPORT) {
  */
 async function translate(lang_title, template) {
 	let question = "";
-	if (message.operatorMessage === null || message.operatorMessage.trim().length === 0) {
+	if (!message.operatorMessage || message.operatorMessage.trim().length === 0 || message.operatorMessage.trim() === "\\") {
 		/*return ResponseWrapper("❗️ Вставьте или напишите текст для перевода в поле ввода ответа", []);*/
 		const clientMessages = message.messages.filter(x => x.side === "client");
 		const messagesStr = `${clientMessages[0].text}`;
