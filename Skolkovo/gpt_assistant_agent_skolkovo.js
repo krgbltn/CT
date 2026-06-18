@@ -55,12 +55,13 @@ const LLM_TEMPLATE_FIX_SYNTAX = `
 const LLM_TEMPLATE_SELL = `
 Ты помогаешь оператору продать услугу или товар клиенту. Сформируй продающую фразу на основе фразы оператора.  
 `;
-const LLM_TEMPLATE_REJECT = `
-Ты помогаешь оператору подготовить корректный и грамматически верный ответ. Проверь ответ оператора и исправь в нем грамматические и синтаксические ошибки.  
+const LLM_TEMPLATE_FIX_ERRORS = `
+Ты - помощник оператора контакт-центра. Исправь орфографические и грамматические ошибки в тексте. Верни только исправленный текст, без дополнительных слов, комментариев или пояснений. Сохрани содержание и стиль исходного текста.
 `;
 
 const LLM_TEMPLATE_EMPATHY = `
-Ты определяешь вежливость, корректность ии профессиональность ответов оператора в диалога чата. 
+Ты - помощник оператора контакт-центра. Проанализируй диалог по скрипту Академии наставников. Дай рекомендации: что сделано правильно, какие шаги пропущены, что нужно сделать дальше.
+Скрипт:1. Перечисли форматы обучения (Интенсивы - трехдневное обучение практикам наставничества в проектной деятельности, Курсы - дистанционные курсы для наставников, вебинары и методические материалы) 2. Уточни, какой формат интересует клиента 3. Расскажи подробнее про выбранный формат 4. Предложи записаться на обучение.
 `;
 
 const LLM_TEMPLATE_SUGGEST_OUTGOING = `
@@ -79,7 +80,7 @@ const LLM_TEMPLATE_TONE = `
 - недовольство/жалоба
 - дружелюбное общение
 
-Дай краткий анализ с указанием категории и пояснением.
+Определи категорию тональности и дай одну короткую рекомендацию (1-2 предложения), как свести диалог к дружелюбно-деловому общению.
 `;
 
 const LLM_TEMPLATE_ADAPTATION = `
@@ -271,24 +272,24 @@ async function sell() {
 }
 
 /**
- * command: reject
+ * command: reject (исправить ошибки)
  */
 async function reject() {
 	if (message.operatorMessage === null || message.operatorMessage.trim().length === 0)
-		return ResponseWrapper("❗️ Вставьте или напишите в поле ввода ответа – на какой запрос клиента необходимо подготовить отказ", []);
+		return ResponseWrapper("❗️ Вставьте или напишите текст для исправления ошибок в поле ввода ответа", []);
 
 	let question =
-		"Напиши отказ клиенту в его просьбе на основе описания оператора. \n\nОписание оператора:\n" +
+		"Исправь ошибки в тексте:\n" +
 		message.operatorMessage;
 	try {
 		const response = await commandGeneric(
 			question,
-			LLM_TEMPLATE_REJECT
+			LLM_TEMPLATE_FIX_ERRORS
 		);
 
 		return ResponseWrapper(cleanResponse(response.data.answer), []);
 	} catch (e) {
-		return ResponseWrapper("Что-то пошло не так при отказе");
+		return ResponseWrapper("Что-то пошло не так при исправлении ошибок");
 	}
 }
 
@@ -325,7 +326,7 @@ async function empathy() {
 	const messagesStr =       message.messages.reverse().map(x => x.side + ": " + x.text + "\n").join("\n");
 
 	let question =
-		"Определи, есть ли в диалоге невежливое или непрофессиональное обращение оператора контакт-центра к клиенту. Дай конкретную рекомендацию - какая фраза некорректная. Ответь \"да\" или \"нет\". Объясни причину своего ответа.  \n\nДиалог:\n" + messagesStr;
+		"Проанализируй ответы оператора по скрипту Академии наставников. И дай короткий содержательный ответ до 300 символов \n\nДиалог:\n" + messagesStr;
 
 	try {
 		const response = await commandGeneric(
@@ -384,6 +385,28 @@ async function adaptation() {
 		return ResponseWrapper(cleanResponse(response.data.answer), []);
 	} catch (e) {
 		return ResponseWrapper("Что-то пошло не так при адаптации стиля подсказки");
+	}
+}
+
+/**
+ * command: crm (Обратиться к CRM)
+ */
+async function crm_lookup() {
+	const messages = message.messages || [];
+	const allText = messages.map(x => x.text || "").join(" ");
+	const targetPhone = "89999999999";
+
+	if (allText.includes(targetPhone)) {
+		const clientCard = {
+			"ФИО": "Иван Петрович Сидоров",
+			"Телефон": "89999999999",
+			"Email": "ivan.sidorov@academy.ru",
+			"Статус": "Постоянный клиент",
+			"Последнее обращение": "Запись на интенсив по наставничеству"
+		};
+		return ResponseWrapper("🔍 Карточка клиента:\n" + JSON.stringify(clientCard, null, 2), []);
+	} else {
+		return ResponseWrapper("Клиент не найден", []);
 	}
 }
 
@@ -456,7 +479,8 @@ const REQUEST_TYPES_LIST = {
 	trans_en: "Перевести на английский",
 	empathy: "Дай рекомендации по ведению диалога",
 	tone: "Определи тональность диалога",
-	adaptation: "Адаптируй стиль подсказки"
+	adaptation: "Адаптируй стиль подсказки",
+	crm: "Обратиться к CRM"
 
 };
 
@@ -493,6 +517,8 @@ async function getReply() {
 				return tone();
 			case "adaptation":
 				return adaptation();
+			case "crm":
+				return crm_lookup();
 			case "detailed":
 				return gptReplicas(true);
 			default:
