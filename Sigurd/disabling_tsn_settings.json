@@ -1,15 +1,15 @@
 {
-  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{user_id}/disconnections_heat",
+  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id}}/disconnections_heat",
+  "method": "get",
   "nextArticle": "article-aba26765-2c58-47c8-b5c3-7aca6143c44f",
   "slotsMapping": [
-    { "slotId": "date_end", "path": "disconnection.date_end" },
-    { "slotId": "debt", "path": "debt" }
+    { "slotId": "debt", "path": "debt" },
+    { "slotId": "house_type", "path": "house_type" },
+    { "slotId": "disconnection_text", "path": "disconnection.text" }
   ],
-  "requestBody": {
-    "user_id": "{{slots.account_number}}"
-
-  },
+  "authorizationToken": "Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==",
   "headers": {
-    "ES-Request-Source": "Website"
+    "ES-Request-Source": "Website",
+    "Accept": "application/json"
   }
 }

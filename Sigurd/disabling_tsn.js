@@ -2,6 +2,7 @@ const {
 	url,
 	method = "post",
 	headers = {},
+	authorizationToken,
 	requestBody = {},
 	slotsMapping = [],
 	nextArticle
@@ -114,6 +115,7 @@ const resolveTemplates = (data) => {
 }
 
 const createRequestBody = () => resolveTemplates(requestBody)
+const createRequestUrl = () => renderTemplateString(url)
 
 const normalizeSlotValue = (value) => {
 	if (typeof value === "object") {
@@ -123,12 +125,15 @@ const normalizeSlotValue = (value) => {
 	return value.toString()
 }
 
-const sendRequest = async (body) => {
+const sendRequest = async (requestUrl, body) => {
 	try {
+		const requestHeaders = authorizationToken
+			? { ...headers, 'Authorization': authorizationToken }
+			: headers
 		const res = await axios({
-			url,
+			url: requestUrl,
 			method,
-			headers,
+			headers: requestHeaders,
 			data: body,
 			httpsAgent: new https.Agent({ rejectUnauthorized: false })
 		})
@@ -161,10 +166,13 @@ const fillSlotsFromRequest = (data) => {
 }
 
 const main = async () => {
+	const requestUrl = createRequestUrl()
+	logger.info(`Created request url: ${requestUrl}`)
+
 	const body = createRequestBody()
 	logger.info(`Created request body: ${JSON.stringify(body)}`)
 
-	const responseData = await sendRequest(body)
+	const responseData = await sendRequest(requestUrl, body)
 	logger.info(`Got response data: ${JSON.stringify(responseData || {})}`)
 
 	let filledSlots = fillSlotsFromRequest(responseData)
