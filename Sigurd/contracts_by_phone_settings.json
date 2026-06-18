@@ -1,0 +1,72 @@
+{
+  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/contracts_by_phone?phone={{slots.sys_phone}}",
+  "method": "get",
+  "nextArticle": "article-aba26765-2c58-47c8-b5c3-7aca6143c44f",
+  "slotsMapping": [
+    { "slotId": "user_id", "path": "[0].UserId" },
+    { "slotId": "address", "path": "[0].WebProperties.Address" },
+    { "slotId": "contract_no", "path": "[0].WebProperties.ContractNo" }
+  ],
+  "authorizationToken": "Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==",
+  "headers": {
+    "ES-Request-Source": "Website",
+    "Accept": "application/json"
+  },
+  "stub": true,
+  "stubResponse": [
+    {
+      "WebProperties": {
+        "Address": "664074, обл Иркутская, г Иркутск, ул Чернышевского, дом № 8 кв. 29",
+        "ContractNo": "ЕТСОО167639",
+        "GroupId": null
+      },
+      "UserId": "6907038b-9b49-11e4-a084-d8d385e6fca3",
+      "IsRegistered": true
+    },
+    {
+      "WebProperties": {
+        "Address": "666025, обл Иркутская, р-н Шелеховский, с Шаманка, ул Набережная, дом № 3 кв. 2",
+        "ContractNo": "ШСРО00076005",
+        "GroupId": "df2402f0-cb31-47d1-8e94-6bbb5a75e1ab"
+      },
+      "UserId": "480d16ad-d596-11e2-b3f3-001f29ceb871",
+      "IsRegistered": true
+    },
+    {
+      "WebProperties": {
+        "Address": "664047, обл Иркутская, г Иркутск, ул Александра Невского, дом № 58 кв. 65",
+        "ContractNo": "ЕТСОО781208",
+        "GroupId": null
+      },
+      "UserId": "7d955435-90af-11e8-80be-9457a553d5eb",
+      "IsRegistered": false
+    },
+    {
+      "WebProperties": {
+        "Address": "664047, обл Иркутская, г Иркутск, ул Александра Невского, дом № 58 кв. 65",
+        "ContractNo": "ИНОК00003480",
+        "GroupId": null
+      },
+      "UserId": "960d334e-1541-11e9-80c1-9457a553d5eb",
+      "IsRegistered": true
+    },
+    {
+      "WebProperties": {
+        "Address": "664047, обл Иркутская, г Иркутск, ул Партизанская, дом № 73 кв. 10",
+        "ContractNo": "ЭИОЗ00153332",
+        "GroupId": null
+      },
+      "UserId": "db344119-9b58-11e4-a084-d8d385e6fca3",
+      "IsRegistered": false
+    },
+    {
+      "WebProperties": {
+        "Address": "664049, обл Иркутская, г Иркутск, ул Багратиона, дом № 49 кв. 14",
+        "ContractNo": "ЕТСОО780628",
+        "GroupId": "df2402f0-cb31-47d1-8e94-6bbb5a75e1ab"
+      },
+      "UserId": "c197e5c1-9b5a-11e4-a084-d8d385e6fca3",
+      "IsRegistered": true
+    }
+  ]
+}
