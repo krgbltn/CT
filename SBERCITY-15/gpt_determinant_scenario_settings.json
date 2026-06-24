@@ -1,0 +1,106 @@
+{
+  "api": {
+    "base_url": "http://opbot-workplace:8086",
+    "url_context_search": "http://contextsearch:8801",
+    "url_llm": "http://craftgpt1:3020",
+    "llm_auth_token": "MDE5YTI1NWQtOWY2NC03NzY5LTlkMDQtZGQwY2I5NjNmYzk2OjQyMGY1ZTUyLTI4ZGQtNGNmZS1iNmQwLWEwNWI2OGRlNTMxOQ==",
+    "url_mediator_service": "http://opbot-botmediator:8080/webhooks/mediator/messages"
+  },
+  "customer_id": "sbercity",
+  "llm_settings": {
+    "model_gpt": "GigaChat",
+    "timeout": 58,
+    "temperature": 0.2,
+    "temperature_smalltalk": 0.5,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0
+  },
+  "context_settings": {
+    "LAST_CONTEXT_PRICE": 0.19,
+    "OTHER_CONTEXT_PRICE": 3.1,
+    "ADD_OTHER_CONTEXT": false,
+    "MAX_CONTEXTS": -1
+  },
+  "agent_parameters": {
+    "DO_REPHRASE": false,
+    "REPHRASE_N_GENERATIONS": 4,
+    "REPHRASE_SAMPLES_PER_GENERATION": 8,
+    "ENABLE_THINKING_SMALLTALK": false,
+    "ENABLE_THINKING_RAG": false,
+    "SHOW_THINKING": false,
+    "SMALLTALK_IF_NO_CONTEXT": true,
+    "RECORD_TYPE": null,
+    "SHOW_CONTEXT": false,
+    "SHOW_REFERENCES": false,
+    "USE_HISTORY": false,
+    "DEBUG": false,
+    "THINK": " /think",
+    "NO_THINK": " /no_think",
+    "REDIRECT_BACK_TO_AIA2": false,
+    "AIA2_NAME": "aiassist2"
+  },
+  "articles": {
+    "WORK_OUTSIDE_APARTMENT": {
+      "ID": "article-9852c5f8-007b-4efd-90f7-99755875903f",
+      "NAME": "Работы вне квартиры"
+    },
+    "GUARANTEE_WORKS": {
+      "ID": "article-5de72c12-9dae-4556-8b57-a789061eb183",
+      "NAME": "Гарантийные работы внутри квартиры"
+    },
+    "PASS_ORDER": {
+      "ID": "article-ad07d2dd-f393-4daa-bc26-dd08f6eaf5ae",
+      "NAME": "Заказ пропуска для въезда на территорию"
+    },
+    "INFORMATION": {
+      "ID": "article-5de72c12-9dae-4556-8b57-a789061eb183",
+      "NAME": "Информирование жителей"
+    },
+    "OPERATOR": {
+      "ID": "article-5de72c12-9dae-4556-8b57-a789061eb183",
+      "NAME": "Оператор"
+    },
+    "MAIN_MENU": {
+      "ID": "article-5de72c12-9dae-4556-8b57-a789061eb183",
+      "NAME": "Перейти в главное меню"
+    },
+    "FILE": {
+      "ID": "article-5de72c12-9dae-4556-8b57-a789061eb183",
+      "NAME": "Файл без запроса"
+    },
+    "UNKNOWN_TOPIC": {
+      "ID": "article-5de72c12-9dae-4556-8b57-a789061eb183",
+      "NAME": "Бот не знает ответа"
+    },
+    "GUARANTY_REPAIR": {
+      "ID": "",
+      "NAME": "Гарантийный ремонт в квартире"
+    },
+    "WATER": {
+      "ID": "",
+      "NAME": "Вода (качество воды / отсутствие воды)"
+    },
+    "HEATING": {
+      "ID": "",
+      "NAME": "Отопление - несоответствие температурного режима"
+    },
+    "SMART_HOME": {
+      "ID": "",
+      "NAME": "Поддержка Умный дом"
+    },
+    "GARBAGE": {
+      "ID": "article-9ea56aa0-23f5-4076-9a97-a4606df4e348",
+      "NAME": "Вывоз мусора"
+    },
+    "APPLICATION_INFO": {
+      "ID": "",
+      "NAME": "Получение информации по ранее созданной заявке"
+    }
+  },
+  "standard_messages": {
+    "DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",
+    "TIMEOUT_ERROR_MSG": "Извините за задержку! Похоже, запрос занял больше времени, чем ожидалось. Пожалуйста, попробуйте снова позже.",
+    "NO_CONTEXT_TEXT": "К сожалению я не знаю ответ на ваш вопрос. Попробуйте задать вопрос иначе."
+  }
+}

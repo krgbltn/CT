@@ -1,0 +1,103 @@
+{
+  "api": {
+    "base_url": "http://opbot-workplace:8086",
+    "url_context_search": "http://contextsearch:8801",
+    "url_llm": "http://craftgpt:80",
+    "llm_auth_token": "MDE5YTI1NWQtOWY2NC03NzY5LTlkMDQtZGQwY2I5NjNmYzk2OjQyMGY1ZTUyLTI4ZGQtNGNmZS1iNmQwLWEwNWI2OGRlNTMxOQ==",
+    "url_mediator_service": "http://opbot-botmediator:8080/webhooks/mediator/messages",
+    "url_crm_create": "http://172.20.207.14:9000/client-relations/application-full",
+    "url_crm_token": "http://172.20.207.14:8083/users/auth/login",
+    "login": "CRMUKGCHTST@sbercity.ru",
+    "password": "4AHsUraetLrcnZnAURco"
+  },
+  "customer_id": "sbercity",
+  "llm_settings": {
+    "timeout": 200,
+    "temperature": 0.6,
+    "temperature_smalltalk": 0.7,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0
+  },
+  "context_settings": {
+    "LAST_CONTEXT_PRICE": 0.19,
+    "OTHER_CONTEXT_PRICE": 3.1,
+    "ADD_OTHER_CONTEXT": true,
+    "MAX_CONTEXTS": -1
+  },
+  "agent_parameters": {
+    "DO_REPHRASE": false,
+    "REPHRASE_N_GENERATIONS": 4,
+    "REPHRASE_SAMPLES_PER_GENERATION": 8,
+    "ENABLE_THINKING_SMALLTALK": true,
+    "ENABLE_THINKING_RAG": false,
+    "SHOW_THINKING": false,
+    "MAX_CYCLES": 5,
+    "SMALLTALK_IF_NO_CONTEXT": true,
+    "RECORD_TYPE": "sberciti_gpt",
+    "SHOW_CONTEXT": false,
+    "SHOW_REFERENCES": false,
+    "USE_HISTORY": true,
+    "DEBUG": false,
+    "THINK": " /think",
+    "NO_THINK": " /no_think"
+  },
+  "roles": {
+    "USER": "user",
+    "BOT": "assistant",
+    "OPERATOR": "operator"
+  },
+  "keys": {
+    "QUEUE_KEY": "function_queue",
+    "N_CYCLES_KEY": "n_cycles"
+  },
+  "user_slots": [
+    {"id": "client_verified", "description": "Верификация по номеру телефона (true/false/null) — передается внешней системой, НЕ извлекается"},
+    {"id": "client_name_display", "description": "Как к клиенту обращаться (имя или ФИО)"},
+    {"id": "client_status", "description": "\"резидент\" / \"гость\""},
+    {"id": "building_number", "description": "Номер дома (цифры/буквы)"},
+    {"id": "corpus", "description": "Корпус/строение (если есть)"},
+    {"id": "apartment_number", "description": "Номер квартиры"},
+    {"id": "heating_problem_type", "description": "Тип проблемы: \"холодно\" / \"слишком_жарко\" / \"радиатор_не_греет\" / \"слабый_прогрев\" / \"неравномерный_прогрев\""},
+    {"id": "temperature_value", "description": "Фактическая температура в квартире, если измеряли"},
+    {"id": "problem_room", "description": "Помещение: вся квартира или конкретные комнаты"},
+    {"id": "radiator_status", "description": "Состояние радиаторов: холодные/частично теплые/слабо греют/слишком горячие"},
+    {"id": "problem_since", "description": "Когда проблема появилась"},
+    {"id": "is_permanent", "description": "Проблема постоянная или периодическая"},
+    {"id": "neighbors_have_problem", "description": "Есть ли проблема у соседей: true/false/не знаю"},
+    {"id": "need_access", "description": "Нужен ли доступ в квартиру для проверки: true/false"},
+    {"id": "contact_date", "description": "Удобная дата для связи"},
+    {"id": "contact_time", "description": "Удобный интервал для связи"},
+    {"id": "phone_number", "description": "Номер телефона (при отсутствии верификации)"},
+    {"id": "event_type", "description": "Тип события"},
+    {"id": "object_type", "description": "Тип объекта"},
+    {"id": "type_of_premises_or_service", "description": "Отопление"},
+    {"id": "purpose_of_premises_or_service", "description": "Несоответствие температурного режима"},
+    {"id": "problem_category", "description": "Категория заявки"},
+    {"id": "priority", "description": "Приоритет: \"Аварийная\" / \"Обычная\""},
+    {"id": "problem_description", "description": "Полный исходный текст обращения"}
+  ],
+  "agent_slots": {
+    "SCENARIO_RESULT": "scenario_result",
+    "LLM_ANSWER_HISTORY": "llm_history_messages"
+  },
+  "articles": {
+    "TRANSFER_FOR_OPERATOR": {
+      "ID": "article-75d6da99-0617-49eb-a586-5ff265443548",
+      "NAME": "Отсутствие операторов"
+    }
+  },
+  "standard_messages": {
+    "DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",
+    "TIMEOUT_ERROR_MSG": "Извините за задержку! Похоже, запрос занял больше времени, чем ожидалось. Пожалуйста, попробуйте снова позже.",
+    "MESSAGE_CANCEL_WAITING": "Готов ответить на ваш следующий вопрос! Чем ещё могу помочь?",
+    "NO_CONTEXT_TEXT": "К сожалению я не знаю ответ на ваш вопрос. Попробуйте задать вопрос иначе."
+  },
+  "trans_map": {
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "yo",
+    "ж": "zh", "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m",
+    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ф": "f", "х": "kh", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "shch",
+    "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya"
+  }
+}
