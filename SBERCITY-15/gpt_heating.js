@@ -56,6 +56,10 @@ let LLM_SYSTEM_TEMPLATE = `
 
 4. **problem_description** — **дословный текст**.
 
+5. **Массовые аварии и плановые работы:**
+   - Если есть массовая авария или плановые работы по отоплению — не создавать дубль заявки, сообщить жителю известную информацию о сроках восстановления.
+   - Если проблема локальная или информация о массовости отсутствует — собрать обязательные атрибуты и создать заявку.
+
 ---
 
 ## Инструменты уточнения (ТОЛЬКО ОДИН)
@@ -66,10 +70,12 @@ let LLM_SYSTEM_TEMPLATE = `
 | \`client_verified\` ≠ true && \`client_name_display\` ≠ null && \`client_status\` == null | \`ask_for_client_status\` | "Вы проживаете в этом доме или в гостях?" |
 | \`building_number\` == null **или** \`apartment_number\` == null | \`ask_for_address\` | "Назовите номер дома и квартиры." |
 | \`heating_problem_type\` == null или неоднозначен | \`ask_for_heating_problem_type\` | "Подскажите, пожалуйста, какая именно проблема с отоплением: холодно, слишком жарко или радиаторы не греют?" |
+| \`temperature_value\` == null | \`ask_for_temperature_value\` | "Какая сейчас температура воздуха в помещении, если измеряли?" |
 | \`problem_room\` == null | \`ask_for_problem_room\` | "В какой комнате или во всей квартире наблюдается проблема?" |
 | \`radiator_status\` == null | \`ask_for_radiator_status\` | "Радиаторы холодные полностью, частично теплые или просто слабо греют?" |
 | \`problem_since\` == null | \`ask_for_problem_since\` | "Как давно появилась проблема?" |
 | \`contact_date\` == null **или** \`contact_time\` == null | \`ask_for_contact_datetime\` | "Укажите удобную дату и интервал для связи." |
+| Все обязательные слоты заполнены | \`ask_for_photo\` | "Если у вас есть фото термометра или видео/фото проблемы с радиатором, пожалуйста, приложите материалы. Если сейчас неудобно, заявку можно создать без вложений." |
 
 > **ВАЖНО:**  
 > - Не вызывайте 2+ инструментов за раз.  
@@ -614,12 +620,30 @@ function extractThinkContent(input, escapeHtml) {
 
 function extractJSON(response) {
     try {
+        const jsonRegex = /```(?:json)?\s*([\s\S]*?)```/g;
+        let match;
+        while ((match = jsonRegex.exec(response)) !== null) {
+            const jsonStr = match[1].trim();
+            if (jsonStr.startsWith('{') || jsonStr.startsWith('[')) {
+                return JSON.parse(jsonStr);
+            }
+        }
         const jsonStart = response.indexOf('{');
         const jsonEnd = response.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1) return JSON.parse(response.substring(jsonStart, jsonEnd + 1));
+        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            let braceCount = 0;
+            for (let i = jsonStart; i < response.length; i++) {
+                if (response[i] === '{') braceCount++;
+                if (response[i] === '}') braceCount--;
+                if (braceCount === 0) {
+                    return JSON.parse(response.substring(jsonStart, i + 1));
+                }
+            }
+        }
     } catch (error) {
         return response
     }
+    return response
 }
 
 function addUrlToContextTitle(fullContext) {
@@ -851,32 +875,36 @@ async function _printResponse(response, replies, dialogOrHistory, dialogId) {
     if (message?.meta?.isTest) return
     const {thought, cleanedText} = extractThinkContent(response.answer, false);
 
-    if (!cleanedText || !cleanedText.trim().startsWith('{')) {
+    if (!cleanedText) return
+
+    const extracted = extractJSON(cleanedText)
+    const responseData = (typeof extracted === 'object' && extracted !== null && extracted.action_required) ? extracted : null
+
+    if (!responseData) {
         logger.info({step: 'plain_text_response', text_preview: cleanedText?.substring(0, 200)})
         if (AGENT_PARAMETERS.SHOW_THINKING && thought) await replies.textReply(thought); else replies.debugReply(thought)
         if (cleanedText) await replies.markdownReply(cleanedText)
         return
     }
 
-    let responseData
-    try {
-        responseData = JSON.parse(cleanedText);
-        if (typeof responseData !== 'object' || responseData === null) responseData = cleanedText
-    } catch (error) {
-        responseData = extractJSON(cleanedText)
-    }
     if (AGENT_PARAMETERS.SHOW_THINKING && thought) await replies.textReply(thought); else replies.debugReply(thought)
-    if (responseData?.action_required?.tool === "transfer_to_operator") _sendReply(`/switchredirect aiassist2 intent_id="${ARTICLES.TRANSFER_FOR_OPERATOR.ID}"`)
-    if (responseData?.action_required?.tool === "transfer_to_scenario") {
-        const numberApplication = await sendApplication(responseData?.slots, dialogOrHistory, replies);
-        _sendReply(numberApplication, {response_crm: JSON.stringify(responseData?.slots)});
-        await agentApi.finishDialog(dialogId)
+
+    if (responseData.action_required.tool === "transfer_to_operator") {
+        _sendReply(`/switchredirect aiassist2 intent_id="${ARTICLES.TRANSFER_FOR_OPERATOR.ID}"`)
+        return
     }
-    if (cleanedText && responseData?.action_required?.tool !== "transfer_to_operator" && responseData?.action_required?.tool !== "transfer_to_scenario") {
-        if (responseData?.notes !== null) {
-            const cleanedSlots = Object.fromEntries(Object.entries(responseData?.slots || {}).filter(([key, value]) => value !== null).map(([key, value]) => [key, String(value)]));
-            if (responseData?.slots) _sendReply(responseData?.notes, cleanedSlots); else await replies.markdownReply(cleanedText)
-        } else await replies.markdownReply(cleanedText)
+    if (responseData.action_required.tool === "transfer_to_scenario") {
+        const numberApplication = await sendApplication(responseData.slots, dialogOrHistory, replies);
+        _sendReply(numberApplication, {response_crm: JSON.stringify(responseData.slots)});
+        await agentApi.finishDialog(dialogId)
+        return
+    }
+
+    if (responseData.notes !== null && responseData.notes !== undefined) {
+        const cleanedSlots = Object.fromEntries(Object.entries(responseData.slots || {}).filter(([key, value]) => value !== null).map(([key, value]) => [key, String(value)]));
+        _sendReply(responseData.notes, cleanedSlots)
+    } else {
+        await replies.markdownReply(cleanedText)
     }
 }
 

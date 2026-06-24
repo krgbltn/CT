@@ -3,7 +3,7 @@
     "base_url": "http://opbot-workplace:8086",
     "url_context_search": "http://contextsearch:8801",
     "url_llm": "http://craftgpt:80",
-    "llm_auth_token": "MDE5YTI1NWQtOWY2NC03NzY5LTlkMDQtZGQwY2I5NjNmYzk2OjQyMGY1ZTUyLTI4ZGQtNGNmZS1iNmQwLWEwNWI2OGRlNTMxOQ==",
+    "llm_auth_token": "gigab2b_pat_CoMKOL4d-ianO1ltgBieogX9on30y_KZkiFhhcFrjRX-9jwXXu_Si8IXyIbBTMRPBEjxL2fWrwl6E1hmrEWqE4dpZccqws85OhbjtmSELItaJvHxLhp5XDsuDWROJdohxOx6YQiZRU4TU0mDpKUeyxI2OIuHpfSjR40MdW6ZPl2kYTiVLrksQ_4POf04XeTbtdy_NI5FOvWRZ5jTbuRPdAdn1fpzEB3gtigpfynVyZfAKzA5piTGWEaG3cTAFWk7",
     "url_mediator_service": "http://opbot-botmediator:8080/webhooks/mediator/messages",
     "url_crm_create": "http://172.20.207.14:9000/client-relations/application-full",
     "url_crm_token": "http://172.20.207.14:8083/users/auth/login",
@@ -75,7 +75,7 @@
     {"id": "purpose_of_premises_or_service", "description": "Диагностика"},
     {"id": "problem_category", "description": "Категория заявки"},
     {"id": "priority", "description": "Приоритет: \"Обычная\""},
-    {"id": "problem_description_full", "description": "Полный исходный текст обращения"}
+    {"id": "problem_description", "description": "Полный исходный текст обращения"}
   ],
   "agent_slots": {
     "SCENARIO_RESULT": "scenario_result",

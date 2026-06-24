@@ -3,7 +3,7 @@
     "base_url": "http://opbot-workplace:8086",
     "url_context_search": "http://contextsearch:8801",
     "url_llm": "http://craftgpt1:3020",
-    "llm_auth_token": "MDE5YTI1NWQtOWY2NC03NzY5LTlkMDQtZGQwY2I5NjNmYzk2OjQyMGY1ZTUyLTI4ZGQtNGNmZS1iNmQwLWEwNWI2OGRlNTMxOQ==",
+    "llm_auth_token": "gigab2b_pat_CoMKOL4d-ianO1ltgBieogX9on30y_KZkiFhhcFrjRX-9jwXXu_Si8IXyIbBTMRPBEjxL2fWrwl6E1hmrEWqE4dpZccqws85OhbjtmSELItaJvHxLhp5XDsuDWROJdohxOx6YQiZRU4TU0mDpKUeyxI2OIuHpfSjR40MdW6ZPl2kYTiVLrksQ_4POf04XeTbtdy_NI5FOvWRZ5jTbuRPdAdn1fpzEB3gtigpfynVyZfAKzA5piTGWEaG3cTAFWk7",
     "url_mediator_service": "http://opbot-botmediator:8080/webhooks/mediator/messages"
   },
   "customer_id": "sbercity",
@@ -74,19 +74,19 @@
       "NAME": "Бот не знает ответа"
     },
     "GUARANTY_REPAIR": {
-      "ID": "",
+      "ID": "article-9702c446-ae5b-4ecd-b141-f980a30f7c96",
       "NAME": "Гарантийный ремонт в квартире"
     },
     "WATER": {
-      "ID": "",
+      "ID": "article-6399a6d8-b047-40dd-af69-ef3dac11a83f",
       "NAME": "Вода (качество воды / отсутствие воды)"
     },
     "HEATING": {
-      "ID": "",
+      "ID": "article-358addce-9f54-43f4-9fcb-d753ae47ee72",
       "NAME": "Отопление - несоответствие температурного режима"
     },
     "SMART_HOME": {
-      "ID": "",
+      "ID": "article-8fa530e1-35f4-43f8-bfa2-d0af87625aa3",
       "NAME": "Поддержка Умный дом"
     },
     "GARBAGE": {
@@ -94,7 +94,7 @@
       "NAME": "Вывоз мусора"
     },
     "APPLICATION_INFO": {
-      "ID": "",
+      "ID": "article-2fd1e5fd-0a7a-4862-8230-b9a4f98afb49",
       "NAME": "Получение информации по ранее созданной заявке"
     }
   },

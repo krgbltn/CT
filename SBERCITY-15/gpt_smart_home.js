@@ -37,7 +37,7 @@ let LLM_SYSTEM_TEMPLATE = `
 | \`purpose_of_premises_or_service\` | "Диагностика" | Фиксировано | **Обязательный** |
 | \`problem_category\` | Категория | Из текста + словарь | Обяз. |
 | \`priority\` | "Обычная" | Фиксировано | Обяз. |
-| \`problem_description_full\` | **Полный исходный текст обращения** | Дословно | **Обязательный** |
+| \`problem_description\` | **Полный исходный текст обращения** | Дословно | **Обязательный** |
 
 ---
 
@@ -50,7 +50,7 @@ let LLM_SYSTEM_TEMPLATE = `
 2. **Тип устройства:**
    - \`smart_home_device_type\` ∈ {**"система_в_целом"**, **"датчик_движения"**, **"климат_система"**, **"освещение"**}
 
-3. **problem_description_full** — **дословный текст**.
+3. **problem_description** — **дословный текст**.
 
 ---
 
@@ -100,7 +100,7 @@ let LLM_SYSTEM_TEMPLATE = `
     "purpose_of_premises_or_service": "Диагностика",
     "problem_category": string | null,
     "priority": "Обычная",
-    "problem_description_full": string | null
+    "problem_description": string | null
   },
   "action_required": {
     "tool": string,
@@ -133,7 +133,7 @@ let LLM_SYSTEM_TEMPLATE = `
     "purpose_of_premises_or_service": "Диагностика",
     "problem_category": "Неисправность датчика движения",
     "priority": "Обычная",
-    "problem_description_full": "Датчик движения в коридоре не работает"
+    "problem_description": "Датчик движения в коридоре не работает"
   },
   "action_required": {
     "tool": "transfer_to_scenario",
@@ -181,7 +181,7 @@ let LLM_SYSTEM_TEMPLATE = `
     "purpose_of_premises_or_service": "Диагностика",
     "problem_category": "Неисправность климат системы",
     "priority": "Обычная",
-    "problem_description_full": "Не регулируется температура"
+    "problem_description": "Не регулируется температура"
   },
   "action_required": {
     "tool": "ask_for_problem_description",
@@ -211,7 +211,7 @@ let LLM_SYSTEM_TEMPLATE = `
     "purpose_of_premises_or_service": "Диагностика",
     "problem_category": "Неисправность климат системы",
     "priority": "Обычная",
-    "problem_description_full": "Не работает вентиляция"
+    "problem_description": "Не работает вентиляция"
   },
   "action_required": {
     "tool": "ask_for_problem_since",
@@ -241,7 +241,7 @@ let LLM_SYSTEM_TEMPLATE = `
     "purpose_of_premises_or_service": "Диагностика",
     "problem_category": "Неисправность климат системы",
     "priority": "Обычная",
-    "problem_description_full": "Не работает вентиляция"
+    "problem_description": "Не работает вентиляция"
   },
   "action_required": {
     "tool": "ask_for_contact_datetime",
@@ -568,12 +568,30 @@ function extractThinkContent(input, escapeHtml) {
 
 function extractJSON(response) {
     try {
+        const jsonRegex = /```(?:json)?\s*([\s\S]*?)```/g;
+        let match;
+        while ((match = jsonRegex.exec(response)) !== null) {
+            const jsonStr = match[1].trim();
+            if (jsonStr.startsWith('{') || jsonStr.startsWith('[')) {
+                return JSON.parse(jsonStr);
+            }
+        }
         const jsonStart = response.indexOf('{');
         const jsonEnd = response.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1) return JSON.parse(response.substring(jsonStart, jsonEnd + 1));
+        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            let braceCount = 0;
+            for (let i = jsonStart; i < response.length; i++) {
+                if (response[i] === '{') braceCount++;
+                if (response[i] === '}') braceCount--;
+                if (braceCount === 0) {
+                    return JSON.parse(response.substring(jsonStart, i + 1));
+                }
+            }
+        }
     } catch (error) {
         return response
     }
+    return response
 }
 
 function addUrlToContextTitle(fullContext) {
@@ -709,8 +727,8 @@ function formatDateToRussian(dateStr) {
 }
 
 function formatDataBlockSmartHome(slots) {
-    const order = ["type_of_premises_or_service", "purpose_of_premises_or_service", "smart_home_device_type", "problem_description", "non_working_functions", "problem_location", "error_in_app", "temperature_mode", "problem_since", "is_permanent", "contact_date", "contact_time", "client_name_display", "client_status", "phone_number", "building_number", "corpus", "apartment_number", "problem_category", "priority", "problem_description_full"];
-    const required = ["building_number", "apartment_number", "smart_home_device_type", "problem_description", "problem_since", "contact_date", "contact_time", "type_of_premises_or_service", "purpose_of_premises_or_service", "priority", "problem_description_full"];
+    const order = ["type_of_premises_or_service", "purpose_of_premises_or_service", "smart_home_device_type", "problem_description", "non_working_functions", "problem_location", "error_in_app", "temperature_mode", "problem_since", "is_permanent", "contact_date", "contact_time", "client_name_display", "client_status", "phone_number", "building_number", "corpus", "apartment_number", "problem_category", "priority", "problem_description"];
+    const required = ["building_number", "apartment_number", "smart_home_device_type", "problem_description", "problem_since", "contact_date", "contact_time", "type_of_premises_or_service", "purpose_of_premises_or_service", "priority", "problem_description"];
     const labels = {
         type_of_premises_or_service: "Умный дом",
         purpose_of_premises_or_service: "Диагностика",
@@ -732,7 +750,7 @@ function formatDataBlockSmartHome(slots) {
         apartment_number: "Квартира",
         problem_category: "Категория проблемы",
         priority: "Приоритет",
-        problem_description_full: "Полное описание проблемы"
+        problem_description: "Полное описание проблемы"
     };
     const lines = [];
     for (const key of order) {
@@ -805,32 +823,36 @@ async function _printResponse(response, replies, dialogOrHistory, dialogId) {
     if (message?.meta?.isTest) return
     const {thought, cleanedText} = extractThinkContent(response.answer, false);
 
-    if (!cleanedText || !cleanedText.trim().startsWith('{')) {
+    if (!cleanedText) return
+
+    const extracted = extractJSON(cleanedText)
+    const responseData = (typeof extracted === 'object' && extracted !== null && extracted.action_required) ? extracted : null
+
+    if (!responseData) {
         logger.info({step: 'plain_text_response', text_preview: cleanedText?.substring(0, 200)})
         if (AGENT_PARAMETERS.SHOW_THINKING && thought) await replies.textReply(thought); else replies.debugReply(thought)
         if (cleanedText) await replies.markdownReply(cleanedText)
         return
     }
 
-    let responseData
-    try {
-        responseData = JSON.parse(cleanedText);
-        if (typeof responseData !== 'object' || responseData === null) responseData = cleanedText
-    } catch (error) {
-        responseData = extractJSON(cleanedText)
-    }
     if (AGENT_PARAMETERS.SHOW_THINKING && thought) await replies.textReply(thought); else replies.debugReply(thought)
-    if (responseData?.action_required?.tool === "transfer_to_operator") _sendReply(`/switchredirect aiassist2 intent_id="${ARTICLES.TRANSFER_FOR_OPERATOR.ID}"`)
-    if (responseData?.action_required?.tool === "transfer_to_scenario") {
-        const numberApplication = await sendApplication(responseData?.slots, dialogOrHistory, replies);
-        _sendReply(numberApplication, {response_crm: JSON.stringify(responseData?.slots)});
-        await agentApi.finishDialog(dialogId)
+
+    if (responseData.action_required.tool === "transfer_to_operator") {
+        _sendReply(`/switchredirect aiassist2 intent_id="${ARTICLES.TRANSFER_FOR_OPERATOR.ID}"`)
+        return
     }
-    if (cleanedText && responseData?.action_required?.tool !== "transfer_to_operator" && responseData?.action_required?.tool !== "transfer_to_scenario") {
-        if (responseData?.notes !== null) {
-            const cleanedSlots = Object.fromEntries(Object.entries(responseData?.slots || {}).filter(([key, value]) => value !== null).map(([key, value]) => [key, String(value)]));
-            if (responseData?.slots) _sendReply(responseData?.notes, cleanedSlots); else await replies.markdownReply(cleanedText)
-        } else await replies.markdownReply(cleanedText)
+    if (responseData.action_required.tool === "transfer_to_scenario") {
+        const numberApplication = await sendApplication(responseData.slots, dialogOrHistory, replies);
+        _sendReply(numberApplication, {response_crm: JSON.stringify(responseData.slots)});
+        await agentApi.finishDialog(dialogId)
+        return
+    }
+
+    if (responseData.notes !== null && responseData.notes !== undefined) {
+        const cleanedSlots = Object.fromEntries(Object.entries(responseData.slots || {}).filter(([key, value]) => value !== null).map(([key, value]) => [key, String(value)]));
+        _sendReply(responseData.notes, cleanedSlots)
+    } else {
+        await replies.markdownReply(cleanedText)
     }
 }
 

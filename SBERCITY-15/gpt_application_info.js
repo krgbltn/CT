@@ -55,6 +55,10 @@ let LLM_SYSTEM_TEMPLATE = `
 
 4. **problem_description** — **дословный текст**.
 
+5. **Обработка закрытых заявок:**
+   - Если заявка найдена, но закрыта, а житель сообщает, что проблема не решена → предложить создать новую заявку или передать оператору.
+   - notes в таком случае: «По данным системы заявка №{номер} находится в статусе "{статус}". Если проблема сохраняется, я могу помочь оформить новую заявку или передать обращение оператору для дополнительной проверки.»
+
 ---
 
 ## Инструменты уточнения (ТОЛЬКО ОДИН)
@@ -470,12 +474,30 @@ function extractThinkContent(input, escapeHtml) {
 
 function extractJSON(response) {
     try {
+        const jsonRegex = /```(?:json)?\s*([\s\S]*?)```/g;
+        let match;
+        while ((match = jsonRegex.exec(response)) !== null) {
+            const jsonStr = match[1].trim();
+            if (jsonStr.startsWith('{') || jsonStr.startsWith('[')) {
+                return JSON.parse(jsonStr);
+            }
+        }
         const jsonStart = response.indexOf('{');
         const jsonEnd = response.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1) return JSON.parse(response.substring(jsonStart, jsonEnd + 1));
+        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            let braceCount = 0;
+            for (let i = jsonStart; i < response.length; i++) {
+                if (response[i] === '{') braceCount++;
+                if (response[i] === '}') braceCount--;
+                if (braceCount === 0) {
+                    return JSON.parse(response.substring(jsonStart, i + 1));
+                }
+            }
+        }
     } catch (error) {
         return response
     }
+    return response
 }
 
 function addUrlToContextTitle(fullContext) {
@@ -622,25 +644,37 @@ async function sendApplication(slots, dialogOrHistory, replies) {
 async function _printResponse(response, replies, dialogOrHistory, dialogId) {
     if (message?.meta?.isTest) return
     const {thought, cleanedText} = extractThinkContent(response.answer, false);
-    let responseData
-    try {
-        responseData = JSON.parse(cleanedText);
-        if (typeof responseData !== 'object' || responseData === null) responseData = cleanedText
-    } catch (error) {
-        responseData = extractJSON(cleanedText)
+
+    if (!cleanedText) return
+
+    const extracted = extractJSON(cleanedText)
+    const responseData = (typeof extracted === 'object' && extracted !== null && extracted.action_required) ? extracted : null
+
+    if (!responseData) {
+        logger.info({step: 'plain_text_response', text_preview: cleanedText?.substring(0, 200)})
+        if (AGENT_PARAMETERS.SHOW_THINKING && thought) await replies.textReply(thought); else replies.debugReply(thought)
+        if (cleanedText) await replies.markdownReply(cleanedText)
+        return
     }
+
     if (AGENT_PARAMETERS.SHOW_THINKING && thought) await replies.textReply(thought); else replies.debugReply(thought)
-    if (responseData?.action_required?.tool === "transfer_to_operator") _sendReply(`/switchredirect aiassist2 intent_id="${ARTICLES.TRANSFER_FOR_OPERATOR.ID}"`)
-    if (responseData?.action_required?.tool === "transfer_to_scenario") {
-        const numberApplication = await sendApplication(responseData?.slots, dialogOrHistory, replies);
-        _sendReply(numberApplication, {response_crm: JSON.stringify(responseData?.slots)});
-        await agentApi.finishDialog(dialogId)
+
+    if (responseData.action_required.tool === "transfer_to_operator") {
+        _sendReply(`/switchredirect aiassist2 intent_id="${ARTICLES.TRANSFER_FOR_OPERATOR.ID}"`)
+        return
     }
-    if (cleanedText && responseData?.action_required?.tool !== "transfer_to_operator" && responseData?.action_required?.tool !== "transfer_to_scenario") {
-        if (responseData?.notes !== null) {
-            const cleanedSlots = Object.fromEntries(Object.entries(responseData?.slots || {}).filter(([key, value]) => value !== null).map(([key, value]) => [key, String(value)]));
-            if (responseData?.slots) _sendReply(responseData?.notes, cleanedSlots); else await replies.markdownReply(cleanedText)
-        } else await replies.markdownReply(cleanedText)
+    if (responseData.action_required.tool === "transfer_to_scenario") {
+        const numberApplication = await sendApplication(responseData.slots, dialogOrHistory, replies);
+        _sendReply(numberApplication, {response_crm: JSON.stringify(responseData.slots)});
+        await agentApi.finishDialog(dialogId)
+        return
+    }
+
+    if (responseData.notes !== null && responseData.notes !== undefined) {
+        const cleanedSlots = Object.fromEntries(Object.entries(responseData.slots || {}).filter(([key, value]) => value !== null).map(([key, value]) => [key, String(value)]));
+        _sendReply(responseData.notes, cleanedSlots)
+    } else {
+        await replies.markdownReply(cleanedText)
     }
 }
 

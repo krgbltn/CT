@@ -59,6 +59,11 @@ let LLM_SYSTEM_TEMPLATE = `
 
 4. **problem_description** — **дословный текст**.
 
+5. **Массовые и аварийные отключения:**
+   - При массовом аварийном отключении — сообщить известные сроки восстановления, заявку не дублировать.
+   - При плановых работах — предоставить информацию о сроках завершения.
+   - Если проблема локальная — оформить заявку.
+
 ---
 
 ## Инструменты уточнения (ТОЛЬКО ОДИН)
@@ -74,6 +79,7 @@ let LLM_SYSTEM_TEMPLATE = `
 | \`problem_since\` == null | \`ask_for_problem_since\` | "Как давно наблюдается проблема?" |
 | \`problem_scope\` == null | \`ask_for_problem_scope\` | "Проблема только у вас или у соседей тоже?" |
 | \`contact_date\` == null **или** \`contact_time\` == null | \`ask_for_contact_datetime\` | "Укажите удобную дату и интервал для связи." |
+| Все обязательные слоты заполнены | \`ask_for_photo\` | "Если у вас есть фото или видео проблемы, пожалуйста, приложите материалы. Если сейчас неудобно, заявку можно оформить без вложений." |
 
 > **ВАЖНО:**  
 > - Не вызывайте 2+ инструментов за раз.  
@@ -617,12 +623,30 @@ function extractThinkContent(input, escapeHtml) {
 
 function extractJSON(response) {
     try {
+        const jsonRegex = /```(?:json)?\s*([\s\S]*?)```/g;
+        let match;
+        while ((match = jsonRegex.exec(response)) !== null) {
+            const jsonStr = match[1].trim();
+            if (jsonStr.startsWith('{') || jsonStr.startsWith('[')) {
+                return JSON.parse(jsonStr);
+            }
+        }
         const jsonStart = response.indexOf('{');
         const jsonEnd = response.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1) return JSON.parse(response.substring(jsonStart, jsonEnd + 1));
+        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            let braceCount = 0;
+            for (let i = jsonStart; i < response.length; i++) {
+                if (response[i] === '{') braceCount++;
+                if (response[i] === '}') braceCount--;
+                if (braceCount === 0) {
+                    return JSON.parse(response.substring(jsonStart, i + 1));
+                }
+            }
+        }
     } catch (error) {
         return response
     }
+    return response
 }
 
 function addUrlToContextTitle(fullContext) {
@@ -863,40 +887,38 @@ async function _printResponse(response, replies, dialogOrHistory, dialogId) {
     if (message?.meta?.isTest) return
     const {thought, cleanedText} = extractThinkContent(response.answer, false)
 
-    if (!cleanedText || !cleanedText.trim().startsWith('{')) {
+    if (!cleanedText) return
+
+    const extracted = extractJSON(cleanedText)
+    const responseData = (typeof extracted === 'object' && extracted !== null && extracted.action_required) ? extracted : null
+
+    if (!responseData) {
         logger.info({step: 'plain_text_response', text_preview: cleanedText?.substring(0, 200)})
         if (AGENT_PARAMETERS.SHOW_THINKING && thought) await replies.textReply(thought)
         else replies.debugReply(thought)
-        if (cleanedText) await replies.markdownReply(cleanedText)
+        await replies.markdownReply(cleanedText)
         return
-    }
-
-    let responseData
-    try {
-        responseData = JSON.parse(cleanedText)
-        if (typeof responseData !== 'object' || responseData === null) responseData = cleanedText
-    } catch (error) {
-        responseData = extractJSON(cleanedText)
     }
 
     if (AGENT_PARAMETERS.SHOW_THINKING && thought) await replies.textReply(thought)
     else replies.debugReply(thought)
 
-    if (responseData?.action_required?.tool === "transfer_to_operator") {
+    if (responseData.action_required.tool === "transfer_to_operator") {
         _sendReply(`/switchredirect aiassist2 intent_id="${ARTICLES.TRANSFER_FOR_OPERATOR.ID}"`)
+        return
     }
-    if (responseData?.action_required?.tool === "transfer_to_scenario") {
-        const numberApplication = await sendApplication(responseData?.slots, dialogOrHistory, replies)
-        _sendReply(numberApplication, {response_crm: JSON.stringify(responseData?.slots)})
+    if (responseData.action_required.tool === "transfer_to_scenario") {
+        const numberApplication = await sendApplication(responseData.slots, dialogOrHistory, replies)
+        _sendReply(numberApplication, {response_crm: JSON.stringify(responseData.slots)})
         await agentApi.finishDialog(dialogId)
+        return
     }
 
-    if (cleanedText && responseData?.action_required?.tool !== "transfer_to_operator" && responseData?.action_required?.tool !== "transfer_to_scenario") {
-        if (responseData?.notes !== null) {
-            const cleanedSlots = Object.fromEntries(Object.entries(responseData?.slots || {}).filter(([key, value]) => value !== null).map(([key, value]) => [key, String(value)]))
-            if (responseData?.slots) _sendReply(responseData?.notes, cleanedSlots)
-            else await replies.markdownReply(cleanedText)
-        } else await replies.markdownReply(cleanedText)
+    if (responseData.notes !== null && responseData.notes !== undefined) {
+        const cleanedSlots = Object.fromEntries(Object.entries(responseData.slots || {}).filter(([key, value]) => value !== null).map(([key, value]) => [key, String(value)]))
+        _sendReply(responseData.notes, cleanedSlots)
+    } else {
+        await replies.markdownReply(cleanedText)
     }
 }
 
