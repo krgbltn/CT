@@ -47,6 +47,7 @@ let LLM_SYSTEM_TEMPLATE = `
 1. **Клиентские данные:**
    - Если \`client_verified\` = **true** → \`client_name_display\` и \`client_status\` **не запрашиваем**.
    - Если \`client_verified\` = **false/null** → сначала \`client_name_display\`, потом \`client_status\`, потом адрес.
+   - Если есть history, то значения в ней актуальнее чем в Слотах
 
 2. **Адрес:**
    - \`"22 к2, 34"\` → \`building_number=22\`, \`corpus=2\`, \`apartment_number=34\`
@@ -63,6 +64,19 @@ let LLM_SYSTEM_TEMPLATE = `
 5. **Время визита:**
    - Гарантийный ремонт: **рабочие дни 10:00–17:00**.
    - Если указанное время вне рабочего окна → сообщить: «Гарантийный ремонт выполняется в рабочие дни с 10:00 до 17:00. Пожалуйста, выберите дату и интервал времени в этом диапазоне.»
+
+6. **Извлечение ответов из текста пользователя:**
+   - Когда пользователь отвечает на вопрос — извлеките ответ и обновите соответствующий слот
+   - "дверь" / "входная" / "межкомнатная" → \`defect_object_type\`: "двери"
+   - "окно" / "стеклопакет" / "рама" / "балконная" → \`defect_object_type\`: "окна"
+   - "отделка" / "трещина" / "скол" / "вздутие" → \`defect_object_type\`: "отделка"
+   - описание неисправности → \`defect_description\`
+   - "входная дверь" / "межкомнатная" → \`door_type\`
+   - место дефекта → \`defect_location\`
+   - тип отделки → \`finish_type\`
+   - размер дефекта → \`defect_size\`
+   - дата → \`visit_date\`
+   - время → \`visit_time\`
 
 ---
 
@@ -349,6 +363,7 @@ let LLM_SYSTEM_TEMPLATE = `
 - notes = ВОПРОС КЛИЕНТУ 1:1 ИЗ ТАБЛИЦЫ ИНСТРУМЕНТОВ ВЫШЕ
 - НЕ меняйте формулировку, НЕ сокращайте, НЕ добавляйте свои слова
 - НЕ рассуждение, НЕ объяснение, НЕ список чего не хватает
+ВАЖНО: \`action_required.tool\` всегда должен быть одним из инструментов из таблицы выше. НЕ возвращайте пустой \`action_required\` — если слоты не заполнены, укажите соответствующий \`ask_for_*\` инструмент; если все заполнены — \`transfer_to_scenario\`.
 `
 
 let RAG_TEMPLATE = `[КОНТЕКСТ ИЗ БАЗЫ ЗНАНИЙ]
@@ -985,7 +1000,7 @@ function formatFullDescription(slots, dialogOrHistory) {
 async function sendApplication(slots, dialogOrHistory, replies) {
     let result = formatFullDescription(slots, dialogOrHistory);
     logger.warn({result})
-    return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+    //return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
 
     const token = await getTokenCRM()
     const config = {headers: {'content-type': 'application/json', 'authorization': 'Bearer ' + token}}
@@ -995,7 +1010,7 @@ async function sendApplication(slots, dialogOrHistory, replies) {
         logger.info({responseCrm: response.data}, "sendApplication")
         replies.debugReply(response.data)
         await agentStorage.omniUserStorage.set("APPLICATION_SEND", true)
-        return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+        return `Спасибо, что обратились ко мне. \n✅Заявка №${response.data.number} **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
     } catch (e) {
         logger.error({e}, `Error sendApplication`)
         return STANDARD_MESSAGES.DEFAULT_ERROR_MSG

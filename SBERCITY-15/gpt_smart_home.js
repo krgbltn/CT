@@ -46,11 +46,23 @@ let LLM_SYSTEM_TEMPLATE = `
 1. **Клиентские данные:**
    - Если \`client_verified\` = **true** → \`client_name_display\` и \`client_status\` **не запрашиваем**.
    - Если \`client_verified\` = **false/null** → сначала \`client_name_display\`, потом \`client_status\`, потом адрес.
+   - Если есть history, то значения в ней актуальнее чем в Слотах
 
 2. **Тип устройства:**
    - \`smart_home_device_type\` ∈ {**"система_в_целом"**, **"датчик_движения"**, **"климат_система"**, **"освещение"**}
 
 3. **problem_description** — **дословный текст**.
+
+4. **Извлечение ответов из текста пользователя:**
+   - Когда пользователь отвечает на вопрос — извлеките ответ и обновите соответствующий слот
+   - "датчик движения" / "датчик" → \`smart_home_device_type\`: "датчик_движения"
+   - "климат" / "кондиционер" / "термостат" → \`smart_home_device_type\`: "климат_система"
+   - "освещение" / "свет" / "лампочка" → \`smart_home_device_type\`: "освещение"
+   - "система в целом" / "всё" / "не работает" → \`smart_home_device_type\`: "система_в_целом"
+   - описание проблемы → \`problem_description\`
+   - "вчера" / "сегодня" / "неделю назад" → \`problem_since\`
+   - конкретная дата → \`contact_date\`
+   - временной интервал → \`contact_time\`
 
 ---
 
@@ -268,6 +280,7 @@ let LLM_SYSTEM_TEMPLATE = `
 - notes = ВОПРОС КЛИЕНТУ 1:1 ИЗ ТАБЛИЦЫ ИНСТРУМЕНТОВ ВЫШЕ
 - НЕ меняйте формулировку, НЕ сокращайте, НЕ добавляйте свои слова
 - НЕ рассуждение, НЕ объяснение, НЕ список чего не хватает
+ВАЖНО: \`action_required.tool\` всегда должен быть одним из инструментов из таблицы выше. НЕ возвращайте пустой \`action_required\` — если слоты не заполнены, укажите соответствующий \`ask_for_*\` инструмент; если все заполнены — \`transfer_to_scenario\`.
 `
 
 let RAG_TEMPLATE = `[КОНТЕКСТ ИЗ БАЗЫ ЗНАНИЙ]
@@ -803,7 +816,7 @@ function formatFullDescription(slots, dialogOrHistory) {
 async function sendApplication(slots, dialogOrHistory, replies) {
     let result = formatFullDescription(slots, dialogOrHistory);
     logger.warn({result})
-    return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+    //return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
 
     const token = await getTokenCRM()
     const config = {headers: {'content-type': 'application/json', 'authorization': 'Bearer ' + token}};
@@ -812,7 +825,7 @@ async function sendApplication(slots, dialogOrHistory, replies) {
         const response = await axios.post(API.url_crm_create, data, config);
         logger.info({responseCrm: response.data}, "sendApplication");
         await agentStorage.omniUserStorage.set("APPLICATION_SEND", true);
-        return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+        return `Спасибо, что обратились ко мне. \n✅Заявка №${response.data.number} **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
     } catch (e) {
         logger.error({e}, `Error sendApplication`);
         return STANDARD_MESSAGES.DEFAULT_ERROR_MSG

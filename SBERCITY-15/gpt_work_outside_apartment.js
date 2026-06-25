@@ -233,6 +233,7 @@ let LLM_SYSTEM_TEMPLATE = `
 Часовой пояс: UTC+3 (Москва)
 
 Выполняйте ТОЛЬКО извлечение и принятие решения о следующем шаге. Не ведите диалог.
+ВАЖНО: \`action_required.tool\` всегда должен быть одним из инструментов из таблицы выше. НЕ возвращайте пустой \`action_required\` — если слоты не заполнены, укажите соответствующий \`ask_for_*\` инструмент; если все заполнены — \`transfer_to_scenario\`.
 `
 
 let RAG_TEMPLATE = `[КОНТЕКСТ ИЗ БАЗЫ ЗНАНИЙ]
@@ -990,7 +991,7 @@ function formatFullDescription(slots, dialogOrHistory) {
 async function sendApplication(slots, dialogOrHistory, replies) {
     let result = formatFullDescription(slots, dialogOrHistory);
     logger.warn({result})
-    return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+    //return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
 
     const token = await getTokenCRM()
     const config = {
@@ -1008,7 +1009,7 @@ async function sendApplication(slots, dialogOrHistory, replies) {
         logger.info({responseCrm: response.data}, "sendApplication")
         replies.debugReply(response.data)
         await agentStorage.omniUserStorage.set("APPLICATION_SEND", true)
-        return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+        return `Спасибо, что обратились ко мне. \n✅Заявка №${response.data.number} **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
     } catch (e) {
         logger.error({e}, `Error sendApplication`)
         return STANDARD_MESSAGES.DEFAULT_ERROR_MSG

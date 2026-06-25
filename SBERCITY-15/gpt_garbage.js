@@ -1102,7 +1102,7 @@ async function sendApplication(slots, dialogOrHistory, replies) {
         const response = await axios.post(API.url_crm_create, data, config);
         logger.info({responseCrm: response.data}, "sendApplication");
         await agentStorage.omniUserStorage.set("APPLICATION_SEND", true);
-        return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+        return `Спасибо, что обратились ко мне. \n✅Заявка №${response.data.number} **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
     } catch (e) {
         logger.error({e}, `Error sendApplication`);
         return STANDARD_MESSAGES.DEFAULT_ERROR_MSG

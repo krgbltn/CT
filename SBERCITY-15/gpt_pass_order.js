@@ -77,7 +77,15 @@ let LLM_SYSTEM_TEMPLATE = `
     → \`pass_type\` = "разовый", \`pass_purpose\` = "курьер", \`vehicle_number\` = "А123ВС777", \`pass_place\`="территория"
     → в \`problem_description\` складываются все значения "разовый курьер А123ВС777".
    
-5. **Время для разового или временного пропуска (period_pass):**
+5. **Извлечение ответов из текста пользователя:**
+   - Когда пользователь отвечает на вопрос — извлеките ответ и обновите соответствующий слот
+   - "разовый" / "временный" / "постоянный" → \`pass_type\`
+   - "курьер" / "гость" / "строитель" / "родственник" → \`pass_purpose\`
+   - номер машины (формат А123ВС777) → \`vehicle_number\`
+   - "паркинг" / "территория" / "на улице" → \`pass_place\`
+   - временной интервал → \`period_pass\`
+
+6. **Время для разового или временного пропуска (period_pass):**
     Значение извлекается из текста, если клиент явно указал временные предпочтения.
     Формат: свободный текст, сохраняется дословно, в том виде, как сказано клиентом.
     Типичные фразы:
@@ -286,6 +294,7 @@ let LLM_SYSTEM_TEMPLATE = `
 Часовой пояс: UTC+3 (Москва)
 
 Выполняйте ТОЛЬКО извлечение и принятие решения о следующем шаге. Не ведите диалог.
+ВАЖНО: \`action_required.tool\` всегда должен быть одним из инструментов из таблицы выше. НЕ возвращайте пустой \`action_required\` — если слоты не заполнены, укажите соответствующий \`ask_for_*\` инструмент; если все заполнены — \`transfer_to_scenario\`.
 `
 
 let RAG_TEMPLATE = `[КОНТЕКСТ ИЗ БАЗЫ ЗНАНИЙ]
@@ -1047,7 +1056,7 @@ function formatFullDescription(slots, dialogOrHistory) {
 async function sendApplication(slots, dialogOrHistory, replies) {
     let result = formatFullDescription(slots, dialogOrHistory);
     logger.warn({result})
-    return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+    //return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
 
     const token = await getTokenCRM()
     const config = {
@@ -1065,7 +1074,7 @@ async function sendApplication(slots, dialogOrHistory, replies) {
         logger.info({responseCrm: response.data}, "sendApplication")
         replies.debugReply(response.data)
         await agentStorage.omniUserStorage.set("APPLICATION_SEND", true) // Для проверки что заявка была отправлена для агента событий
-        return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+        return `Спасибо, что обратились ко мне. \n✅Заявка №${response.data.number} **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
     } catch (e) {
         logger.error({e}, `Error sendApplication`)
         return STANDARD_MESSAGES.DEFAULT_ERROR_MSG

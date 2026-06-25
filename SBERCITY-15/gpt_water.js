@@ -47,6 +47,7 @@ let LLM_SYSTEM_TEMPLATE = `
 1. **Клиентские данные:**
    - Если \`client_verified\` = **true** → \`client_name_display\` и \`client_status\` **не запрашиваем**.
    - Если \`client_verified\` = **false/null** → сначала \`client_name_display\`, потом \`client_status\`, потом адрес.
+   - Если есть history, то значения в ней актуальнее чем в Слотах
 
 2. **Классификация проблемы:**
    - \`water_problem_type\` ∈ {**"качество_воды"**, **"отсутствие_воды"**}
@@ -64,6 +65,18 @@ let LLM_SYSTEM_TEMPLATE = `
    - При плановых работах — предоставить информацию о сроках завершения.
    - Если проблема локальная — оформить заявку.
 
+6. **Извлечение ответов из текста пользователя:**
+   - Когда пользователь отвечает на вопрос — извлеките ответ и обновите соответствующий слот
+   - "нет воды" / "отсутствует" / "нет холодной" / "нет горячей" → \`water_problem_type\`: "отсутствие_воды"
+   - "ржавая" / "желтая" / "коричневая" / "мутная" → \`water_issue\`: "цвет", \`water_color\`: соответствующий
+   - "запах" / "воняет" / "химический" → \`water_issue\`: "запах", \`water_smell\`: соответствующий
+   - "слабый напор" / "плохой напор" / "не течет" → \`water_issue\`: "напор", \`water_pressure\`: "слабый"
+   - "горячая" / "холодная" → \`water_type\`: "ГВС" / "ХВС"
+   - "вчера" / "сегодня утром" / "неделю назад" → \`problem_since\`
+   - "только у меня" / "везде" / "у соседей тоже" → \`problem_scope\`
+   - конкретная дата → \`contact_date\`
+   - временной интервал → \`contact_time\`
+
 ---
 
 ## Инструменты уточнения (ТОЛЬКО ОДИН)
@@ -79,7 +92,6 @@ let LLM_SYSTEM_TEMPLATE = `
 | \`problem_since\` == null | \`ask_for_problem_since\` | "Как давно наблюдается проблема?" |
 | \`problem_scope\` == null | \`ask_for_problem_scope\` | "Проблема только у вас или у соседей тоже?" |
 | \`contact_date\` == null **или** \`contact_time\` == null | \`ask_for_contact_datetime\` | "Укажите удобную дату и интервал для связи." |
-| Все обязательные слоты заполнены | \`ask_for_photo\` | "Если у вас есть фото или видео проблемы, пожалуйста, приложите материалы. Если сейчас неудобно, заявку можно оформить без вложений." |
 
 > **ВАЖНО:**  
 > - Не вызывайте 2+ инструментов за раз.  
@@ -296,6 +308,7 @@ let LLM_SYSTEM_TEMPLATE = `
 - notes = ВОПРОС КЛИЕНТУ 1:1 ИЗ ТАБЛИЦЫ ИНСТРУМЕНТОВ ВЫШЕ
 - НЕ меняйте формулировку, НЕ сокращайте, НЕ добавляйте свои слова
 - НЕ рассуждение, НЕ объяснение, НЕ список чего не хватает
+ВАЖНО: \`action_required.tool\` всегда должен быть одним из инструментов из таблицы выше. НЕ возвращайте пустой \`action_required\` — если слоты не заполнены, укажите соответствующий \`ask_for_*\` инструмент; если все заполнены — \`transfer_to_scenario\`.
 `
 
 let RAG_TEMPLATE = `[КОНТЕКСТ ИЗ БАЗЫ ЗНАНИЙ]
@@ -867,7 +880,7 @@ function formatFullDescription(slots, dialogOrHistory) {
 async function sendApplication(slots, dialogOrHistory, replies) {
     let result = formatFullDescription(slots, dialogOrHistory);
     logger.warn({result})
-    return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+    //return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
 
     const token = await getTokenCRM()
     const config = {headers: {'content-type': 'application/json', 'authorization': 'Bearer ' + token}}
@@ -876,7 +889,7 @@ async function sendApplication(slots, dialogOrHistory, replies) {
         const response = await axios.post(API.url_crm_create, data, config);
         logger.info({responseCrm: response.data}, "sendApplication");
         await agentStorage.omniUserStorage.set("APPLICATION_SEND", true);
-        return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+        return `Спасибо, что обратились ко мне. \n✅Заявка №${response.data.number} **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
     } catch (e) {
         logger.error({e}, `Error sendApplication`);
         return STANDARD_MESSAGES.DEFAULT_ERROR_MSG

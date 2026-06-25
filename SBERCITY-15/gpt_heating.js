@@ -46,6 +46,7 @@ let LLM_SYSTEM_TEMPLATE = `
 1. **Клиентские данные:**
    - Если \`client_verified\` = **true** → \`client_name_display\` и \`client_status\` **не запрашиваем**.
    - Если \`client_verified\` = **false/null** → сначала \`client_name_display\`, потом \`client_status\`, потом адрес.
+   - Если есть history, то значения в ней актуальнее чем в Слотах
 
 2. **Тип проблемы:**
    - \`heating_problem_type\` ∈ {**"холодно"**, **"слишком_жарко"**, **"радиатор_не_греет"**, **"слабый_прогрев"**, **"неравномерный_прогрев"**}
@@ -59,6 +60,19 @@ let LLM_SYSTEM_TEMPLATE = `
 5. **Массовые аварии и плановые работы:**
    - Если есть массовая авария или плановые работы по отоплению — не создавать дубль заявки, сообщить жителю известную информацию о сроках восстановления.
    - Если проблема локальная или информация о массовости отсутствует — собрать обязательные атрибуты и создать заявку.
+
+6. **Извлечение ответов из текста пользователя:**
+   - Когда пользователь отвечает на вопрос — извлеките ответ и обновите соответствующий слот
+   - "холодно" / "батареи холодные" / "не греет" → \`heating_problem_type\`: "холодно"
+   - "жарко" / "слишком жарко" / "душно" → \`heating_problem_type\`: "слишком_жарко"
+   - "радиатор не греет" / "батарея не греет" → \`heating_problem_type\`: "радиатор_не_греет"
+   - "слабый прогрев" / "чуть теплые" → \`heating_problem_type\`: "слабый_прогрев"
+   - градусы / "температура" → \`temperature_value\`
+   - "в комнате" / "в спальне" / "на кухне" → \`problem_room\`
+   - "радиаторы холодные" / "частично теплые" → \`radiator_status\`
+   - "вчера" / "сегодня утром" / "неделю назад" → \`problem_since\`
+   - конкретная дата → \`contact_date\`
+   - временной интервал → \`contact_time\`
 
 ---
 
@@ -75,7 +89,6 @@ let LLM_SYSTEM_TEMPLATE = `
 | \`radiator_status\` == null | \`ask_for_radiator_status\` | "Радиаторы холодные полностью, частично теплые или просто слабо греют?" |
 | \`problem_since\` == null | \`ask_for_problem_since\` | "Как давно появилась проблема?" |
 | \`contact_date\` == null **или** \`contact_time\` == null | \`ask_for_contact_datetime\` | "Укажите удобную дату и интервал для связи." |
-| Все обязательные слоты заполнены | \`ask_for_photo\` | "Если у вас есть фото термометра или видео/фото проблемы с радиатором, пожалуйста, приложите материалы. Если сейчас неудобно, заявку можно создать без вложений." |
 
 > **ВАЖНО:**  
 > - Не вызывайте 2+ инструментов за раз.  
@@ -319,8 +332,8 @@ let LLM_SYSTEM_TEMPLATE = `
 - notes = ВОПРОС КЛИЕНТУ 1:1 ИЗ ТАБЛИЦЫ ИНСТРУМЕНТОВ ВЫШЕ
 - НЕ меняйте формулировку, НЕ сокращайте, НЕ добавляйте свои слова
 - НЕ рассуждение, НЕ объяснение, НЕ список чего не хватает
+ВАЖНО: \`action_required.tool\` всегда должен быть одним из инструментов из таблицы выше. НЕ возвращайте пустой \`action_required\` — если слоты не заполнены, укажите соответствующий \`ask_for_*\` инструмент; если все заполнены — \`transfer_to_scenario\`.
 `
-
 let RAG_TEMPLATE = `[КОНТЕКСТ ИЗ БАЗЫ ЗНАНИЙ]
 {context}
 [КОНЕЦ КОНТЕКСТА]
@@ -855,7 +868,7 @@ function formatFullDescription(slots, dialogOrHistory) {
 async function sendApplication(slots, dialogOrHistory, replies) {
     let result = formatFullDescription(slots, dialogOrHistory);
     logger.warn({result})
-    return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+    //return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
 
     const token = await getTokenCRM()
     const config = {headers: {'content-type': 'application/json', 'authorization': 'Bearer ' + token}};
@@ -864,7 +877,7 @@ async function sendApplication(slots, dialogOrHistory, replies) {
         const response = await axios.post(API.url_crm_create, data, config);
         logger.info({responseCrm: response.data}, "sendApplication");
         await agentStorage.omniUserStorage.set("APPLICATION_SEND", true);
-        return `Спасибо, что обратились ко мне. \n✅Заявка **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
+        return `Спасибо, что обратились ко мне. \n✅Заявка №${response.data.number} **оформлена**. \n 📱 Статус заявки присылаем через пуш-уведомления мобильного приложения.`
     } catch (e) {
         logger.error({e}, `Error sendApplication`);
         return STANDARD_MESSAGES.DEFAULT_ERROR_MSG
