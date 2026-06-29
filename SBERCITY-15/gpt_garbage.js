@@ -1097,7 +1097,13 @@ async function sendApplication(slots, dialogOrHistory, replies) {
 
     const token = await getTokenCRM()
     const config = {headers: {'content-type': 'application/json', 'authorization': 'Bearer ' + token}};
-    const data = {id: uuid.v4(), description: `${result}`}
+    const rawPhone = getSlotValue('sys_phone') || slots?.phone_number
+    const phone = rawPhone ? rawPhone.replace(/[^\d]/g, '').replace(/^8(\d{10})$/, '+7$1').replace(/^7(\d{10})$/, '+7$1').replace(/^(\d{10})$/, '+7$1') : null
+    let clientData = null
+    if (phone) {
+        clientData = await getClientByPhone(token, phone)
+    }
+    const data = {id: uuid.v4(), description: `${result}`, ...(clientData && {clientId: clientData})}
     try {
         const response = await axios.post(API.url_crm_create, data, config);
         logger.info({responseCrm: response.data}, "sendApplication");
