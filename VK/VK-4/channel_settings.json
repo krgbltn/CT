@@ -1,0 +1,31 @@
+{
+  "request_settings": [
+    {
+      "name": "customer_id",
+      "type": "string",
+      "value": "konstantin_novikov"
+    },
+    {
+      "name": "outgoing_agent_id",
+      "type": "string",
+      "value": "<REAL_OUTGOING_AGENT_ID>"
+    },
+    {
+      "name": "file_storage_webhook",
+      "type": "string",
+      "value": "http://opbot-filestorage:8100"
+    }
+  ],
+  "general_settings": [
+    {
+      "name": "customer_id",
+      "type": "string",
+      "value": "konstantin_novikov"
+    },
+    {
+      "name": "outgoing_agent_id",
+      "type": "string",
+      "value": "<REAL_OUTGOING_AGENT_ID>"
+    }
+  ]
+}
