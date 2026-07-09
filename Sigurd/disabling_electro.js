@@ -178,20 +178,14 @@ const main = async () => {
 	let filledSlots = fillSlotsFromRequest(responseData)
 	logger.info(`Filled slots: ${JSON.stringify(filledSlots)}`)
 
-	let finalAnswer
+	let finalAnswer = '3'
 	const disconnection = responseData?.disconnection
+	const debt = responseData?.debt
 
-	if (disconnection && responseData?.disconnection?.date_end) {
-		const dateEndStr = responseData.disconnection.date_end
-		const [datePart, timePart] = dateEndStr.split(' ')
-		const [day, month, year] = datePart.split('.')
-		const [hours, minutes] = timePart ? timePart.split(':') : ['0', '0']
-		const dateEnd = new Date(+year, +month - 1, +day, +hours, +minutes)
-		const now = new Date()
-
-		finalAnswer = now < dateEnd ? '2' : '1'
-	} else {
-		finalAnswer = '3'
+	if (disconnection) {
+		finalAnswer = '1'
+	} else if (debt) {
+		finalAnswer = '2'
 	}
 
 	filledSlots = {

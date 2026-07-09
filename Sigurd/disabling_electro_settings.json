@@ -1,5 +1,5 @@
 {
-  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id}}/disconnections_heat",
+  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id}}/disconnections_electro",
   "method": "get",
   "nextArticle": "article-aba26765-2c58-47c8-b5c3-7aca6143c44f",
   "slotsMapping": [
