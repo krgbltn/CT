@@ -3,12 +3,12 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "konstantin_novikov"
+      "value": "akademia-resheniy"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "<REAL_OUTGOING_AGENT_ID>"
+      "value": "outgoing_jsagent_vk"
     },
     {
       "name": "file_storage_webhook",
@@ -20,12 +20,12 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "konstantin_novikov"
+      "value": "akademia-resheniy"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "<REAL_OUTGOING_AGENT_ID>"
+      "value": "outgoing_jsagent_vk"
     }
   ]
 }

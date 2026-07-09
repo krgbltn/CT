@@ -1,31 +1,33 @@
 {
-  "request_settings": [
+  "id": "mid.000000000889de00019f41648424115f",
+  "content": {
+    "text": "Благодарим за оценку 🌷:",
+    "attachments": [],
+    "score": 5
+  },
+  "message_type": 15,
+  "user": {
+    "id": "263195362",
+    "first_name": "Игорь",
+    "last_name": ""
+  },
+  "timestamp": 1783508634511,
+  "slots": [
     {
-      "name": "customer_id",
-      "type": "string",
-      "value": "hiring_servispro"
+      "id": "chat_id_max",
+      "value": "143252992"
     },
     {
-      "name": "outgoing_agent_id",
-      "type": "string",
-      "value": "outgoing_jsagent_vk_hiring_servispro"
+      "id": "user_id_max",
+      "value": "263195362"
     },
     {
-      "name": "file_storage_webhook",
-      "type": "string",
-      "value": "http://opbot-filestorage:8100"
-    }
-  ],
-  "general_settings": [
-    {
-      "name": "customer_id",
-      "type": "string",
-      "value": "hiring_servispro"
+      "id": "sys_lastname",
+      "value": ""
     },
     {
-      "name": "outgoing_agent_id",
-      "type": "string",
-      "value": "outgoing_jsagent_vk_hiring_servispro"
+      "id": "user_name_max",
+      "value": "Игорь"
     }
   ]
-}
+}"}
