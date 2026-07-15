@@ -9,21 +9,23 @@ const {
 const SECONDS_TO_RESPONSE = 30
 const INCOMING_API = `http://opbot-channels:8082/webhooks/integration_channel/${CHANNEL_ID}`
 const OMNI_ID = "OMNI_ID"
-const REQUEST_ID_KEY = "OUTGOING_REQ"
 
 const getStorageKey = (userId, key = OUTGOING_TEXT_KEY) => `${key}-${userId}`
-const getRequestKey = (userId) => `${REQUEST_ID_KEY}-${userId}`
-const getResponseKey = (userId, requestId) => `${OUTGOING_TEXT_KEY}-${userId}-${requestId}`
 
-const getUserText = async (userId, requestId) => {
-	const key = getResponseKey(userId, requestId)
-	logger.info(`Got text stor key: ${key}`)
-	return await agentStorage.globalStorage.get(key) ?? ""
+const getUserText = async (userId) => {
+	logger.info(`Got text stor key: ${getStorageKey(userId)}`)
+	return await agentStorage.globalStorage.get(getStorageKey(userId)) ?? ""
 }
-const deleteUserText = async (userId, requestId) => {
-	const key = getResponseKey(userId, requestId)
-	logger.info(`Got text stor key delete: ${key}`)
-	return await agentStorage.globalStorage.del(key)
+
+const clearStorageKey = async (storageKey) => {
+	logger.info(`Clear stor key: ${storageKey}`)
+
+	await agentStorage.globalStorage.set(storageKey, "")
+	logger.info(`Storage key was overwritten with empty value: ${storageKey}`)
+}
+
+const clearUserText = async (userId) => {
+	await clearStorageKey(getStorageKey(userId))
 }
 const getOmniUserId = async (userId) => await agentStorage.globalStorage.get(getStorageKey(userId, OMNI_ID))
 
@@ -77,7 +79,7 @@ const sendMessage = async (body) => {
 	return response
 }
 
-const waitBotResponse = async (maxSeconds, userId, requestId) => {
+const waitBotResponse = async (maxSeconds, userId) => {
 	const startTime = Date.now()
 	const maxWaitMs = maxSeconds * 1000
 	const text = ""
@@ -88,10 +90,10 @@ const waitBotResponse = async (maxSeconds, userId, requestId) => {
 			return text
 		}
 
-		const textForUser = await getUserText(userId, requestId)
+		const textForUser = await getUserText(userId)
 		logger.info(`Got text: ${textForUser}`)
 		if (textForUser && textForUser.trim().length > 0) {
-			await deleteUserText(userId, requestId)
+			await clearUserText(userId)
 			return textForUser.trim()
 		}
 
@@ -137,9 +139,6 @@ const main = async () => {
 		throw new Error(`Empty user id`)
 	}
 
-	const requestId = uuid.v4()
-	await agentStorage.globalStorage.set(getRequestKey(userId), requestId)
-
 	const slots = getSlots(userId)
 	const requestBody = createSendMessageRequestBody(userId, text, userId, firstName, lastName, slots)
 
@@ -148,14 +147,16 @@ const main = async () => {
 	}
 
 	if (event === "callended" || event === IncomingEvents.FINISH) {
-		await agentStorage.globalStorage.del(getRequestKey(userId))
 		await finishDialog(userId)
+		await clearUserText(userId)
+		await clearStorageKey(getStorageKey(userId, OMNI_ID))
 		return
 	}
 
+	await clearUserText(userId)
 	await sendMessage(requestBody)
 
-	const textForUser = await waitBotResponse(SECONDS_TO_RESPONSE, userId, requestId)
+	const textForUser = await waitBotResponse(SECONDS_TO_RESPONSE, userId)
 	if (!textForUser) {
 		throw new Error(`Text to response not found`)
 	}
