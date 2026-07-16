@@ -1,0 +1,26 @@
+{
+  "maxBotToken": "f9LHodD0cOKILzz0cidSOpJp1tE6KPiMea70x48sVNNczWZ8M43vRxP5vG2BiucV9lom3ufAoJGPJp2iIqKI",
+  "maxBotHost": "https://platform-api.max.ru",
+  "slots": {
+    "maxChatId": "chat_id_max",
+    "maxUserId": "user_id_max",
+    "maxFirstName": "sys_firstname",
+    "maxLastName": "sys_lastname",
+    "maxUserName": "user_name_max",
+    "skipScore": "skip_score"
+  },
+  "host": "https://cloud.craft-talk.ru",
+  "customerId": "rodnik_altai",
+  "incomingAgent": "incoming_jsagent_max_rodnik",
+  "webhook_events": [
+    "message_created",
+    "message_callback",
+    "bot_started"
+  ],
+  "button_text": "Нажмите интересующую вас кнопку",
+  "has_score": true,
+  "has_combination_keyboards": false,
+  "useLegacy": false,
+  "disableLinkPreview": false,
+  "fileStorageUrl": "opbot-filestorage:8100"
+}

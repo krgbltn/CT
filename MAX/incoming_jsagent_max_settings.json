@@ -1,15 +1,17 @@
 {
-  "incoming_api": "http://opbot-channels:8082/webhooks/integration_channel/integration_channel_max_rodnik",
+  "incoming_api": "http://opbot-channels:8082/webhooks/integration_channel/<CHANNEL_ID>",
   "authorization_token_incoming": "",
   "slots": {
     "maxChatId": "chat_id_max",
     "maxUserId": "user_id_max",
     "maxFirstName": "sys_firstname",
     "maxLastName": "sys_lastname",
-    "maxUserName": "user_name_max"
+    "maxUserName": "user_name_max",
+    "deep_linking_token": "deep_linking_token"
   },
+  "maxBotHost": "https://platform-api2.max.ru",
+  "maxBotToken": "<MAX_BOT_TOKEN>",
   "removeButtonsAfterClick": true,
-  "update_slot_user": false,
-  "maxBotToken": "f9LHodD0cOKILzz0cidSOpJp1tE6KPiMea70x48sVNNczWZ8M43vRxP5vG2BiucV9lom3ufAoJGPJp2iIqKI",
-  "maxBotHost": "https://platform-api.max.ru"
+  "evaluationMessage": "Спасибо за вашу оценку:",
+  "update_slot_user": false
 }

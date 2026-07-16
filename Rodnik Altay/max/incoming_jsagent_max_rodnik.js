@@ -1,6 +1,41 @@
 const INCOMING_API = agentSettings.incoming_api
 const AUTHORIZATION_TOKEN_INCOMING = agentSettings.authorization_token_incoming
 const SLOTS = agentSettings.slots
+const MAX_BOT_HOST = agentSettings.maxBotHost
+const MAX_API_TOKEN = agentSettings.maxBotToken
+const EVALUATION_MESSAGE = agentSettings.evaluation_message || "Благодарим за оценку:"
+const REMOVE_BUTTONS_AFTER_CLICK = agentSettings.removeButtonsAfterClick ?? true
+const PROXY = agentSettings.proxy
+
+const indexScore = "__#score__"
+
+const getHttpsAgent = () => {
+	const baseAgent = new https.Agent({
+		rejectUnauthorized: false,
+		secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT
+	})
+
+	if (!PROXY) {
+		return baseAgent
+	}
+
+	try {
+		return new HttpsProxyAgent(`http://${PROXY.host}:${PROXY.port}`)
+	} catch (error) {
+		logger.warn(`Can't create HttpProxyAgent: ${error}`)
+		return baseAgent
+	}
+}
+
+const httpsAgent = getHttpsAgent()
+
+const isHttpsProxyAgentNowAvailable = httpsAgent instanceof https.Agent
+
+const proxyConfig = PROXY && isHttpsProxyAgentNowAvailable ? {
+	protocol: "http",
+	host: PROXY.host,
+	port: PROXY.port
+} : undefined
 
 const ATTACHMENT_TYPE = Object.freeze({
 	IMAGE: "image",
@@ -11,6 +46,7 @@ const ATTACHMENT_TYPE = Object.freeze({
 	SHARE: "share",
 	UNKNOWN: "unknown"
 })
+
 const ATTACHMENT_FILE_NAME = Object.freeze({
 	IMAGE: "Изображение.jpg",
 	FILE: "Файл без имени",
@@ -64,21 +100,80 @@ function formatAttachments(attachments) {
 		}))
 }
 
+function createMessageButton(score) {
+	// Варианты оценки диалога от одного до пяти
+	const baseButtons = [1, 2, 3, 4, 5].map(num => ({
+		type: "callback",
+		text: num.toString(),
+		payload: indexScore + num
+	}))
+
+	return REMOVE_BUTTONS_AFTER_CLICK
+		? {
+			text: EVALUATION_MESSAGE,
+			attachments: [{
+				type: "inline_keyboard",
+				payload: {
+					buttons: [[{
+						type: "callback",
+						text: score,
+						payload: indexScore + score
+					}]]
+				}
+			}]
+		}
+		: {
+			text: `${EVALUATION_MESSAGE} ${score}`,
+			attachments: [{
+				type: "inline_keyboard",
+				payload: {
+					buttons: [baseButtons]
+				}
+			}]
+		}
+}
+
+async function updatingButtonSelection(callbackId, score) {
+	const message = createMessageButton(score)
+
+	const config = {
+		method: 'post',
+		url: `${MAX_BOT_HOST}/answers?callback_id=${callbackId}`,
+		httpsAgent,
+		proxy: proxyConfig,
+		headers: {
+			Authorization: MAX_API_TOKEN,
+			'Content-Type': 'application/json'
+		},
+		data: {message}
+	}
+
+	try {
+		await axios(config)
+	} catch (error) {
+		logger.error({error: error.message}, "Failed to update button selection")
+	}
+}
+
 async function buildMessageResponse(
 	{
 		mid = "",
 		text = "",
 		attachments = [],
 		action = "",
+		callbackId = "",
 		sender = {},
 		chatId,
 		type = MESSAGE_TYPES.MESSAGE
 	}
 ) {
-	const {user_id, first_name = "", last_name = "", name = ""} = sender
+	const {user_id, first_name: incomingFirstName = "", last_name = "", name = ""} = sender
 
-	const isScore = action?.includes("__#score__")
-
+	const isScore = action?.includes(indexScore)
+	const score = action?.replace(indexScore, "")
+	if (isScore) {
+		await updatingButtonSelection(callbackId, score)
+	}
 
 	const slots = [
 		{id: SLOTS.maxChatId, value: String(chatId)},
@@ -87,58 +182,53 @@ async function buildMessageResponse(
 		{id: SLOTS.maxUserName, value: name}
 	]
 
+	// 🔑 Уникальный ключ для каждого пользователя
+	const firstNameKey = `${SLOTS.maxFirstName}_${user_id}`;
 
-	let existingFirstName = null;
+	let storedFirstName = null;
 	try {
-		existingFirstName = await agentStorage.globalStorage.get(SLOTS.maxFirstName);
-		logger.info(`Existing first_name in slot: ${existingFirstName}`);
+		storedFirstName = await agentStorage.globalStorage.get(firstNameKey);
+		logger.info(`Stored first_name for user ${user_id}: "${storedFirstName}"`);
 	} catch (error) {
-		logger.error(`Error getting slot ${SLOTS.maxFirstName}: ${error}`);
+		logger.error(`Error getting slot ${firstNameKey}: ${error}`);
 	}
 
-	if ((!existingFirstName || existingFirstName.trim() === "") &&
-		first_name && first_name.trim() !== "") {
+	const isStoredEmpty = !storedFirstName || storedFirstName.trim() === "";
+	const isIncomingValid = incomingFirstName?.trim();
 
-		slots.splice(2, 0, {id: SLOTS.maxFirstName, value: first_name});
-
+	if (isStoredEmpty && isIncomingValid) {
+		const nameToSave = incomingFirstName.trim();
+		slots.splice(2, 0, {id: SLOTS.maxFirstName, value: nameToSave});
 
 		try {
-			await agentStorage.globalStorage.set(SLOTS.maxFirstName, first_name);
-			logger.info(`Saved first_name to storage for future use: ${first_name}`);
+			const setResult = await agentStorage.globalStorage.set(firstNameKey, nameToSave);
+			logger.info(`✅ globalStorage.set() result: ${setResult}, saved: "${nameToSave}"`);
 		} catch (error) {
-			logger.error(`Error saving slot ${SLOTS.maxFirstName}: ${error}`);
+			logger.error(`Error saving slot ${firstNameKey}: ${error}`);
 		}
+	} else if (!isStoredEmpty) {
+		logger.info(`📦 Using existing first_name from storage: "${storedFirstName}"`);
 	}
 
+	// Для user.first_name используем сохранённое имя (если есть)
+	const finalFirstName = (!isStoredEmpty && storedFirstName) ? storedFirstName : incomingFirstName;
 
 	return {
 		id: mid,
 		content: {
 			text,
 			attachments: formatAttachments(attachments),
-			...(!isScore && action
-				? {action: action}
-				: {}),
-			...(isScore
-				? {score: +action.replace("__#score__", "")}
-				: {}),
+			...(!isScore && action ? {action: action} : {}),
+			...(isScore ? {score: +score} : {}),
 		},
 		message_type: !isScore ? type : MESSAGE_TYPES.UPDATE_DIALOG_SCORE,
 		user: {
 			id: String(user_id),
-			first_name,
+			first_name: finalFirstName,
 			last_name
 		},
+		timestamp: Date.now(),
 		slots: slots
-	}
-}
-
-const processBotStarted = (chatId, sender) => {
-	return {
-		mid: MESSAGE_TYPES_MAX.BOT_STARTED,
-		sender,
-		chatId,
-		type: MESSAGE_TYPES.INITIAL
 	}
 }
 
@@ -147,7 +237,8 @@ const processMessageCallback = (messageData, callback) => {
 		mid: messageData?.body?.mid,
 		action: callback?.payload ?? "",
 		sender: callback?.user,
-		chatId: messageData?.recipient?.chat_id
+		chatId: messageData?.recipient?.chat_id,
+		callbackId: callback?.callback_id
 	}
 }
 

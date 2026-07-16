@@ -10,6 +10,7 @@ const PROXY = agentSettings.proxy
 
 const indexScore = "__#score__"
 const postfix = "userDataSent"
+const CALLBACK_MESSAGE_TEXT_PREFIX = "max_callback_message_text:"
 
 const getHttpsAgent = () => {
 	const baseAgent = new https.Agent({
@@ -22,9 +23,16 @@ const getHttpsAgent = () => {
 	}
 
 	try {
-		return new HttpsProxyAgent(`http://${PROXY.host}:${PROXY.port}`)
+		const proxyAgent = new HttpsProxyAgent(`http://${PROXY.host}:${PROXY.port}`)
+		const originalCallback = proxyAgent.callback.bind(proxyAgent)
+		proxyAgent.callback = function(req, opts) {
+			opts.rejectUnauthorized = false
+			opts.secureOptions = crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT
+			return originalCallback(req, opts)
+		}
+		return proxyAgent
 	} catch (error) {
-		logger.warn(`Can't create HttpProxyAgent: ${error}`)
+		logger.warn({"Can't create HttpProxyAgent": error})
 		return baseAgent
 	}
 }
@@ -67,6 +75,12 @@ const MESSAGE_TYPES_MAX = Object.freeze({
 	MESSAGE_CALLBACK: "message_callback"
 })
 
+const CHAT_TYPE = Object.freeze({
+	CHAT: "chat",
+	CHANNEL: "channel",
+	DIALOG: "dialog"
+})
+
 const MESSAGE_TYPES = Object.freeze({
 	INITIAL: 0,
 	MESSAGE: 1,
@@ -102,58 +116,58 @@ function formatAttachments(attachments) {
 		}))
 }
 
-function createMessageButton(score) {
-	// Варианты оценки диалога от одного до пяти
-	const baseButtons = [1, 2, 3, 4, 5].map(num => ({
-		type: "callback",
-		text: num.toString(),
-		payload: indexScore + num
-	}))
-
-	return REMOVE_BUTTONS_AFTER_CLICK
-		? {
-			text: EVALUATION_MESSAGE,
-			attachments: [{
-				type: "inline_keyboard",
-				payload: {
-					buttons: [[{
-						type: "callback",
-						text: score,
-						payload: indexScore + score
-					}]]
+function findButtonLabel(messageData, payload) {
+	const attachments = messageData?.body?.attachments || []
+	for (const att of attachments) {
+		if (att.type === "inline_keyboard") {
+			for (const row of (att.payload?.buttons || [])) {
+				for (const btn of row) {
+					if (btn.payload === payload) return btn.text
 				}
-			}]
+			}
 		}
-		: {
-			text: `${EVALUATION_MESSAGE} ${score}`,
-			attachments: [{
-				type: "inline_keyboard",
-				payload: {
-					buttons: [baseButtons]
-				}
-			}]
-		}
+	}
+	return null
 }
 
-async function updatingButtonSelection(callbackId, score) {
-	const message = createMessageButton(score)
+function getButtonText(action, messageData) {
+	if (action?.includes(indexScore)) return action.replace(indexScore, "")
+	return findButtonLabel(messageData, action) || action
+}
 
-	const config = {
-		method: 'post',
-		url: `${MAX_BOT_HOST}/answers?callback_id=${callbackId}`,
-		httpsAgent,
-		proxy: proxyConfig,
-		headers: {
-			Authorization: MAX_API_TOKEN,
-			'Content-Type': 'application/json'
-		},
-		data: {message}
-	}
+async function updateMessageAfterClick(callbackId, action, buttonLabel, originalText, messageId) {
+	if (!REMOVE_BUTTONS_AFTER_CLICK || !action) return
+
+	const isScore = action.includes(indexScore)
+	const savedTextKey = !isScore && messageId ? `${CALLBACK_MESSAGE_TEXT_PREFIX}${messageId}` : null
+	const savedText = savedTextKey ? await agentStorage.globalStorage.get(savedTextKey) : null
+	const baseText = isScore ? EVALUATION_MESSAGE : savedText || originalText
+	const label = buttonLabel || action.replace(indexScore, "") || action
+	const updatedText = `${baseText}\n\n✅ ${label}`
 
 	try {
-		await axios(config)
+		await axios({
+			method: 'post',
+			url: `${MAX_BOT_HOST}/answers?callback_id=${callbackId}`,
+			httpsAgent,
+			proxy: proxyConfig,
+			headers: {
+				Authorization: MAX_API_TOKEN,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				message: {
+					text: updatedText,
+					attachments: [],
+					format: "markdown"
+				}
+			}
+		})
+		if (savedTextKey) {
+			await agentStorage.globalStorage.del(savedTextKey)
+		}
 	} catch (error) {
-		logger.error({error: error.message}, "Failed to update button selection")
+		logger.error({error: error.message}, "Failed to update message after click")
 	}
 }
 
@@ -166,18 +180,22 @@ async function buildMessageResponse(
 		callbackId = "",
 		sender = {},
 		chatId,
-		type = MESSAGE_TYPES.MESSAGE
+		reply_id,
+		type = MESSAGE_TYPES.MESSAGE,
+		payload = "",
+		messageTimestamp,
+		buttonLabel = ""
 	}
 ) {
 	const {user_id, first_name = "", last_name = "", name = ""} = sender
 
 	const isScore = action?.includes(indexScore)
 	const score = action?.replace(indexScore, "")
-	if (isScore) {
-		await updatingButtonSelection(callbackId, score)
+	if (action) {
+		await updateMessageAfterClick(callbackId, action, buttonLabel, text, mid)
 	}
 	const apiMessage = {
-		id: mid,
+		id: callbackId || mid,
 		content: {
 			text,
 			attachments: formatAttachments(attachments),
@@ -188,33 +206,47 @@ async function buildMessageResponse(
 				? {score: +score}
 				: {}),
 		},
+		reply_to_msg_id: reply_id,
 		message_type: !isScore ? type : MESSAGE_TYPES.UPDATE_DIALOG_SCORE,
 		user: {
 			id: String(user_id)
 		},
-		timestamp: Date.now(),
+		timestamp: messageTimestamp || Date.now(),
 		slots: [
 			{id: SLOTS.maxChatId, value: String(chatId)},
 			{id: SLOTS.maxUserId, value: String(user_id)},
 			{id: SLOTS.maxUserName, value: name}
 		]
 	}
-	if (!await agentStorage.globalStorage.get(user_id + postfix) || UPDATE_SLOT_USER) {
+	const isUpdateUser = await agentStorage.globalStorage.get(user_id + postfix)
+	if (!isUpdateUser || UPDATE_SLOT_USER) {
+		apiMessage.user.first_name = first_name
+		apiMessage.user.last_name = last_name
 		apiMessage.slots.push(
 			{id: SLOTS.maxFirstName, value: first_name},
 			{id: SLOTS.maxLastName, value: last_name},
 		)
 	}
-	await agentStorage.globalStorage.set(user_id + postfix, true)
+	if (!isUpdateUser) {
+		await agentStorage.globalStorage.set(user_id + postfix, true)
+	}
+	if (payload) {
+		apiMessage.slots.push(
+			{id: SLOTS.deep_linking_token, value: payload}
+		)
+	}
+
 	return apiMessage
 }
 
-const processBotStarted = (chatId, sender) => {
+const processBotStarted = (chatId, sender, payload, timestamp) => {
 	return {
 		mid: MESSAGE_TYPES_MAX.BOT_STARTED,
 		sender,
 		chatId,
-		type: MESSAGE_TYPES.INITIAL
+		type: MESSAGE_TYPES.INITIAL,
+		payload,
+		messageTimestamp: timestamp
 	}
 }
 
@@ -224,7 +256,8 @@ const processMessageCallback = (messageData, callback) => {
 		action: callback?.payload ?? "",
 		sender: callback?.user,
 		chatId: messageData?.recipient?.chat_id,
-		callbackId: callback?.callback_id
+		callbackId: callback?.callback_id,
+		messageTimestamp: callback?.timestamp
 	}
 }
 
@@ -232,16 +265,19 @@ const processDefault = (messageData) => {
 	const sender = messageData?.sender || {}
 	const recipient = messageData?.recipient || {}
 	const body = messageData?.body || {}
+	const link = messageData?.link || {}
 
 	return {
 		mid: body.mid,
 		attachments: body.attachments ?? [],
 		sender,
-		chatId: recipient.chat_id
+		reply_id: link?.type === "reply" ? link?.message?.mid : null,
+		chatId: recipient.chat_id,
+		messageTimestamp: messageData?.timestamp
 	}
 }
 
-const handleBotStopped = async (update_type, chatId, sender) => {
+const handleBotStopped = async (update_type, chatId, sender, timestamp) => {
 	const dialogId = await agentStorage.globalStorage.get(chatId)
 	logger.info(`dialogId: ${dialogId}`)
 
@@ -255,17 +291,17 @@ const handleBotStopped = async (update_type, chatId, sender) => {
 	}
 
 	logger.info(`Client ${update_type} the bot for chat: ${chatId}`)
-	return {sender, chatId}
+	return {sender, chatId, messageTimestamp: timestamp}
 }
 
 async function preprocessMessage() {
-	const {update_type, chat_id, user, message: messageData, callback} = message
+	const {update_type, chat_id, user, payload, message: messageData, callback, timestamp} = message
 	let result
 	const text = messageData?.body?.text ?? ""
 
 	switch (update_type) {
 		case MESSAGE_TYPES_MAX.BOT_STARTED:
-			result = processBotStarted(chat_id, user)
+			result = processBotStarted(chat_id, user, payload, timestamp)
 			break
 
 		case MESSAGE_TYPES_MAX.MESSAGE_CALLBACK:
@@ -274,11 +310,29 @@ async function preprocessMessage() {
 
 		case MESSAGE_TYPES_MAX.BOT_STOPPED:
 		case MESSAGE_TYPES_MAX.BOT_REMOVED:
-			result = await handleBotStopped(update_type, chat_id, user)
+			result = await handleBotStopped(update_type, chat_id, user, timestamp)
+			break
+
+		case MESSAGE_TYPES_MAX.MESSAGE_CREATED:
+			const chatType = messageData?.recipient?.chat_type || ""
+			switch (chatType) {
+				case CHAT_TYPE.DIALOG:
+					result = processDefault(messageData)
+					break
+				case CHAT_TYPE.CHAT:
+				case CHAT_TYPE.CHANNEL:
+				default:
+					logger.info(`Chat type "${chatType}" not supported yet. Skip.`)
+					return false
+			}
 			break
 
 		default:
 			result = processDefault(messageData)
+	}
+
+	if (update_type === MESSAGE_TYPES_MAX.MESSAGE_CALLBACK && result.action) {
+		result.buttonLabel = getButtonText(result.action, messageData)
 	}
 
 	return await buildMessageResponse({
@@ -289,6 +343,8 @@ async function preprocessMessage() {
 
 async function sendMessage() {
 	const data = await preprocessMessage()
+	if (!data) return
+
 	logger.info(`Data: ${JSON.stringify(data)}`)
 
 	const config = {
@@ -315,14 +371,12 @@ async function sendMessage() {
 }
 
 async function run() {
-	logger.info(`Raw incoming message: ${JSON.stringify(message)}`)
-
+	logger.info({"Raw incoming message": message})
 	try {
 		await sendMessage()
 	} catch (error) {
 		logger.error(`Error in run(): ${error}`)
 	}
-
 	return {}
 }
 
@@ -330,5 +384,5 @@ run()
 	.then(res => resolve(res))
 	.catch(er => {
 		logger.error(JSON.stringify(er))
-		resolve([])
+		resolve({})
 	})
