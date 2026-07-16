@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+
+  "references": {
+    "docs": {
+      "path": "./agent_docs",
+      "description": "Платформенная документация: API, модели, команды, шаблоны агентов"
+    },
+    "craft": {
+      "path": "./Craft",
+      "description": "Общие агенты платформы (GPT, MAX, VK)"
+    }
+  },
+
+  "permission": {
+    "external_directory": {
+      "~/WebstormProjects/**": "allow",
+      "*": "ask"
+    }
+  },
+
+  "tool_output": {
+    "max_lines": 200,
+    "max_bytes": 8192
+  }
+}

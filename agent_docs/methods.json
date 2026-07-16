@@ -1,0 +1,147 @@
+{
+  "methods": [
+    {
+      "name": "makeTextReply",
+      "description": "Send a plain text message to the user. The most commonly used reply method.",
+      "parameters": {
+        "text": { "type": "string", "required": true },
+        "attachment": { "type": "Attachment", "required": false },
+        "actions": { "type": "Action[]", "required": false },
+        "filledSlots": { "type": "Record<string, string>", "required": false }
+      },
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "makeMarkdownReply",
+      "description": "Send a Markdown-formatted message to the user.",
+      "parameters": {
+        "markdownText": { "type": "string", "required": true },
+        "filledSlots": { "type": "Record<string, string>", "required": false }
+      },
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "makeRedirectReply",
+      "description": "Forward the current message to another agent. The dialog RETURNS to the current agent after the target agent responds. Equivalent to the /redirect command. Use when you need a temporary handoff — e.g. pass a message to aiassist2 for recognition, then continue in the current agent.",
+      "command": "/redirect <destinationAgent> [text]",
+      "parameters": {
+        "destinationAgent": { "type": "string", "required": true, "description": "ID of the target agent instance (read from agentSettings, never hardcode)" },
+        "text": { "type": "string", "required": false, "description": "Text forwarded to the target agent. For aiassist2, can be intent_id=\"<articleCode>\" to open a specific article." }
+      },
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "makeSwitchRedirectReply",
+      "description": "Transfer dialog ownership to another agent AND forward the current message to it. The dialog STAYS on the new agent after handling — it does not return to the current agent. Equivalent to the /switchredirect command. Use for permanent handoffs where the new agent should continue handling the conversation.",
+      "command": "/switchredirect <destinationAgent> [text]",
+      "parameters": {
+        "destinationAgent": { "type": "string", "required": true, "description": "ID of the target agent instance (read from agentSettings, never hardcode)" },
+        "text": { "type": "string", "required": false, "description": "Text forwarded to the target agent. For aiassist2, can be intent_id=\"<articleCode>\" to open a specific article." }
+      },
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "makeSwitchReply",
+      "description": "Change the default agent of the dialog without forwarding any message. No reply is sent to the user. The next client message will go to the new agent. Equivalent to the /switch command. Use to silently transfer to routingagent, finishagent, or any other agent.",
+      "command": "/switch <destinationAgent>",
+      "parameters": {
+        "destinationAgent": { "type": "string", "required": true, "description": "ID of the target agent instance (read from agentSettings, never hardcode)" }
+      },
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "makeArticleReply",
+      "description": "Send a specific knowledge base article to the user. The article is identified by its symbolCode. Optionally targets a specific aiassist2 instance via aiassistAgentId.",
+      "parameters": {
+        "articleSymbolCode": { "type": "string", "required": true, "description": "The symbolCode of the article to send (read from agentSettings)" },
+        "aiassistAgentId": { "type": "string", "required": false, "description": "ID of the aiassist2 instance that owns this article. Required when multiple aiassist2 instances are deployed." }
+      },
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "makeArticleReplyAndSendToBot",
+      "description": "Send a specific knowledge base article to the user AND transfer the dialog to the aiassist2 bot. Combines article delivery with a permanent handoff to the AI assistant. Use when the article response may trigger follow-up questions that aiassist2 should handle.",
+      "parameters": {
+        "articleSymbolCode": { "type": "string", "required": true, "description": "The symbolCode of the article to send (read from agentSettings)" },
+        "aiassistAgentId": { "type": "string", "required": false, "description": "ID of the aiassist2 instance that owns this article. Required when multiple aiassist2 instances are deployed." }
+      },
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "makeFinishReply",
+      "description": "Finish the dialog immediately from the JS agent. Use when a direct, unconditional close is needed. For a managed finish with platform-side post-dialog logic (e.g. CSAT), use makeSwitchReply to a finishagent instance instead.",
+      "parameters": {
+        "reason": { "type": "string", "required": true }
+      },
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "makeAckReply",
+      "description": "Acknowledge receipt of the message without sending anything visible to the user. Use as the default return value for unhandled message types (e.g. message_type !== 1) and system events (message_type === 200). Equivalent to the /ack ack ack command.",
+      "command": "/ack ack ack",
+      "parameters": {},
+      "returns": "ReplyMessage"
+    },
+    {
+      "name": "sendMessage",
+      "description": "Send a message to a dialog. If the dialog does not exist, one will be created.",
+      "parameters": {
+        "sendMessageRequest": { "type": "SendMessageRequest", "required": true },
+        "logger": { "type": "logger", "required": true }
+      },
+      "returns": "SendMessageResponse"
+    },
+    {
+      "name": "finishDialog",
+      "description": "Finish a dialog by its ID. Can be called from any agent context, not just the active dialog.",
+      "parameters": {
+        "dialogId": { "type": "string", "required": true },
+        "reason": { "type": "string", "required": false },
+        "score": { "type": "number", "required": false }
+      },
+      "returns": "FinishDialogResponse"
+    },
+    {
+      "name": "getDialogId",
+      "description": "Get the dialog ID for a given user and project.",
+      "parameters": {
+        "omni_user_id": { "type": "string", "required": true },
+        "customer_id": { "type": "string", "required": true }
+      },
+      "returns": "GetDialogIdResponse"
+    },
+    {
+      "name": "getDialog",
+      "description": "Get the full Dialog object by dialog ID.",
+      "parameters": {
+        "dialogId": { "type": "string", "required": true }
+      },
+      "returns": "GetDialogResponse"
+    },
+    {
+      "name": "searchAll",
+      "description": "Search storage records using an Elasticsearch-like DSL query. Always searches agentStorage.globalStorage in practice. Returns an array of StorageSearchResult objects — each has a .data field containing the value passed to storage.set(), plus field arrays for keyword_fields, text_fields, timestamp_fields, and number_fields.",
+      "parameters": {
+        "storage": { "type": "StorageScope", "required": true, "description": "Storage scope to search. Always agentStorage.globalStorage in practice." },
+        "query": { "type": "SearchQuery", "required": true, "description": "DSL query object. See agent_storage.md for query structure." },
+        "limit": { "type": "number", "required": false, "description": "Maximum number of results to return." },
+        "sort": { "type": "null", "required": false, "description": "Sort parameter. Pass null — custom sorting is not used in practice." }
+      },
+      "returns": "StorageSearchResult[]"
+    },
+    {
+      "name": "createConverterMarkdown",
+      "description": "Create a Markdown converter for use in outgoing channel adapters. Converts CraftTalk internal Markdown into channel-specific message blocks. Call .Parse(text) on the returned converter to get an array of typed answer objects (TextAnswer, FileAnswer, ButtonsAnswer, ComplexAnswer, StickerAnswer, WidgetAnswer). See channel_adapters.md for full usage.",
+      "parameters": {
+        "rules": { "type": "MarkdownRules", "required": true, "description": "Rules object from getPredefinedMarkdownRules() or a custom rules object." }
+      },
+      "returns": "MarkdownConverter"
+    },
+    {
+      "name": "getPredefinedMarkdownRules",
+      "description": "Returns an object containing predefined Markdown rule sets for common channel types. Properties: .Empty (Telegram, WeChat, Max), .Common (Wappi, OZON, Wildberries, YandexMarket, Avito), .WhatsApp (Wazzup — supports rule overrides), .RocketChat. Used exclusively in outgoing channel adapters. See channel_adapters.md.",
+      "parameters": {},
+      "returns": "{ Empty: MarkdownRules, Common: MarkdownRules, WhatsApp: MarkdownRules, RocketChat: MarkdownRules }"
+    }
+  ]
+}
