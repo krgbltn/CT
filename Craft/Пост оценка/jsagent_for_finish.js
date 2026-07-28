@@ -37,7 +37,7 @@ async function run(){
 
 				if (last_client_message) {
 
-					logger.info(`Finded Last message. ${last_client_message}`)
+					logger.info(`Finded Last message.`)
 
 					last_client_message = last_client_message.value
 					last_client_message = JSON.parse(last_client_message)
@@ -50,7 +50,6 @@ async function run(){
 				} else {
 					logger.info("Not finded Last message.")
 				}
-				logger.info(`Full message: ${JSON.stringify(message)}`)
 				let score = message.slot_context.filled_slots.find(
 
 					(slot) => slot.slot_id == "ep_Score"

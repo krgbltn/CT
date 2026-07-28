@@ -21,11 +21,11 @@ function createFinishMessage() {
 }
 
 function createRatingMessage(isVertical = false) {
-	const buttons = [1, 2, 3, 4, 5]
+	const buttons = [5, 4, 3, 2, 1]
 		.map(score => `[${score}](type:action action:__#score__${score})`)
 		.join(isVertical ? '\n::\n' : '\n')
 
-	return `Оцените работу оператора\n\n\`\`\`buttons\n::\n${buttons}\n\`\`\``
+	return `Оцените работу менеджера\n\n\`\`\`buttons\n::\n${buttons}\n\`\`\``
 }
 
 const MAX_COLUMNS = 7
