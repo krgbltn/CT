@@ -7,7 +7,6 @@ const {
 	slots: SLOTS,
 	webhook_events: WEBHOOK_EVENTS,
 	button_text: TEXT_FOR_BUTTON_MESSAGE = "Нажмите интересующую вас кнопку",
-	useLegacy: USE_LEGACY = false,
 	proxy: PROXY,
 	disableLinkPreview: DISABLE_LINK_PREVIEW = false,
 	incomingProcessor: INCOMING_PROCESSOR,
@@ -22,17 +21,18 @@ function createFinishMessage() {
 }
 
 function createRatingMessage(isVertical = false) {
-	const buttons = [1, 2, 3, 4, 5]
+	const buttons = [5, 4, 3, 2, 1]
 		.map(score => `[${score}](type:action action:__#score__${score})`)
 		.join(isVertical ? '\n::\n' : '\n')
 
-	return `Оцените работу оператора\n\n\`\`\`buttons\n::\n${buttons}\n\`\`\``
+	return `Оцените работу менеджера\n\n\`\`\`buttons\n::\n${buttons}\n\`\`\``
 }
 
 const MAX_COLUMNS = 7
 const MAX_ROWS = 30
 const SLOT_ID_OMNIUSER = "sys_omniuserid"
 const DELETION_MESSAGE_ATTACHMENT = "Сообщение удалено"
+const CALLBACK_MESSAGE_TEXT_PREFIX = "max_callback_message_text:"
 
 const METHOD_API = Object.freeze({
 	POST: "post",
@@ -94,7 +94,14 @@ const getHttpsAgent = () => {
 	}
 
 	try {
-		return new HttpsProxyAgent(`http://${PROXY.host}:${PROXY.port}`)
+		const proxyAgent = new HttpsProxyAgent(`http://${PROXY.host}:${PROXY.port}`)
+		const originalCallback = proxyAgent.callback.bind(proxyAgent)
+		proxyAgent.callback = function(req, opts) {
+			opts.rejectUnauthorized = false
+			opts.secureOptions = crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT
+			return originalCallback(req, opts)
+		}
+		return proxyAgent
 	} catch (error) {
 		logger.warn(`Can't create HttpProxyAgent: ${error}`)
 		return baseAgent
@@ -111,11 +118,9 @@ const proxyConfig = PROXY && isHttpsProxyAgentNowAvailable ? {
 	port: PROXY.port
 } : undefined
 
-const AUTH_HEADERS = USE_LEGACY ? {} : {
+const AUTH_HEADERS = {
 	Authorization: MAX_API_TOKEN
 }
-
-const AUTH_QUERY_STRING = USE_LEGACY ? `&access_token=${MAX_API_TOKEN}` : ""
 
 function isErrorMessage(data) {
 	return (data?.success === false &&
@@ -258,7 +263,7 @@ async function addMediaAttachments(attachments, files) {
 
 async function getUploadUrl(type) {
 	try {
-		const url = `${MAX_BOT_HOST}/uploads?type=${type}${AUTH_QUERY_STRING}`
+		const url = `${MAX_BOT_HOST}/uploads?type=${type}`
 		const {data} = await axios.post(url, {}, {httpsAgent, proxy: proxyConfig, headers: AUTH_HEADERS})
 		logger.info(`Upload Url: ${JSON.stringify(data)}, to type: ${type}`)
 		return data
@@ -459,7 +464,18 @@ async function preprocessMessage(msg) {
 	}
 
 	const format = textType === TEXT_FORMAT.markdown ? TEXT_FORMAT.markdown : TEXT_FORMAT.html
-	return createMessage(text, attachments, format)
+	const messages = createMessage(text, attachments, format)
+
+	if (msg.reply_to_msg_id) {
+		for (const message of messages) {
+			message.link = {
+				type: "reply",
+				mid: msg.reply_to_msg_id
+			}
+		}
+	}
+
+	return messages
 }
 
 async function sendMessages(method, url, payload = {}) {
@@ -493,12 +509,34 @@ async function handleSendMessage(data) {
 	const userId = getSlotValue(SLOTS.maxUserId)
 	const replies = await preprocessMessage(data)
 	const messages = []
-	const url = `/messages?user_id=${userId}&chat_id=${chatId}${AUTH_QUERY_STRING}&disable_link_preview=${DISABLE_LINK_PREVIEW}`
+	const url = `/messages?user_id=${userId}&chat_id=${chatId}&disable_link_preview=${DISABLE_LINK_PREVIEW}`
+	let sendWithoutReplyLink = false
 	for (const reply of replies) {
 		try {
-			const responseData = await sendMessages(METHOD_API.POST, url, reply)
+			if (sendWithoutReplyLink) {
+				delete reply.link
+			}
+
+			let responseData
+			try {
+				responseData = await sendMessages(METHOD_API.POST, url, reply)
+			} catch (error) {
+				if (!reply.link || !error.message?.includes("Invalid message_id:")) {
+					throw error
+				}
+				logger.warn(`Invalid MAX reply message_id "${reply.link.mid}". Sending message without reply link.`)
+				delete reply.link
+				sendWithoutReplyLink = true
+				responseData = await sendMessages(METHOD_API.POST, url, reply)
+			}
+
+			const messageId = responseData?.message?.body?.mid
+			const hasInlineKeyboard = reply.attachments?.some(attachment => attachment.type === BUTTON_TYPES.inline)
+			if (messageId && hasInlineKeyboard && reply.text) {
+				await agentStorage.globalStorage.set(`${CALLBACK_MESSAGE_TEXT_PREFIX}${messageId}`, reply.text)
+			}
 			const infoMessages = {
-				message_id: responseData?.message?.body?.mid,
+				message_id: messageId,
 				timestamp: responseData?.message?.timestamp
 			}
 			messages.push(infoMessages)
@@ -574,7 +612,7 @@ async function handleDeletionMessage(data) {
 async function bindWebhook() {
 	const INCOMING_WEBHOOK = INCOMING_PROCESSOR ?? `${HOST}/workplace/${CUSTOMER_ID}/${INCOMING_AGENT}`
 	logger.info(`Start binding webhook ${INCOMING_WEBHOOK} for max.`)
-	const url = `${MAX_BOT_HOST}/subscriptions?${AUTH_QUERY_STRING.slice(1)}`
+	const url = `${MAX_BOT_HOST}/subscriptions`
 	const data = {url: INCOMING_WEBHOOK, update_types: WEBHOOK_EVENTS}
 
 	try {

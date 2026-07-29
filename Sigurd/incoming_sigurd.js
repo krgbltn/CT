@@ -1,33 +1,15 @@
 const {
-	storageKey: OUTGOING_TEXT_KEY,
 	channelId: CHANNEL_ID,
-	channelAuthToken: AUTHORIZATION_TOKEN_INCOMING,
 	customerId: CUSTOMER_ID,
-	slots: SLOTS
+	slots: SLOTS,
+	channelAuthToken: AUTHORIZATION_TOKEN_INCOMING,
+	urlMediatorService: URL_MEDIATOR,
+	channelsUrl: CHANNELS_URL
 } = agentSettings
 
 const SECONDS_TO_RESPONSE = 30
 const INCOMING_API = `http://opbot-channels:8082/webhooks/integration_channel/${CHANNEL_ID}`
-const OMNI_ID = "OMNI_ID"
-
-const getStorageKey = (userId, key = OUTGOING_TEXT_KEY) => `${key}-${userId}`
-
-const getUserText = async (userId) => {
-	logger.info(`Got text stor key: ${getStorageKey(userId)}`)
-	return await agentStorage.globalStorage.get(getStorageKey(userId)) ?? ""
-}
-
-const clearStorageKey = async (storageKey) => {
-	logger.info(`Clear stor key: ${storageKey}`)
-
-	await agentStorage.globalStorage.set(storageKey, "")
-	logger.info(`Storage key was overwritten with empty value: ${storageKey}`)
-}
-
-const clearUserText = async (userId) => {
-	await clearStorageKey(getStorageKey(userId))
-}
-const getOmniUserId = async (userId) => await agentStorage.globalStorage.get(getStorageKey(userId, OMNI_ID))
+const MESSAGE_TYPE_TEXT = 1
 
 const extractPhoneNumber = (phoneNumber) => phoneNumber.replace(/\D/g, '')
 
@@ -37,16 +19,70 @@ const IncomingEvents = {
 	FINISH: "call_ended"
 }
 
-const OutgoingEvents = {
-	TEXT: "text_message",
-	TRANSFER: "transfer_to_operator",
-	FINISH: "end_call"
+const getOmniUserId = async (channelId, channelUserId) => {
+	try {
+		const response = await axios.get(CHANNELS_URL +
+			"/user-channels/get_omni_user_id?customer_id=" + CUSTOMER_ID + "&channel_id=" +
+			channelId + "&channel_user_id=" + channelUserId)
+		return response.data
+	} catch (error) {
+		logger.error(`Error getOmniUserId: ${error}`)
+		throw error
+	}
 }
+
+const getDialogHistory = async (dialogId) => {
+	if (!dialogId) return []
+	try {
+		const response = await axios.get(`${URL_MEDIATOR}?dialog_id=${dialogId}`, {
+			timeout: 3000
+		})
+		const data = response.data
+		if (!data || !Array.isArray(data)) return []
+
+		const parsed = data.reduce((acc, item) => {
+			const isUser = !!item.msg
+			const source = isUser ? item.msg : item.reply
+			const type = source?.message_type
+			const text = source?.message?.text
+			if (type === MESSAGE_TYPE_TEXT && text) {
+				acc.push({
+					role: isUser ? "user" : "assistant",
+					message: text,
+					timestamp: source?.timestamps?.dispatched || 0
+				})
+			}
+			return acc
+		}, [])
+
+		const last3 = parsed.slice(-3)
+		logger.info(`Dialog history: total=${parsed.length}, last3=${JSON.stringify(last3)}`)
+
+		return parsed
+	} catch (e) {
+		logger.error(`Error getDialogHistory: ${e}`)
+		return []
+	}
+}
+
+const getLastBotMessage = (history) => {
+	for (let i = history.length - 1; i >= 0; i--) {
+		if (history[i].role === "assistant") {
+			return history[i].message
+		}
+	}
+	return ""
+}
+
+const getHeaders = () => ({
+	'Authorization': AUTHORIZATION_TOKEN_INCOMING,
+	'Content-Type': 'application/json'
+})
 
 const createSendMessageRequestBody = (phone, text, userId, firstName, lastName, slots) => ({
 	id: uuid.v4(),
 	content: {
-		text: text,
+		text: text?.trim(),
 		attachments: []
 	},
 	message_type: !!text ? 1 : 0,
@@ -59,14 +95,8 @@ const createSendMessageRequestBody = (phone, text, userId, firstName, lastName, 
 	slots
 })
 
-const getHeaders = () => ({
-	'Authorization': AUTHORIZATION_TOKEN_INCOMING,
-	'Content-Type': 'application/json'
-})
-
 const sendMessage = async (body) => {
 	let response
-
 	try {
 		const responseFromUrl = await axios.post(INCOMING_API, body, { headers: getHeaders() })
 		logger.info(`Incoming data ${JSON.stringify(responseFromUrl.data)}`)
@@ -75,26 +105,30 @@ const sendMessage = async (body) => {
 		logger.error(`Error when sending request to ${INCOMING_API}: ${error}`)
 		response = null
 	}
-
 	return response
 }
 
-const waitBotResponse = async (maxSeconds, userId) => {
+const waitBotResponse = async (maxSeconds, dialogId, historyLenBefore) => {
 	const startTime = Date.now()
 	const maxWaitMs = maxSeconds * 1000
-	const text = ""
+	let pollCount = 0
 
 	while (true) {
 		if (Date.now() - startTime > maxWaitMs) {
 			logger.info(`Timeout has exceeded ${maxSeconds}s`)
-			return text
+			return ""
 		}
 
-		const textForUser = await getUserText(userId)
-		logger.info(`Got text: ${textForUser}`)
-		if (textForUser && textForUser.trim().length > 0) {
-			await clearUserText(userId)
-			return textForUser.trim()
+		pollCount++
+		const history = await getDialogHistory(dialogId)
+		const lastItem = history[history.length - 1]
+		const botText = getLastBotMessage(history)
+
+		logger.info(`Poll #${pollCount}: historyLen=${history.length}, historyLenBefore=${historyLenBefore}, botText="${botText}", lastItemRole=${lastItem?.role}`)
+
+		if (history.length > historyLenBefore && lastItem?.role === "assistant" && botText && botText.trim().length > 0) {
+			logger.info(`Got bot response: ${botText}`)
+			return botText.trim()
 		}
 
 		const pauseStart = Date.now()
@@ -118,9 +152,8 @@ const getSlots = (userId) => {
 	]
 }
 
-const finishDialog = async (userId) => {
+const finishDialog = async (omniUserId) => {
 	try {
-		const omniUserId = await getOmniUserId(userId)
 		const { Response: dialogId } = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
 		await agentApi.finishDialog(dialogId, "Call end", 5)
 	} catch (err) {
@@ -128,9 +161,28 @@ const finishDialog = async (userId) => {
 	}
 }
 
+const waitForDialog = async (omniUserId, existingDialogId, maxSeconds = 10) => {
+	if (existingDialogId) return existingDialogId
+
+	const startTime = Date.now()
+	const maxWaitMs = maxSeconds * 1000
+
+	while (Date.now() - startTime < maxWaitMs) {
+		const { Response: dialogId } = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
+		if (dialogId) {
+			logger.info(`Dialog created: ${dialogId}`)
+			return dialogId
+		}
+		const pauseStart = Date.now()
+		while (Date.now() - pauseStart < 500) {}
+	}
+
+	logger.info(`Timeout waiting for dialog creation`)
+	return null
+}
+
 const main = async () => {
 	logger.info(`Incoming message: ${JSON.stringify(message)}`)
-
 	const { sessionID, event, channel, user, text } = message
 	const { id, first_name: firstName = "Нет данных", last_name: lastName = "Нет данных", phone } = user
 
@@ -138,6 +190,12 @@ const main = async () => {
 	if (!userId) {
 		throw new Error(`Empty user id`)
 	}
+
+	const omniUserId = await getOmniUserId(CHANNEL_ID, userId)
+	logger.info(`Got omniUserId: ${omniUserId}`)
+
+	const { Response: dialogId } = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
+	logger.info(`Got dialogId: ${dialogId}`)
 
 	const slots = getSlots(userId)
 	const requestBody = createSendMessageRequestBody(userId, text, userId, firstName, lastName, slots)
@@ -147,16 +205,22 @@ const main = async () => {
 	}
 
 	if (event === "callended" || event === IncomingEvents.FINISH) {
-		await finishDialog(userId)
-		await clearUserText(userId)
-		await clearStorageKey(getStorageKey(userId, OMNI_ID))
+		await finishDialog(omniUserId)
 		return
 	}
 
-	await clearUserText(userId)
-	await sendMessage(requestBody)
+	const historyLenBefore = dialogId ? (await getDialogHistory(dialogId)).length : 0
+	logger.info(`History length before send: ${historyLenBefore}`)
 
-	const textForUser = await waitBotResponse(SECONDS_TO_RESPONSE, userId)
+	await sendMessage(requestBody)
+	logger.info(`Sent to platform: ${requestBody.content.text}`)
+
+	const currentDialogId = await waitForDialog(omniUserId, dialogId)
+	if (!currentDialogId) {
+		throw new Error(`Dialog not created`)
+	}
+
+	const textForUser = await waitBotResponse(SECONDS_TO_RESPONSE, currentDialogId, historyLenBefore)
 	if (!textForUser) {
 		throw new Error(`Text to response not found`)
 	}

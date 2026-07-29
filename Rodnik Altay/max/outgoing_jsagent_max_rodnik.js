@@ -13,7 +13,8 @@ const {
 	has_score: HAS_SCORE = false,
 	fileStorageUrl: FILE_STORAGE_URL,
 	has_combination_keyboards: HAS_COMBINATION_KEYBOARDS = false,
-	enableFinishMessage : ENABLE_FINISH_MESSAGE = false
+	enableFinishMessage : ENABLE_FINISH_MESSAGE = false,
+	ratingConfig: RATING_CONFIG = { "1": "1", "2": "2", "3": "3", "4": "4", "5": "5" }
 } = agentSettings
 
 function createFinishMessage() {
@@ -21,8 +22,8 @@ function createFinishMessage() {
 }
 
 function createRatingMessage(isVertical = false) {
-	const buttons = [5, 4, 3, 2, 1]
-		.map(score => `[${score}](type:action action:__#score__${score})`)
+	const buttons = Object.entries(RATING_CONFIG)
+		.map(([id, label]) => `[${label}](type:action action:__#score__${id})`)
 		.join(isVertical ? '\n::\n' : '\n')
 
 	return `Оцените работу менеджера\n\n\`\`\`buttons\n::\n${buttons}\n\`\`\``

@@ -132,8 +132,8 @@ function findButtonLabel(messageData, payload) {
 }
 
 function getButtonText(action, messageData) {
-	if (action?.includes(indexScore)) return action.replace(indexScore, "")
-	return findButtonLabel(messageData, action) || action
+	return findButtonLabel(messageData, action)
+		|| (action?.includes(indexScore) ? action.replace(indexScore, "") : action)
 }
 
 async function updateMessageAfterClick(callbackId, action, buttonLabel, originalText, messageId) {
