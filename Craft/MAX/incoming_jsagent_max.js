@@ -3,7 +3,7 @@ const AUTHORIZATION_TOKEN_INCOMING = agentSettings.authorization_token_incoming
 const SLOTS = agentSettings.slots
 const MAX_BOT_HOST = agentSettings.maxBotHost
 const MAX_API_TOKEN = agentSettings.maxBotToken
-const EVALUATION_MESSAGE = agentSettings.evaluation_message || "Спасибо за вашу оценку:"
+const EVALUATION_MESSAGE = agentSettings.evaluationMessage || "Спасибо за вашу оценку:"
 const REMOVE_BUTTONS_AFTER_CLICK = agentSettings.removeButtonsAfterClick ?? true
 const UPDATE_SLOT_USER = agentSettings.update_slot_user ?? false
 const PROXY = agentSettings.proxy
@@ -131,8 +131,8 @@ function findButtonLabel(messageData, payload) {
 }
 
 function getButtonText(action, messageData) {
-	if (action?.includes(indexScore)) return action.replace(indexScore, "")
-	return findButtonLabel(messageData, action) || action
+	return findButtonLabel(messageData, action)
+		|| (action?.includes(indexScore) ? action.replace(indexScore, "") : action)
 }
 
 async function updateMessageAfterClick(callbackId, action, buttonLabel, originalText, messageId) {

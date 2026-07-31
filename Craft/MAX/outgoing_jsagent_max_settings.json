@@ -7,7 +7,8 @@
     "maxFirstName": "sys_firstname",
     "maxLastName": "sys_lastname",
     "maxUserName": "user_name_max",
-    "deep_linking_token": "deep_linking_token"
+    "deep_linking_token": "deep_linking_token",
+    "skipScore": "skip_score"
   },
   "host": "https://cloud.craft-talk.ru/",
   "customerId": "<CUSTOMER_ID>",
@@ -18,5 +19,13 @@
   "has_combination_keyboards": false,
   "disableLinkPreview": false,
   "fileStorageUrl": "opbot-filestorage:8100",
-  "enableFinishMessage": false
+  "enableFinishMessage": false,
+  "scoreMessage": "Оцените работу оператора",
+  "scoreConfig": {
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5"
+  }
 }

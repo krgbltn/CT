@@ -13,19 +13,21 @@ const {
 	has_score: HAS_SCORE = false,
 	fileStorageUrl: FILE_STORAGE_URL,
 	has_combination_keyboards: HAS_COMBINATION_KEYBOARDS = false,
-	enableFinishMessage: ENABLE_FINISH_MESSAGE = false
+	enableFinishMessage: ENABLE_FINISH_MESSAGE = false,
+	scoreConfig: SCORE_CONFIG = { "1": "1", "2": "2", "3": "3", "4": "4", "5": "5" },
+	scoreMessage: SCORE_MESSAGE = "Оцените работу оператора"
 } = agentSettings
 
 function createFinishMessage() {
 	return `Для старта бота нажмите "Начать"\n\n\`\`\`buttons\n::\n[Начать](type:action action:/start)\`\`\``
 }
 
-function createRatingMessage(isVertical = false) {
-	const buttons = [1, 2, 3, 4, 5]
-		.map(score => `[${score}](type:action action:__#score__${score})`)
+function createScoreMessage(isVertical = false) {
+	const buttons = Object.entries(SCORE_CONFIG)
+		.map(([id, label]) => `[${label}](type:action action:__#score__${id})`)
 		.join(isVertical ? '\n::\n' : '\n')
 
-	return `Оцените работу оператора\n\n\`\`\`buttons\n::\n${buttons}\n\`\`\``
+	return `${SCORE_MESSAGE}\n\n\`\`\`buttons\n::\n${buttons}\n\`\`\``
 }
 
 const MAX_COLUMNS = 7
@@ -654,10 +656,11 @@ async function run() {
 					logger.info(`Message sent successfully: ${JSON.stringify(response)}`)
 					break
 				case MESSAGE_TYPES_SEND_MESSAGE.FINISH_DIALOG:
+					const skipScore = getSlotValue(SLOTS.skipScore)
 					await agentStorage.globalStorage.del(getSlotValue(SLOTS.maxChatId))
 
-					if (HAS_SCORE) {
-						message.data.content.text = createRatingMessage()
+					if (HAS_SCORE && !skipScore) {
+						message.data.content.text = createScoreMessage()
 						message.data.content.text_type = TEXT_FORMAT.markdown
 						await handleSendMessage(message.data)
 					}

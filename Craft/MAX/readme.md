@@ -61,15 +61,15 @@
     "maxFirstName": "sys_firstname",
     "maxLastName": "sys_lastname",
     "maxUserName": "user_name_max",
-    "deep_linking_token": "deep_linking_token"
+    "deep_linking_token": "deep_linking_token",
+    "skipScore": "skip_score"
   },
   "host": "<HOST>",
   "customerId": "<CUSTOMER_ID>",
   "incomingAgent": "<INCOMING_JSAGENT>",
   "webhook_events": "<webhook_events>",
   "button_text": "<button_text>",
-  "has_score": "true | false",
-  "has_combination_keyboards": "true | false",
+    "has_combination_keyboards": "true | false",
   "disableLinkPreview": "true | false",
   "proxy": {
     "host": "127.0.0.1",
@@ -77,7 +77,16 @@
   },
   "incomingProcessor": "<HOST>/api/v1/max/<CUSTOMER_ID>/<CHANNEL_ID>/<INCOMING_JSAGENT>",
   "fileStorageUrl": "<FILESTORAGE_URL>",
-  "enableFinishMessage": "true | false"
+  "enableFinishMessage": "true | false",
+  "has_score": "true | false",
+  "scoreMessage": "<SCORE_MESSAGE>",
+  "scoreConfig": {
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5"
+  }
 }
 ```
 
@@ -89,7 +98,6 @@
 **\<slots\>** - нужные слоты для интеграции <br>
 **\<webhook_events\>** - нужные события от MAX: (`["message_created", "message_callback", "bot_started", "bot_stopped", "bot_removed"]`) <br>
 **\<button_text\>** - Сообщение, которое будет отсылаться с кнопками, если не указан текст: `Нажмите интересующую вас кнопку` <br>
-**has_score** - Переключатель для оценки диалога. Если не указывается или указан как `false`, то оценка не отправится. Если указан как `true`, то - отправится  <br>
 **has_combination_keyboards** - Переключатель для объединения нескольких клавиатур. Если не указывается или указан как `false`, то не объединяться. Если указан как `true`, то - объединятся  <br>
 **disableLinkPreview** - Если `true`, сервер не будет генерировать превью для ссылок в тексте сообщения. Если не указывается или указан как `false` - будет генерировать<br>
 **proxy** - Блок настроек прокси. Опицонально. `proxy.host` - хост прокси сервера. `proxy.port` - порт прокси сервера<br>
@@ -101,6 +109,10 @@
   В поле «Переключить, если агент Приветствия не получил данные для вызова» выберите агента типа «Интеллектуальный бот».
 - Интеллектуальный бот.
   В поле «Статья, если бот не знает ответ» выберите статью, которая должна запускаться при нажатии кнопки «Начать».
+
+**has_score** - Переключатель для оценки диалога. Если не указывается или указан как `false`, то оценка не отправится. Если указан как `true`, то - отправится  <br>
+**\<SCORE_MESSAGE\>** - Сообщение, отправляемое с кнопками оценки диалога. Если не указан: `"Оцените работу оператора"`. <br>
+**scoreConfig** - Объект с настройкой кнопок оценки диалога. Ключ - индекс оценки, значение - подпись кнопки. Если не указан: `{"1":"1","2":"2","3":"3","4":"4","5":"5"}`. <br>
 
 **4. Создать канал с типом integration_channel**<br>
 **5. Указать в настройках канала "Токен для входящих сообщений". Можно оставить пустым.**<br>
@@ -162,4 +174,5 @@ http://\<HOST\>/integration_channel <br>
 | user_id_max         | ID юзера в канале                       |
 | user_name_max       | Юзернейм                                |
 | deep_linking_token  | Произвольный параметр в ссылке на бота  |
+| skip_score          | Слот запрета отправки оценки диалога    |
 
