@@ -6,7 +6,8 @@ const {
 	urlMediatorService: URL_MEDIATOR,
 	channelsUrl: CHANNELS_URL,
 	routingTopics: ROUTING_TOPICS,
-	routingText: ROUTING_TEXT
+	routingText: ROUTING_TEXT,
+	endingText: ENDING_TEXT
 } = agentSettings
 
 const SECONDS_TO_RESPONSE = 30
@@ -40,27 +41,31 @@ const getOmniUserId = async (channelId, channelUserId) => {
 }
 
 const getDialogHistory = async (dialogId) => {
-	if (!dialogId) return {messages: [], isRouted: false, routingTopic: "", routingGroups: []}
+	if (!dialogId) return {messages: [], isRouted: false, routingTopic: "", routingGroups: [], isFinished: false}
 	try {
 		const response = await axios.get(`${URL_MEDIATOR}?dialog_id=${dialogId}`, {
 			timeout: 10000
 		})
 		const data = response.data
 		//logger.info({data}, "DialogHistory")
-		if (!data || !Array.isArray(data)) return {messages: [], isRouted: false, routingTopic: "", routingGroups: []}
+		if (!data || !Array.isArray(data)) return {messages: [], isRouted: false, routingTopic: "", routingGroups: [], isFinished: false}
 
 		let isRouted = false
 		let routingTopic = ""
 		let routingGroups = []
+		let isFinished = false
 		const parsed = data.reduce((acc, item) => {
 			const isUser = !!item.msg
 			const source = isUser ? item.msg : item.reply
 			const type = source?.message_type
 			const text = source?.message?.text
 
-			if (!isRouted && type === 30) {
+			if (type === 30) {
 				const msgText = text || ""
-				if (msgText.includes("routingagent")) {
+				if (!isFinished && msgText.includes("finishdialogagent")) {
+					isFinished = true
+				}
+				if (!isRouted && msgText.includes("routingagent")) {
 					isRouted = true
 					const topic = msgText.replace("/switchredirect routingagent", "").trim()
 					const topics = ROUTING_TOPICS || {}
@@ -84,12 +89,12 @@ const getDialogHistory = async (dialogId) => {
 		}, [])
 
 		const last3 = parsed.slice(-3)
-		logger.info(`Dialog history: total=${parsed.length}, isRouted=${isRouted}, routingTopic="${routingTopic}", last3=${JSON.stringify(last3)}`)
+		logger.info(`Dialog history: total=${parsed.length}, isRouted=${isRouted}, routingTopic="${routingTopic}", isFinished=${isFinished}, last3=${JSON.stringify(last3)}`)
 
-		return {messages: parsed, isRouted, routingTopic, routingGroups}
+		return {messages: parsed, isRouted, routingTopic, routingGroups, isFinished}
 	} catch (e) {
 		logger.error(`Error getDialogHistory: ${e}`)
-		return {messages: [], isRouted: false, routingTopic: "", routingGroups: []}
+		return {messages: [], isRouted: false, routingTopic: "", routingGroups: [], isFinished: false}
 	}
 }
 
@@ -144,7 +149,7 @@ const waitBotResponse = async (maxSeconds, dialogId, historyLenBefore) => {
 	while (true) {
 		if (Date.now() - startTime > maxWaitMs) {
 			logger.info(`Timeout has exceeded ${maxSeconds}s`)
-			return {text: "", isRouted: false, routingTopic: "", routingGroups: []}
+			return {text: "", isRouted: false, routingTopic: "", routingGroups: [], isFinished: false}
 		}
 
 		pollCount++
@@ -153,11 +158,16 @@ const waitBotResponse = async (maxSeconds, dialogId, historyLenBefore) => {
 		const lastItem = history[history.length - 1]
 		const botText = getLastBotMessage(history)
 
-		logger.info(`Poll #${pollCount}: historyLen=${history.length}, historyLenBefore=${historyLenBefore}, botText="${botText}", lastItemRole=${lastItem?.role}, isRouted=${result.isRouted}`)
+		logger.info(`Poll #${pollCount}: historyLen=${history.length}, historyLenBefore=${historyLenBefore}, botText="${botText}", lastItemRole=${lastItem?.role}, isRouted=${result.isRouted}, isFinished=${result.isFinished}`)
 
 		if (result.isRouted) {
 			logger.info(`Dialog routed to operator, stopping poll`)
 			return {text: "", isRouted: true, routingTopic: result.routingTopic, routingGroups: result.routingGroups}
+		}
+
+		if (result.isFinished) {
+			logger.info(`Dialog finished by finishdialogagent, stopping poll`)
+			return {text: "", isFinished: true}
 		}
 
 		if (history.length > historyLenBefore && lastItem?.role === "assistant" && botText && botText.trim().length > 0) {
@@ -305,6 +315,10 @@ const main = async () => {
 			topic: response.routingTopic,
 			groups: response.routingGroups
 		})
+	}
+
+	if (response?.isFinished) {
+		return createResponse(sessionID, OutgoingEvents.FINISH, channel, phone, ENDING_TEXT)
 	}
 
 	if (!response.text) {
