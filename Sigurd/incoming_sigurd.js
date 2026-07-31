@@ -4,7 +4,9 @@ const {
 	slots: SLOTS,
 	channelAuthToken: AUTHORIZATION_TOKEN_INCOMING,
 	urlMediatorService: URL_MEDIATOR,
-	channelsUrl: CHANNELS_URL
+	channelsUrl: CHANNELS_URL,
+	routingTopics: ROUTING_TOPICS,
+	routingText: ROUTING_TEXT
 } = agentSettings
 
 const SECONDS_TO_RESPONSE = 30
@@ -17,6 +19,12 @@ const IncomingEvents = {
 	START: "call_started",
 	TEXT: "text_message",
 	FINISH: "call_ended"
+}
+
+const OutgoingEvents = {
+	TEXT: "text_message",
+	TRANSFER: "transfer_to_operator",
+	FINISH: "end_call"
 }
 
 const getOmniUserId = async (channelId, channelUserId) => {
@@ -32,19 +40,39 @@ const getOmniUserId = async (channelId, channelUserId) => {
 }
 
 const getDialogHistory = async (dialogId) => {
-	if (!dialogId) return []
+	if (!dialogId) return {messages: [], isRouted: false, routingTopic: "", routingGroups: []}
 	try {
 		const response = await axios.get(`${URL_MEDIATOR}?dialog_id=${dialogId}`, {
-			timeout: 3000
+			timeout: 10000
 		})
 		const data = response.data
-		if (!data || !Array.isArray(data)) return []
+		//logger.info({data}, "DialogHistory")
+		if (!data || !Array.isArray(data)) return {messages: [], isRouted: false, routingTopic: "", routingGroups: []}
 
+		let isRouted = false
+		let routingTopic = ""
+		let routingGroups = []
 		const parsed = data.reduce((acc, item) => {
 			const isUser = !!item.msg
 			const source = isUser ? item.msg : item.reply
 			const type = source?.message_type
 			const text = source?.message?.text
+
+			if (!isRouted && type === 30) {
+				const msgText = text || ""
+				if (msgText.includes("routingagent")) {
+					isRouted = true
+					const topic = msgText.replace("/switchredirect routingagent", "").trim()
+					const topics = ROUTING_TOPICS || {}
+					const info = topics[topic] || topics["Не определена"] || {
+						topic: "Не определена",
+						groups: [{id: 411, name: "Разное"}]
+					}
+					routingTopic = info.topic
+					routingGroups = info.groups
+				}
+			}
+
 			if (type === MESSAGE_TYPE_TEXT && text) {
 				acc.push({
 					role: isUser ? "user" : "assistant",
@@ -56,12 +84,12 @@ const getDialogHistory = async (dialogId) => {
 		}, [])
 
 		const last3 = parsed.slice(-3)
-		logger.info(`Dialog history: total=${parsed.length}, last3=${JSON.stringify(last3)}`)
+		logger.info(`Dialog history: total=${parsed.length}, isRouted=${isRouted}, routingTopic="${routingTopic}", last3=${JSON.stringify(last3)}`)
 
-		return parsed
+		return {messages: parsed, isRouted, routingTopic, routingGroups}
 	} catch (e) {
 		logger.error(`Error getDialogHistory: ${e}`)
-		return []
+		return {messages: [], isRouted: false, routingTopic: "", routingGroups: []}
 	}
 }
 
@@ -98,7 +126,7 @@ const createSendMessageRequestBody = (phone, text, userId, firstName, lastName, 
 const sendMessage = async (body) => {
 	let response
 	try {
-		const responseFromUrl = await axios.post(INCOMING_API, body, { headers: getHeaders() })
+		const responseFromUrl = await axios.post(INCOMING_API, body, {headers: getHeaders()})
 		logger.info(`Incoming data ${JSON.stringify(responseFromUrl.data)}`)
 		response = responseFromUrl.data || null
 	} catch (error) {
@@ -116,48 +144,65 @@ const waitBotResponse = async (maxSeconds, dialogId, historyLenBefore) => {
 	while (true) {
 		if (Date.now() - startTime > maxWaitMs) {
 			logger.info(`Timeout has exceeded ${maxSeconds}s`)
-			return ""
+			return {text: "", isRouted: false, routingTopic: "", routingGroups: []}
 		}
 
 		pollCount++
-		const history = await getDialogHistory(dialogId)
+		const result = await getDialogHistory(dialogId)
+		const history = result.messages
 		const lastItem = history[history.length - 1]
 		const botText = getLastBotMessage(history)
 
-		logger.info(`Poll #${pollCount}: historyLen=${history.length}, historyLenBefore=${historyLenBefore}, botText="${botText}", lastItemRole=${lastItem?.role}`)
+		logger.info(`Poll #${pollCount}: historyLen=${history.length}, historyLenBefore=${historyLenBefore}, botText="${botText}", lastItemRole=${lastItem?.role}, isRouted=${result.isRouted}`)
+
+		if (result.isRouted) {
+			logger.info(`Dialog routed to operator, stopping poll`)
+			return {text: "", isRouted: true, routingTopic: result.routingTopic, routingGroups: result.routingGroups}
+		}
 
 		if (history.length > historyLenBefore && lastItem?.role === "assistant" && botText && botText.trim().length > 0) {
 			logger.info(`Got bot response: ${botText}`)
-			return botText.trim()
+			return {text: botText.trim(), isRouted: false, routingTopic: "", routingGroups: []}
 		}
 
 		const pauseStart = Date.now()
 		const second = 1000
-		while (Date.now() - pauseStart < second) {}
+		while (Date.now() - pauseStart < second) {
+		}
 	}
 }
 
-const createResponse = (sessionId, event, channel, phone, text) => ({
-	sessionID: sessionId,
-	event,
-	channel,
-	phone,
-	text,
-	timestamp: Date.now()
-})
+const createResponse = (sessionId, event, channel, phone, text, transferTarget) => {
+	const base = {
+		sessionID: sessionId,
+		event,
+		channel,
+		phone,
+		text,
+		timestamp: Date.now()
+	}
+	if (transferTarget) {
+		base.transfer_target = transferTarget
+	}
+	return base
+}
 
 const getSlots = (userId) => {
 	return [
-		{ id: SLOTS.userId, value: userId }
+		{id: SLOTS.userId, value: userId}
 	]
 }
 
 const finishDialog = async (omniUserId) => {
+	if (!omniUserId) {
+		logger.info(`finishDialog: omniUserId is null, skipping`)
+		return
+	}
 	try {
-		const { Response: dialogId } = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
+		const {Response: dialogId} = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
 		await agentApi.finishDialog(dialogId, "Call end", 5)
 	} catch (err) {
-		logger.error({ stack: err.stack }, `Error when finish dialog: ${err}`)
+		logger.error({stack: err.stack}, `Error when finish dialog: ${err}`)
 	}
 }
 
@@ -168,34 +213,58 @@ const waitForDialog = async (omniUserId, existingDialogId, maxSeconds = 10) => {
 	const maxWaitMs = maxSeconds * 1000
 
 	while (Date.now() - startTime < maxWaitMs) {
-		const { Response: dialogId } = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
+		const {Response: dialogId} = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
 		if (dialogId) {
 			logger.info(`Dialog created: ${dialogId}`)
 			return dialogId
 		}
 		const pauseStart = Date.now()
-		while (Date.now() - pauseStart < 500) {}
+		while (Date.now() - pauseStart < 200) {
+		}
 	}
 
 	logger.info(`Timeout waiting for dialog creation`)
 	return null
 }
 
+const waitForOmniUserId = async (channelId, userId, maxSeconds = 10) => {
+	const startTime = Date.now()
+	const maxWaitMs = maxSeconds * 1000
+
+	while (Date.now() - startTime < maxWaitMs) {
+		const result = await getOmniUserId(channelId, userId)
+		if (result) {
+			logger.info(`OmniUserId appeared: ${result}`)
+			return result
+		}
+		const pauseStart = Date.now()
+		while (Date.now() - pauseStart < 200) {
+		}
+	}
+
+	logger.info(`Timeout waiting for omniUserId after sendMessage`)
+	return null
+}
+
 const main = async () => {
-	logger.info(`Incoming message: ${JSON.stringify(message)}`)
-	const { sessionID, event, channel, user, text } = message
-	const { id, first_name: firstName = "Нет данных", last_name: lastName = "Нет данных", phone } = user
+	logger.info({"Incoming message": message})
+	const {sessionID, event, channel, user, text} = message
+	const {id, first_name: firstName = "Нет данных", last_name: lastName = "Нет данных", phone} = user
 
 	const userId = extractPhoneNumber(id)
 	if (!userId) {
 		throw new Error(`Empty user id`)
 	}
 
-	const omniUserId = await getOmniUserId(CHANNEL_ID, userId)
+	let omniUserId = await getOmniUserId(CHANNEL_ID, userId)
 	logger.info(`Got omniUserId: ${omniUserId}`)
 
-	const { Response: dialogId } = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
-	logger.info(`Got dialogId: ${dialogId}`)
+	let dialogId
+	if (omniUserId) {
+		const {Response} = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
+		dialogId = Response
+		logger.info(`Got dialogId: ${Response}`)
+	}
 
 	const slots = getSlots(userId)
 	const requestBody = createSendMessageRequestBody(userId, text, userId, firstName, lastName, slots)
@@ -206,30 +275,50 @@ const main = async () => {
 
 	if (event === "callended" || event === IncomingEvents.FINISH) {
 		await finishDialog(omniUserId)
-		return
+		return {}
 	}
 
-	const historyLenBefore = dialogId ? (await getDialogHistory(dialogId)).length : 0
+	const historyResult = await getDialogHistory(dialogId)
+	const historyLenBefore = historyResult.messages.length
 	logger.info(`History length before send: ${historyLenBefore}`)
 
 	await sendMessage(requestBody)
 	logger.info(`Sent to platform: ${requestBody.content.text}`)
+
+	if (!omniUserId) {
+		omniUserId = await waitForOmniUserId(CHANNEL_ID, userId, 10)
+		if (!omniUserId) {
+			throw new Error(`OmniUserId not created after send`)
+		}
+	}
 
 	const currentDialogId = await waitForDialog(omniUserId, dialogId)
 	if (!currentDialogId) {
 		throw new Error(`Dialog not created`)
 	}
 
-	const textForUser = await waitBotResponse(SECONDS_TO_RESPONSE, currentDialogId, historyLenBefore)
-	if (!textForUser) {
+	const response = await waitBotResponse(SECONDS_TO_RESPONSE, currentDialogId, historyLenBefore)
+
+	if (response?.isRouted) {
+		await finishDialog(omniUserId)
+		return createResponse(sessionID, OutgoingEvents.TRANSFER, channel, phone, ROUTING_TEXT, {
+			topic: response.routingTopic,
+			groups: response.routingGroups
+		})
+	}
+
+	if (!response.text) {
 		throw new Error(`Text to response not found`)
 	}
 
-	return createResponse(sessionID, event, channel, phone, textForUser)
+	return createResponse(sessionID, event, channel, phone, response.text)
 }
 
 main()
-	.then(response => resolve(response))
+	.then(response => {
+		logger.info({response})
+		resolve(response)
+	})
 	.catch(err => {
 		logger.error(err)
 		resolve({})
