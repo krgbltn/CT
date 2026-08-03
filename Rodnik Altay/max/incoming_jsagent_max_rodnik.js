@@ -5,11 +5,13 @@ const MAX_BOT_HOST = agentSettings.maxBotHost
 const MAX_API_TOKEN = agentSettings.maxBotToken
 const EVALUATION_MESSAGE = agentSettings.evaluation_message || "Благодарим за оценку:"
 const REMOVE_BUTTONS_AFTER_CLICK = agentSettings.removeButtonsAfterClick ?? true
+const DEDUPLICATE_SCORE = agentSettings.deduplicateScore ?? true
 const UPDATE_SLOT_USER = agentSettings.update_slot_user ?? false
 const PROXY = agentSettings.proxy
 
 const postfix = "userDataSent"
 const CALLBACK_MESSAGE_TEXT_PREFIX = "max_callback_message_text:"
+const SCORE_SENT_PREFIX = "score_sent:"
 
 const indexScore = "__#score__"
 
@@ -192,6 +194,17 @@ async function buildMessageResponse(
 
 	const isScore = action?.includes(indexScore)
 	const score = action?.replace(indexScore, "")
+
+	if (isScore && DEDUPLICATE_SCORE && mid) {
+		const scoreSentKey = `${SCORE_SENT_PREFIX}${chatId}:${mid}`
+		const scoreSent = await agentStorage.globalStorage.get(scoreSentKey)
+		if (scoreSent) {
+			logger.info(`Score for message ${mid} already sent. Skip duplicate callback ${callbackId}.`)
+			return false
+		}
+		await agentStorage.globalStorage.set(scoreSentKey, true)
+	}
+
 	if (action) {
 		await updateMessageAfterClick(callbackId, action, buttonLabel, text, mid)
 	}

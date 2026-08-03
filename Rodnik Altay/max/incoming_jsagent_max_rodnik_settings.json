@@ -9,6 +9,7 @@
     "maxUserName": "user_name_max"
   },
   "removeButtonsAfterClick": true,
+  "deduplicateScore": true,
   "update_slot_user": false,
   "maxBotToken": "f9LHodD0cOKILzz0cidSOpJp1tE6KPiMea70x48sVNNczWZ8M43vRxP5vG2BiucV9lom3ufAoJGPJp2iIqKI",
   "maxBotHost": "https://platform-api2.max.ru"
