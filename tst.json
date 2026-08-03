@@ -1,33 +1,22 @@
 {
-  "edit_message": true,
-  "delete_message": true,
-  "request_settings": [
-    {
-      "name": "customer_id",
-      "type": "string",
-      "value": "rodnik_altai"
+  "level": "INFO",
+  "timestamp": "2026-08-03 09:01:03.784",
+  "pid": 1,
+  "hostname": "7d1be63e49a2",
+  "name": "incoming_integration_sigurd",
+  "codeRunId": "a3b1c710-e199-4bc3-a4c8-300716151c26",
+  "trace_id": "9f65322fbec689aee34f7ff2c1414f39",
+  "span_id": "077fcb768ff70edb",
+  "trace_flags": "01",
+  "Incoming message": {
+    "sessionID": "call_1fb96a58b0eacf45",
+    "event": "callstarted",
+    "channel": "790799",
+    "fromNumber": "9307777137",
+    "user": {
+      "id": "phone:9307777137",
+      "phone": "9307777137"
     },
-    {
-      "name": "outgoing_agent_id",
-      "type": "string",
-      "value": "outgoing_jsagent_max_rodnik"
-    },
-    {
-      "name": "file_storage_webhook",
-      "type": "string",
-      "value": "http://opbot-filestorage:8100"
-    }
-  ],
-  "general_settings": [
-    {
-      "name": "customer_id",
-      "type": "string",
-      "value": "rodnik_altai"
-    },
-    {
-      "name": "outgoing_agent_id",
-      "type": "string",
-      "value": "outgoing_jsagent_max_rodnik"
-    }
-  ]
+    "timestamp": 1785747663
+  }
 }

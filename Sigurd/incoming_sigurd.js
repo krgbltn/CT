@@ -132,10 +132,10 @@ const sendMessage = async (body) => {
 	let response
 	try {
 		const responseFromUrl = await axios.post(INCOMING_API, body, {headers: getHeaders()})
-		logger.info(`Incoming data ${JSON.stringify(responseFromUrl.data)}`)
+		logger.info(`Send status=${responseFromUrl.status}, response=${JSON.stringify(responseFromUrl.data)}, request=${JSON.stringify(body)}`)
 		response = responseFromUrl.data || null
 	} catch (error) {
-		logger.error(`Error when sending request to ${INCOMING_API}: ${error}`)
+		logger.error({status: error.response?.status, data: error.response?.data}, `Error when sending request to ${INCOMING_API}: ${error}`)
 		response = null
 	}
 	return response
@@ -216,17 +216,22 @@ const finishDialog = async (omniUserId) => {
 	}
 }
 
-const waitForDialog = async (omniUserId, existingDialogId, maxSeconds = 10) => {
+const waitForDialog = async (omniUserId, existingDialogId, maxSeconds = 30) => {
 	if (existingDialogId) return existingDialogId
 
 	const startTime = Date.now()
 	const maxWaitMs = maxSeconds * 1000
+	let attempts = 0
 
 	while (Date.now() - startTime < maxWaitMs) {
+		attempts++
 		const {Response: dialogId} = await agentApi.getDialogId(omniUserId, CUSTOMER_ID)
 		if (dialogId) {
 			logger.info(`Dialog created: ${dialogId}`)
 			return dialogId
+		}
+		if (attempts === 1 || attempts % 10 === 0) {
+			logger.info(`Waiting for dialog creation... attempt=${attempts}, elapsed=${Date.now() - startTime}ms`)
 		}
 		const pauseStart = Date.now()
 		while (Date.now() - pauseStart < 200) {
@@ -302,7 +307,13 @@ const main = async () => {
 		}
 	}
 
-	const currentDialogId = await waitForDialog(omniUserId, dialogId)
+	const omniUserIdAfterSend = await getOmniUserId(CHANNEL_ID, userId)
+	if (omniUserIdAfterSend !== omniUserId) {
+		logger.info(`OMNI CHANGED after send: before=${omniUserId}, after=${omniUserIdAfterSend}. User-mapping mismatch!`)
+		omniUserId = omniUserIdAfterSend || omniUserId
+	}
+
+	const currentDialogId = await waitForDialog(omniUserId, dialogId, 30)
 	if (!currentDialogId) {
 		throw new Error(`Dialog not created`)
 	}
