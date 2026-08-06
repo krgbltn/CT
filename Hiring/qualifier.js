@@ -11,7 +11,12 @@ const cityMapping = {
 	"Ногинск": "article-1ee033cc-0940-4d25-bce3-28e23db1035d",
 	"Серпухов": "article-765d4bec-644b-4b3e-8c83-d66323ba9fb6",
 	"Другой город": "article-f87e2e32-141c-4aa2-af8e-5258f9292c6a",
-	"Чехов": "article-a0d262d4-415e-4c17-bb90-a5110ad85509"
+	"Чехов": "article-a0d262d4-415e-4c17-bb90-a5110ad85509",
+	"Казань": "article-d2472944-ec56-45a0-a197-2f420b8d8274",
+	"Наро-Фоминск": "article-36327f5a-3b2c-464d-b3ff-02b7aa3433c6",
+	"Обнинск": "article-3a127291-16b2-49fe-b496-ff06c4df9b10",
+	"Домодедово": "article-3ee1dbea-5671-4645-add7-ec32bb3c48d5",
+	"Можайск": "article-484c3133-b4ae-423d-a392-4d8ea8495ad3"
 };
 
 const CITY_ROLES = {
@@ -82,6 +87,8 @@ const CITY_ROLES = {
 		"Курьер пеший БЕРИ ЗАРЯД": "role_spb_courier_pesh_beri",
 		"Мойщик": "role_spb_washer",
 		"Перегонщик на мойку": "role_spb_transfer_wash",
+		"Перегонщик на СТО (Яндекс)": "role_spb_sto_ya",
+		"Перегонщик электрокаров на зарядные станции": "role_spb_zs_ya",
 		"Срочный ШМ": "role_spb_urgent_tire",
 		"Стационарный шиномонтажник": "role_spb_stat_tire",
 		"Перегонщик на СТО (Делимобиль)": "role_spb_transfer_sto_deli",
@@ -111,6 +118,10 @@ const CITY_ROLES = {
 	// ========== КАЛУГА ==========
 	"Калуга": {
 		"Водитель-логист на корп.авто (ТШ)": "role_kaluga_logist_corp",
+		"Водитель-логист на своем авто (ТШ)": "role_kaluga_logist_self",
+		"Энерджайзер (ТШ)": "role_kaluga_energizer",
+		"Скаут (ТШ)": "role_kaluga_skaut",
+		"Электронщик (ТШ)": "role_kaluga_electro",
 		"Водитель-курьер (Яндекс.Еда)": "role_kaluga_courier_yae_auto",
 		"Велокурьер (Яндекс.Еда)": "role_kaluga_courier_yae_bike",
 		"Пеший курьер (Яндекс.Еда)": "role_kaluga_courier_yae_pesh",
@@ -200,7 +211,7 @@ const CITY_ROLES = {
 }
 //список id слотов ролей по городам
 const CITY_TO_ROLE_SLOT = {
-	"Москва": "role_moscow",
+	"Москва": "role_moscow1",
 	"Сочи": "role_sochi",
 	"Санкт-Петербург": "role_spb",
 	"Видное": "role_vidnoye",
@@ -301,6 +312,10 @@ async function run(message) {
 	logger.info(`deepLinkingTokenEntry: ${JSON.stringify(deepLinkingTokenEntry)}`);
 	logger.info(`deepLinkingToken: ${deepLinkingToken}`);
 
+	if (deepLinkingToken.endsWith(".") || deepLinkingToken.endsWith(",")) {
+		deepLinkingToken = deepLinkingToken.slice(0, -1)
+	}
+
 	await extlogger({token: deepLinkingTokenEntry, chat_id: chatId, channel_id: channelId});
 
 	// 1. Если токен не найден (прямой вход в канал)
@@ -313,6 +328,8 @@ async function run(message) {
 			if (isTg || isMax || isVk) {
 				let top_doer_bot_url = getSlot("top_doer_bot_url", message.slot_context?.filled_slots);
 				if (!top_doer_bot_url) newSlots.top_doer_bot_url = "https://t.me/TopDoerBot";
+				let top_doer_app_url = getSlot("top_doer_app_url", message.slot_context?.filled_slots);
+				if (!top_doer_app_url) newSlots.top_doer_app_url = "https://app.topdoer.ru/registration";
 			}
 		} catch (e) {
 			await extlogger(`Error in no-token block: ${e.message}`, "error");
@@ -337,6 +354,7 @@ async function run(message) {
 
 		if (isTg || isMax || isVk) {
 			newSlots.top_doer_bot_url = `https://t.me/TopDoerBot?start=amo_lead_id=${cleanedToken}`;
+			newSlots.top_doer_app_url = `https://app.topdoer.ru/registration?amo_lead_id=${cleanedToken}`;
 		}
 
 		logger.info(`amo_lead_url: ${newSlots.amo_lead_url}`);
@@ -405,12 +423,11 @@ async function run(message) {
 			} else {
 				logger.warn(`Role mapping failed: city=${data.city}, role=${data.role_BD}, citySlotName=${citySlotName}, hasCityRoles=${!!cityRoles}`)
 			}
-			//newSlots[CITY_TO_ROLE_SLOT[data.city]] = CITY_ROLE[data.city][data.role_BD] || CITY_ROLE[data.city]["Другая роль"]
 		}
 
 
 		if (nationalityMapping[data.nationality]) newSlots.nationality = nationalityMapping[data.nationality];
-		if (data?.city) {
+		if (data.city) {
 			if (cityMapping[data.city]) {
 				newSlots.city_26 = cityMapping[data.city];
 			} else {
@@ -418,7 +435,7 @@ async function run(message) {
 				newSlots.city_26 = cityMapping["Другой город"];
 			}
 		}
-		if (data?.driving_experience) newSlots.driving_experience = data.driving_experience;
+		if (data.driving_experience) newSlots.driving_experience = data.driving_experience;
 		if (utm) newSlots.utm = utm;
 
 		logger.info(`Mapped slots - name: ${newSlots.name}, phone: ${newSlots.phone_numer}, age: ${newSlots.age}, role: ${newSlots.role}, city: ${newSlots.city_26}`);

@@ -1,4 +1,5 @@
 const EVENT_SLOT_ID = "domain_event_type";
+const TELEGRAM_API_URL = "https://api.telegram.org/bot";
 const PROTECTED_URL =
 	"http://api.ucar.pro/proteted/9d90f3a2-df78-4201-ae3d-af6a1a4e380d";
 
@@ -20,6 +21,16 @@ function getQueueAgent(channel_id) {
 	};
 	let default_queue_agent = "default_queue_agent";
 	return queues[channel_id] || default_queue_agent;
+}
+
+function getTelegramToken(channel_id) {
+	let tokens = {
+		channel_14ab6e4: "1716146537:AAEvThFnumE8cP38xElMhA1i27uLlqqHlqc",
+		channel_54c50e2: "6014912212:AAHeLd2KZaUl9y6b2g6XfMg1GhFoZ8bHEgs",
+		channel_3b69d70: "6602601395:AAE2xi8wczUP4L8SQHfAXGh4X0WW4iiOTYA",
+	};
+
+	return tokens[channel_id];
 }
 
 function getQueueId(channel_id) {
@@ -61,6 +72,47 @@ async function sendMessage(text, message, logger, slots = {}) {
 	};
 
 	return await agentApi.sendMessage(sendMessageRequest, logger);
+}
+
+async function getTelegramAccountLink(chatId, channel_id) {
+	logger.info(`Incoming get_Telegram_Account_Link`);
+	try {
+		const token = getTelegramToken(channel_id);
+		// ЗАЩИТА: Если токена нет, это не Телеграм канал, выходим сразу
+		if (!token) {
+			return null;
+		}
+		logger.info(`Incoming befor axios`);
+
+		const response = await axios.get(`${TELEGRAM_API_URL}${token}/getChat`, {timeout : 5000,
+			params: { chat_id: chatId },
+		});
+		logger.info(`Incoming after axios`);
+
+		if (response.data.ok) {
+			const chat = response.data.result;
+			if (chat.username) {
+				const link = `@${chat.username}`;
+				logger.info({ chat_id: chatId, message: `Ссылка на аккаунт: ${link}` });
+				await extlogger({ chat_id: chatId }, `Ссылка на аккаунт: ${link}`);
+				return link;
+			} else {
+				logger.info({
+					chat_id: chatId,
+					message: "Имя пользователя не найдено",
+				});
+				return null;
+			}
+		} else {
+			throw new Error("Не удалось получить информацию о чате");
+		}
+	} catch (error) {
+		logger.error({
+			chat_id: chatId,
+			message: `Ошибка при получении информации о чате: ${error.message}`,
+		});
+		return undefined;
+	}
 }
 
 async function checkEvents(message, event) {
@@ -210,13 +262,24 @@ async function getTgTag(message) {
 	logger.info(`Incoming getTgTag`);
 	let tg_tag = "";
 	try {
-		tg_tag = message.user?.username || "";
+		tg_tag = getSlot("sys_username", message.slot_context.filled_slots);
 		if (tg_tag) return tg_tag;
 
-		tg_tag = getSlot("sys_username", message.slot_context.filled_slots) || "";
-		if (tg_tag) return tg_tag;
+		tg_tag = getSlot("tg_tag", message.slot_context.filled_slots);
 
-		tg_tag = getSlot("tg_tag", message.slot_context.filled_slots) || "";
+		// ЗАЩИТА: проверяем, есть ли смысл вообще лезть за ссылкой в Телеграм
+		const token = getTelegramToken(message.channel.channel_id);
+		if (token) {
+			let new_tg_tag = await getTelegramAccountLink(
+				message.user.channel_user_id,
+				message.channel.channel_id,
+			);
+			if (new_tg_tag !== undefined) {
+				tg_tag = new_tg_tag;
+			}
+		}
+
+		if (tg_tag == null) tg_tag = "";
 	} catch (e) {
 		logger.error(`${message}, ${e.message}`);
 	}
