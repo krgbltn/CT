@@ -1,0 +1,10 @@
+{
+  "request_settings": [
+    { "name": "customer_id", "type": "string", "value": "energo" },
+    { "name": "outgoing_agent_id", "type": "string", "value": "outgoing_sigurd-webhook" }
+  ],
+  "general_settings": [
+    { "name": "customer_id", "type": "string", "value": "energo" },
+    { "name": "outgoing_agent_id", "type": "string", "value": "outgoing_sigurd-webhook" }
+  ]
+}
