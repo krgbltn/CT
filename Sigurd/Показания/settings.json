@@ -1,0 +1,8 @@
+{
+	"storageKey": "OUTGOING_TEXT",
+	"channelId": "",
+	"channelAuthToken": "",
+	"slots": {
+		"userId": "user_id"
+	}
+}
