@@ -1,0 +1,44 @@
+{
+  "url": "https://asuse-test.ie.corp/IVR.asmx",
+  "phoneSlotId": "sys_phone",
+  "methodName": "GetContractsInfo_By_Phone",
+  "targetNamespace": "http://tempuri.org/",
+  "soapVersion": "1.1",
+  "parameters": [
+    { "name": "PhoneNumber", "value": "79025151311" }
+  ],
+  "resultPath": "soap:Envelope.soap:Body.GetContractsInfo_By_PhoneResponse.GetContractsInfo_By_PhoneResult.ContractInfo",
+  "slotsMapping":[
+    { "slotId": "account_number", "path": "No", "defaultValue": "" }
+
+  ],
+  "nextArticle": "article-c45ef64c-075d-4d0e-8da9-98d8914df244",
+  "stub": false,
+  "stubResponse": {
+    "soap:Envelope": {
+      "soap:Body": {
+        "GetContractsInfo_By_PhoneResponse": {
+          "GetContractsInfo_By_PhoneResult": {
+            "ContractInfo": [
+              {
+                "ID": "0e114d18-62b6-11e7-80de-00237d360000",
+                "No": "103800120",
+                "Adress": "Нижний Новгород, ул.Челюскинцев, д.107, кв.917",
+                "City": "Нижний Новгород",
+                "Residents": "5",
+                "FullArea": "19.17",
+                "DateUpdate": "2022-11-03T15:36:43.76",
+                "Stove": "тип плиты не указан",
+                "Status": "Действует",
+                "AbonentName": "Марина",
+                "FirstName": "Тестовая",
+                "Patronimic": "Сергеевна",
+                "DivisionID": "9bad477b-26ee-11dc-8782-000423d10000"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

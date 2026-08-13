@@ -35,14 +35,16 @@ function createConfig(method, url, headers, data) {
     }
 }
 
-async function sendRequest(data) {
+async function sendRequest(data, soapAction) {
     logger.info('Start sending request')
 
     const headers = {
-        'Content-Type': 'application/xml'
+        'Content-Type': 'text/xml; charset=utf-8',
+        'SOAPAction': soapAction
     }
 
     const config = createConfig("post", INCOMING_API, headers, data)
+    config.httpsAgent = new https.Agent({ rejectUnauthorized: false })
 
     try {
         const response = await axios(config)
@@ -54,6 +56,7 @@ async function sendRequest(data) {
         }
     } catch (error) {
         logger.error(`Send error : ${error}`)
+        logger.error(`Response data: ${JSON.stringify(error.response?.data)}`)
     }
 }
 
@@ -136,8 +139,11 @@ const extractInfoFromResponse = async (parsedData) => {
     }
 
     const contractsInfo = body["GetContractsInfo_By_PhoneResponse"]?.["GetContractsInfo_By_PhoneResult"]?.["ContractInfo"]
+    const contractsInfoArr = Array.isArray(contractsInfo)
+        ? contractsInfo
+        : (contractsInfo ? [contractsInfo] : [])
     // сохраняем в стор ключ - номер лиц счета, знач - ид лиц счета
-    const contractIdMap = contractsInfo.reduce((acc, cur) => {
+    const contractIdMap = contractsInfoArr.reduce((acc, cur) => {
         acc[cur.No] = cur.ID
         return acc
     }, {})
@@ -146,17 +152,17 @@ const extractInfoFromResponse = async (parsedData) => {
         CONTRACTS_KEY,
         JSON.stringify(contractIdMap)
     )
-    return { contracts: (contractsInfo ?? []).map(info => info.No), contractIdMap } // возвращаем номер лицевого счета
+    return { contracts: contractsInfoArr.map(info => info.No), contractIdMap } // возвращаем номер лицевого счета
 }
 
 const getContractsInfoByPhone = async (phoneNumber) => {
     const requestBody = {
         "@": {
-            "xmlns:soap": "http://www.w3.org/2003/05/soap-envelope",
+            "xmlns:soapenv": "http://schemas.xmlsoap.org/soap/envelope/",
             "xmlns:tem": "http://tempuri.org/",
         },
-        "soap:Header": "",
-        "soap:Body": {
+        "soapenv:Header": "",
+        "soapenv:Body": {
             "tem:GetContractsInfo_By_Phone": {
                 "tem:PhoneNumber": phoneNumber
             }
@@ -165,10 +171,15 @@ const getContractsInfoByPhone = async (phoneNumber) => {
 
     const xmlData = parseJsonToXml("soapenv:Envelope", requestBody)
     logger.info(`Created xml data: ${JSON.stringify(xmlData)}`)
-    const xmlResponse = await sendRequest(xmlData)
+    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/GetContractsInfo_By_Phone')
     logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
-    return xmlResponse ? await extractInfoFromResponse(xmlResponse) : { contracts: [], contractIdMap: {} }
+    if (!xmlResponse) {
+        return { contracts: [], contractIdMap: {} }
+    }
+
+    const parsedResponse = await parseXmlToJson(xmlResponse)
+    return await extractInfoFromResponse(parsedResponse)
 }
 
 /**
@@ -240,18 +251,19 @@ const extractMdInfoFromResponse = async (parsedData) => {
     }
 
     const mdInfo = body?.["GetMDInfo_By_ContractIDAndNomenclatureCodeResponse"]?.["GetMDInfo_By_ContractIDAndNomenclatureCodeResult"]?.["MDInfo"]
-    return mdInfo[0]
+    const mdInfoArr = Array.isArray(mdInfo) ? mdInfo : (mdInfo ? [mdInfo] : [])
+    return mdInfoArr[0]
 }
 
 // получаем данные счетчиков по лицевому счету
 const getMDInfo = async (contractId, nomenclatureCode) => {
     const requestBody = {
         "@": {
-            "xmlns:soap": "http://www.w3.org/2003/05/soap-envelope",
+            "xmlns:soapenv": "http://schemas.xmlsoap.org/soap/envelope/",
             "xmlns:tem": "http://tempuri.org/",
         },
-        "soap:Header": "",
-        "soap:Body": {
+        "soapenv:Header": "",
+        "soapenv:Body": {
             "tem:GetMDInfo_By_ContractIDAndNomenclatureCode": {
                 "tem:ContractStrGUID": contractId,
                 "tem:NomenclatureCode": nomenclatureCode
@@ -261,7 +273,7 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
 
     const xmlData = parseJsonToXml("soapenv:Envelope", requestBody)
     logger.info(`Created xml data: ${JSON.stringify(xmlData)}`)
-    const xmlResponse = await sendRequest(xmlData)
+    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/GetMDInfo_By_ContractIDAndNomenclatureCode')
     logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
     if (getDebug()) {
@@ -283,7 +295,12 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
         }
     }
 
-    return xmlResponse ? await extractMdInfoFromResponse(xmlResponse) : []
+    if (!xmlResponse) {
+        return []
+    }
+
+    const parsedResponse = await parseXmlToJson(xmlResponse)
+    return await extractMdInfoFromResponse(parsedResponse)
 }
 
 const getMDSInfo = async (contractId) => {
@@ -301,7 +318,7 @@ const getMDSInfo = async (contractId) => {
 
         return mdsResultPromises.reduce(
             (acc, cur, indx) => {
-                if (cur.status === "fulfilled") {
+                if (cur.status === "fulfilled" && cur.value !== undefined) {
                     acc[NOMENCLATURES[indx]] = cur.value
                 }
 
@@ -351,7 +368,9 @@ const getSlots = (mdsInfo, contract) => {
     }
 
     for (const nom of Object.keys(mdsInfo)) {
-        const scaleInfo = mdsInfo[nom].MDScales?.MDScaleInfo
+        let scaleInfo = mdsInfo[nom]?.MDScales?.MDScaleInfo
+        logger.info(`Slots: ${JSON.stringify(scaleInfo)}`)
+         scaleInfo = Array.isArray(scaleInfo) ? scaleInfo[0] : scaleInfo
 
         if (!scaleInfo) {
             continue
@@ -401,7 +420,7 @@ const main = async () => {
     let contractsPagination
 
     if (!storedContracts) {
-        let phoneNumber = getSlotValueById(PHONE_SLOT_ID)
+        let phoneNumber = "79025151311"//getSlotValueById(PHONE_SLOT_ID)
         logger.info(`Got phone number ${phoneNumber}`)
 
         if (getDebug()) {
