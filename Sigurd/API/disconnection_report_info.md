@@ -87,3 +87,62 @@ curl -X GET \
   "address": "664074, обл Иркутская, г Иркутск, ул Чернышевского, дом № 8 кв. 29"
 }
 ```
+
+---
+
+# POST — Оформление заявки в КСРТ
+
+## HTTP-запрос
+
+```
+POST /api/service/sigurd/fl/{user_id}/disconnection_report_info
+```
+
+## Параметры пути
+
+| Параметр | Тип | Описание |
+|----------|-----|----------|
+| `user_id` | string | Идентификатор пользователя (UserId) |
+
+## Тело запроса
+
+```
+DisconnectionRequestData {
+  isbuilding (boolean) — отсутствие э/э во всём доме/у соседей тоже
+  iscounter (boolean) — об отключении счётчика
+  isfrequent (boolean) — о частых отключениях (readOnly, считается от Message)
+  message (string) — дополнительная информация (INVALID / NoPower / FrequentShutdowns / Other / LightFlashes / NoPhase / LowVoltage)
+  comment (string) — комментарий
+  phone (string) — номер телефона
+}
+```
+
+## Заголовки
+
+| Заголовок | Значение |
+|-----------|----------|
+| `Accept` | `application/json` |
+| `ES-Request-Source` | `Website` |
+| `Authorization` | `Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==` |
+
+## Модель ответа
+
+Без тела ответа (status 200 OK).
+
+## Пример curl
+
+```bash
+curl -X POST \
+  --header 'Accept: application/json' \
+  --header 'Content-Type: application/json' \
+  --header 'ES-Request-Source: Website' \
+  --header 'Authorization: Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==' \
+  --data '{
+    "isbuilding": false,
+    "iscounter": false,
+    "message": "NoPower",
+    "comment": "",
+    "phone": "79025151311"
+  }' \
+  'https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/6907038b-9b49-11e4-a084-d8d385e6fca3/disconnection_report_info'
+```
