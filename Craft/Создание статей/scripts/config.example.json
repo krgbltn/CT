@@ -1,0 +1,17 @@
+{
+  "host": "https://cloud.craft-talk.ru/api/external",
+  "project": "PROJECT_ID",
+  "catalog_code": "classifier-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+  "ext_source": "MY_SOURCE",
+  "xlsx": "C:\\path\\to\\data.xlsx",
+  "sheet": "Лист1",
+  "rows": {"start": 2, "end": 200, "skip": []},
+  "columns": {"theme": 1, "question": 2, "answer": 4, "examples": 5},
+  "ext_ids": {
+    "theme": "{src}-1e-t{n}",
+    "question": "{src}-1e-q{row}"
+  },
+  "publish_themes": true,
+  "add_markup": true,
+  "report": "import_report.csv"
+}

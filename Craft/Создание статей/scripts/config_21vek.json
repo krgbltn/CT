@@ -1,0 +1,17 @@
+{
+  "host": "https://cloud.craft-talk.ru/api/external",
+  "project": "asopov",
+  "catalog_code": "classifier-19d9ad70-4cbc-4857-87e7-258c0af93eff",
+  "ext_source": "21vek",
+  "xlsx": "D:\\сигурд\\21 век\\Тематики Триовист.xlsx",
+  "sheet": "Тематики 1 Этап",
+  "rows": {"start": 2, "end": 111, "skip": [109]},
+  "columns": {"theme": 1, "question": 2, "answer": 4, "examples": 5},
+  "ext_ids": {
+    "theme": "{src}-1e-t{n}",
+    "question": "{src}-1e-q{row}"
+  },
+  "publish_themes": true,
+  "add_markup": true,
+  "report": "D:\\сигурд\\21 век\\import_report.csv"
+}
