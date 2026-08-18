@@ -1,0 +1,78 @@
+{
+    "api": {
+        "url_context_search": "http://contextsearch:8801",
+        "url_llm": "http://craftgpt-yandex:3020",
+        "llm_auth_token": "~~secret~~"
+    },
+    "customer_id": "bank_soyuz",
+    "agent_name": "gpt_bank_soyuz",
+    "llm_settings": {
+        "timeout": 58,
+        "temperature": 0.2,
+        "temperature_smalltalk": 0.2,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "max_tokens": null
+    },
+    "context_settings": {
+        "LAST_CONTEXT_PRICE": 0.19,
+        "OTHER_CONTEXT_PRICE": 3.1,
+        "ADD_OTHER_CONTEXT": false,
+        "MAX_CONTEXTS": 10,
+        "MAX_COMPLEX_SCENARIOS": 5,
+        "MAX_COMPLEX_QUESTION_EXAMPLES_LENGTH": 1000,
+        "CONTEXT_FROM_SCENARIOS": false,
+        "ADD_COMPLEX_SCENARIOS_TO_TOOLS": false,
+        "FILTERS": [
+            [{
+                "field": "symbol_code",
+                "condition": "must",
+                "values": []
+            }]
+        ],
+        "RECORD_TYPE": "gpt_tst"
+    },
+    "agent_parameters": {
+        "DEBUG": true,
+        "DO_REPHRASE": true,
+        "REPHRASE_N_GENERATIONS": 2,
+        "REPHRASE_SAMPLES_PER_GENERATION": 6,
+        "ENABLE_THINKING_SMALLTALK": false,
+        "ENABLE_THINKING_RAG": true,
+        "SHOW_THINKING": false,
+        "MAX_CYCLES": 5,
+        "SMALLTALK_IF_NO_CONTEXT": true,
+        "SHOW_CONTEXT": true,
+        "SHOW_REFERENCES": false,
+        "USE_HISTORY": true,
+        "HISTORY_FROM_BOT_MEDIATOR": false,
+        "CATALOG_IDS": null,
+        "TAGS": null,
+        "USE_RAG": true
+    },
+    "standard_messages": {
+        "DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",
+        "TIMEOUT_ERROR_MSG": "Извините за задержку! Похоже, запрос занял больше времени, чем ожидалось. Пожалуйста, попробуйте снова позже.",
+        "MESSAGE_CANCEL_WAITING": "Готов ответить на ваш следующий вопрос! Чем ещё могу помочь?",
+        "NO_CONTEXT_TEXT": "К сожалению я не знаю ответ на ваш вопрос. попробуйте задать вопрос иначе."
+    },
+    "proxy": {
+        "USE_PROXY": false
+    },
+    "slots": {
+        "agent_slots": {
+            "SCENARIO_RESULT": "scenario_result",
+            "SCENARIO_SOURCE": "scenario_source"
+        },
+        "use_slots": false,
+        "user_slots_placeholder": "## Слоты:",
+        "user_slots": []
+    },
+    "articles": {
+        "TRANSFER_FOR_OPERATOR": {
+            "ID": "",
+            "NAME": ""
+        }
+    }
+}

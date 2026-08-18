@@ -1,0 +1,81 @@
+{
+    "api": {
+        "base_url": "https://chat.idabot.ru",
+        "url_context_search": "http://contextsearch:8801",
+        "url_llm": "http://craftgpt:3020",
+        "llm_auth_token": "kjtcCq6d8yKS6d5ylOHYOCAKKkwze1OJ3r7s7FpdNYA",
+        "url_mediator_service": "http://opbot-botmediator:8080"
+    },
+    "customer_id": "idadocs",
+    "agent_name": "gpt",
+    "llm_settings": {
+        "timeout": 68,
+        "temperature": 0.5,
+        "temperature_smalltalk": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "max_tokens": null
+    },
+    "context_settings": {
+        "LAST_CONTEXT_PRICE": 0.19,
+        "OTHER_CONTEXT_PRICE": 3.1,
+        "ADD_OTHER_CONTEXT": true,
+        "MAX_CONTEXTS": 10,
+        "MAX_COMPLEX_SCENARIOS": 5,
+        "MAX_COMPLEX_QUESTION_EXAMPLES_LENGTH": 1000,
+        "CONTEXT_FROM_SCENARIOS": false,
+        "ADD_COMPLEX_SCENARIOS_TO_TOOLS": false,
+        "FILTERS": [
+            [
+                {
+                    "field": "symbol_code",
+                    "condition": "must",
+                    "values": []
+                }
+            ]
+        ],
+        "RECORD_TYPE": null,
+        "CATALOG_IDS": ["classifier-f405109f-18f2-4326-b7a0-7354820101a3"]
+    },
+    "agent_parameters": {
+        "DEBUG": true,
+        "DO_REPHRASE": true,
+        "REPHRASE_N_GENERATIONS": 3,
+        "REPHRASE_SAMPLES_PER_GENERATION": 3,
+        "ENABLE_THINKING_SMALLTALK": true,
+        "ENABLE_THINKING_RAG": true,
+        "SHOW_THINKING": false,
+        "MAX_CYCLES": 5,
+        "SMALLTALK_IF_NO_CONTEXT": true,
+        "SHOW_CONTEXT": false,
+        "SHOW_REFERENCES": false,
+        "USE_HISTORY": true,
+        "HISTORY_FROM_BOT_MEDIATOR": false,
+        "DEFINE_TOPIC": false,
+        "USE_RAG": true,
+        "SHARE_ID": null,
+        "URL_REPLACE_FROM": null,
+        "URL_REPLACE_TO": null
+    },
+    "standard_messages": {
+        "DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",
+        "TIMEOUT_ERROR_MSG": "Извините за задержку! Похоже, запрос занял больше времени, чем ожидалось. Пожалуйста, попробуйте снова позже.",
+        "MESSAGE_CANCEL_WAITING": "Готов ответить на ваш следующий вопрос! Чем ещё могу помочь?",
+        "NO_CONTEXT_TEXT": "К сожалению я не смог найти ответ в Базе Знаний. Попробуйте задать вопрос иначе."
+    },
+    "proxy": {
+        "USE_PROXY": false,
+        "url": "proxy.example.com",
+        "port": 3128
+    },
+    "slots": {
+        "agent_slots": {
+            "SCENARIO_RESULT": "scenario_result"
+        },
+        "use_slots": false,
+        "user_slots_placeholder": "## Слоты:",
+        "user_slots": []
+    },
+    "articles": {}
+}

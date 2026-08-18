@@ -1,0 +1,13 @@
+{
+  "url_context_search": "http://contextsearch:8801",
+  "url_llm": "http://craftgpt:3020",
+  "url_mediator_service": "http://opbot-botmediator:8080/webhooks/mediator/messages",
+  "llm_auth_token": "<TOKEN>",
+  "llm_timeout": 200,
+  "llm_temperature": 0.3,
+  "isThinking": false,
+  "isSupport": false,
+  "base_url": "https://cloud.craft-talk.ru",
+  "customer_id": "<CUSTOMER>",
+  "record_type": "<RECORD>"
+}
