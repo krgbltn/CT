@@ -29,7 +29,8 @@
 	"agent_parameters": {
 		"DEBUG": false,
 		"DO_REPHRASE": false,
-		"ENABLE_THINKING_SMALLTALK": true,
+		"ENABLE_THINKING_SMALLTALK": false,
+		"ENABLE_THINKING_RAG": false,
 		"SHOW_THINKING": false,
 		"MAX_CYCLES": 5,
 		"SMALLTALK_IF_NO_CONTEXT": true,
@@ -71,7 +72,7 @@
 	},
 	"articles": {
 		"TRANSFER_FOR_OPERATOR": {
-			"ID": "article-abae67bd-9f73-4157-afbb-582248506ae9",
+			"ID": "article-319a599c-5931-42a4-aeae-6aa55f9970c9",
 			"NAME": "Перевод на оператора"
 		}
 	}

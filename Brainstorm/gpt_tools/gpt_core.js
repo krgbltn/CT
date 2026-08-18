@@ -2483,9 +2483,6 @@ async function sendMessageToLLM(question, dialog_id, history, replies, opts = {}
         if (use_smalltalk) {
             response = await smalltalk(question, dialog_id, history, replies)
             await _printResponse(response, replies)
-            if (!use_rag) {
-                replies.markdownReply(`_Внимание! При ответе не использовалась база знаний_`)
-            }
             return response
         } else {
             replies.markdownReply(NO_CONTEXT_TEXT)
