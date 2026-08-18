@@ -1,0 +1,78 @@
+{
+	"api": {
+		"base_url": "https://cloud.craft-talk.ru",
+		"url_context_search": "http://contextsearch:8801",
+		"url_llm": "http://craftgpt:3020",
+		"llm_auth_token": "SKfLcuNKrmGzbP9pKgVpi7aMq8ciESn1Xgzm6xAq8y8"
+	},
+	"customer_id": "brainstorm",
+	"agent_name": "gpt_brainstorm",
+	"llm_settings": {
+		"timeout": 58,
+		"temperature": 0.5,
+		"temperature_smalltalk": 0.6,
+		"top_p": 0.95,
+		"top_k": 20,
+		"min_p": 0,
+		"max_tokens": null
+	},
+	"context_settings": {
+		"LAST_CONTEXT_PRICE": 0.19,
+		"OTHER_CONTEXT_PRICE": 3.1,
+		"ADD_OTHER_CONTEXT": false,
+		"MAX_CONTEXTS": 10,
+		"RECORD_TYPE": null,
+		"CATALOG_IDS": null,
+		"TAGS": null,
+		"FILTERS": []
+	},
+	"agent_parameters": {
+		"DEBUG": false,
+		"DO_REPHRASE": false,
+		"ENABLE_THINKING_SMALLTALK": true,
+		"SHOW_THINKING": false,
+		"MAX_CYCLES": 5,
+		"SMALLTALK_IF_NO_CONTEXT": true,
+		"SHOW_REFERENCES": false,
+		"SHOW_CONTEXT": false,
+		"USE_HISTORY": true
+	},
+	"standard_messages": {
+		"DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",
+		"TIMEOUT_ERROR_MSG": "Извините за задержку! Похоже, запрос занял больше времени, чем ожидалось. Пожалуйста, попробуйте снова позже.",
+		"NO_CONTEXT_TEXT": "К сожалению я не знаю ответ на ваш вопрос. Попробуйте задать вопрос иначе."
+	},
+	"products": {
+		"grunbaum": {
+			"name": "TPMS TPMSMAN",
+			"description": "Датчики и программаторы TPMS TPMSMAN (собственное производство BRAINSTORM)",
+			"queue": "tpmsman"
+		},
+		"autell": {
+			"name": "AUTEL TPMS",
+			"description": "Программаторы датчиков давления в шинах AUTEL (MaxiTPMS серия)",
+			"queue": "autel"
+		},
+		"jaltest": {
+			"name": "JALTEST",
+			"description": "Диагностическое оборудование JALTEST",
+			"queue": "диагностическое"
+		},
+		"autel_diag": {
+			"name": "AUTEL Diagnostic",
+			"description": "Диагностическое оборудование AUTEL (MaxiSYS, MaxiDAS, MaxiIM, MaxiBAS, Maxivideo, ADAS)",
+			"queue": "диагностическое"
+		},
+		"launch": {
+			"name": "LAUNCH",
+			"description": "Диагностическое оборудование LAUNCH (X-431 PAD/PRO, BST, CReader, ADAS)",
+			"queue": "диагностическое"
+		}
+	},
+	"articles": {
+		"TRANSFER_FOR_OPERATOR": {
+			"ID": "article-abae67bd-9f73-4157-afbb-582248506ae9",
+			"NAME": "Перевод на оператора"
+		}
+	}
+}
