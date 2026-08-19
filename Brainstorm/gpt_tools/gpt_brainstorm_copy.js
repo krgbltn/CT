@@ -267,6 +267,9 @@ function buildSyntheticContext(question) {
 
 const _coreCallLLM = _callLLM
 _callLLM = async function(url, data, replies, extraErrorHandling = null) {
+    if (data && data.max_tokens === null) {
+        delete data.max_tokens
+    }
     logger.debug(`Body POST ${url}: ${JSON.stringify(data, null, 2)}`)
     return _coreCallLLM(url, data, replies, extraErrorHandling)
 }
@@ -284,6 +287,7 @@ async function sendMessageToLLM(question, dialog_id, history, replies, opts = {}
     } = opts
 
     history = buildLLMHistory(history, [])
+    if (history === null) history = []
 
     let contextsearch_texts = question
     if (use_rephrase) {
