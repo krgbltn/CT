@@ -5,13 +5,17 @@ const {
 	authorizationToken,
 	requestBody = {},
 	slotsMapping = [],
-	nextArticle
+	nextArticle,
+	operatorArticle
 } = agentSettings
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(slot => slot.slot_id === slotId)?.value
 
 const nextArticleReply = (slots) =>
 	agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${nextArticle}"`, undefined, undefined, slots)
+
+const operatorTransferReply = () =>
+	agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${operatorArticle}"`)
 
 const normalizePath = (path) => {
 	if (path === undefined || path === null || path === "" || path === "$") {
@@ -173,6 +177,12 @@ const main = async () => {
 	logger.info(`Created request body: ${JSON.stringify(body)}`)
 
 	const responseData = await sendRequest(requestUrl, body)
+
+	if (!responseData) {
+		logger.warn('No response data or request failed')
+		return [operatorTransferReply()]
+	}
+
 	logger.info(`Got response data: ${JSON.stringify(responseData || {})}`)
 
 	let filledSlots = fillSlotsFromRequest(responseData)
@@ -209,5 +219,5 @@ main()
 	.then(res => resolve(res))
 	.catch(error => {
 		logger.error({ stack: error.stack }, `Error when execute main func. ${error}`)
-		resolve([nextArticleReply({ final_answer: 'error' })])
+		resolve([operatorTransferReply()])
 	})
