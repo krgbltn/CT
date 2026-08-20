@@ -1,0 +1,20 @@
+{
+  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id_tst}}/disconnection_report_info",
+  "method": "post",
+  "nextArticle": "",
+  "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
+  "requestBody": {
+    "is_building": "{{slots.is_building}} || false",
+    "is_counter": "{{slots.is_counter}} || false",
+    "message": "{{slots.message}} || NoPower",
+    "comment": "{{slots.comment}} || ''",
+    "phone": "{{slots.phone}}"
+  },
+  "slotsMapping": [],
+  "authorizationToken": "Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==",
+  "headers": {
+    "ES-Request-Source": "Website",
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  }
+}

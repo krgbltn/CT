@@ -71,7 +71,7 @@ function moduleParams(code) {
 export function loadModulesForMock(modelName = 'qwen') {
   const file = MODEL_FILES[modelName]
   if (!file) throw new Error(`Unknown model: ${modelName}; known: ${Object.keys(MODEL_FILES).join(', ')}`)
-  const core = readRepo('gpt_core.js')
+  const core = readRepo('gpt_core_brainstorm.js')
   const model = readRepo(file)
   return {
     [MODULE_IDS.CORE]: moduleParams(core),

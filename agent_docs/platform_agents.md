@@ -121,7 +121,7 @@ An article can be a FAQ answer, a scenario script, a structured response, or any
 2. **Multiple aiassist2 instances may manage different article sets** — use the correct `aiassistAgentId` for the target knowledge base.
 
 ```js
-// settings.json declares these so the operator can configure them in the UI:
+// rest_settings.json declares these so the operator can configure them in the UI:
 // { "aiassist_agent_id": "...", "welcome_article_code": "..." }
 
 const transfer = agentApi.makeArticleReplyAndSendToBot(

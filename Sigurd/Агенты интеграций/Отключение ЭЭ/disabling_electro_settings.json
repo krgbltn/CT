@@ -1,11 +1,13 @@
 {
-  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id}}/disconnections_electro",
+  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id_tst}}/disconnections_electro",
   "method": "get",
   "nextArticle": "article-aba26765-2c58-47c8-b5c3-7aca6143c44f",
+  "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
   "slotsMapping": [
     { "slotId": "debt", "path": "debt" },
     { "slotId": "house_type", "path": "house_type" },
     { "slotId": "disconnection_text", "path": "disconnection.text" },
+    { "slotId": "disconnection_type", "path": "disconnection.type" },
     { "slotId": "work_type", "path": "disconnection.work_type" }
   ],
   "authorizationToken": "Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==",
