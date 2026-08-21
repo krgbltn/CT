@@ -1,0 +1,14 @@
+{
+  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id_tst}}/info",
+  "method": "get",
+  "nextArticle": "article-aba26765-2c58-47c8-b5c3-7aca6143c44f",
+  "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
+  "slotsMapping": [
+    { "slotId": "is_owner_registered", "path": "account.is_owner_registered" }
+  ],
+  "authorizationToken": "Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==",
+  "headers": {
+    "ES-Request-Source": "Website",
+    "Accept": "application/json"
+  }
+}
