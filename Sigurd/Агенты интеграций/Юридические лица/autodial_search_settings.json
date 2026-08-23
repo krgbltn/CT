@@ -1,0 +1,14 @@
+{
+  "url": "https://autocalls.enplus.group/api/kc/debt-call?phone={{slots.phone_ul}}&ul=1",
+  "method": "get",
+  "phoneSlotId": "phone_ul",
+  "slots": {
+    "ls": "autodial_ls"
+  },
+  "nextArticle": "article-aba26765-2c58-47c8-b5c3-7aca6143c44f",
+  "timeoutMs": 3000,
+  "headers": {
+    "Accept": "application/json",
+    "X-API-Key": "<КЛЮЧ_X_API_KEY_ПЕРЕДАН_ОТДЕЛЬНО>"
+  }
+}

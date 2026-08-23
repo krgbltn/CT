@@ -1,7 +1,7 @@
-// https://cloud.craft-talk.ru/webchat/channel_4c4159d
+// prod
 
 const {
-    phoneSlotId: PHONE_SLOT_ID,
+    numberSlotId: NUMBER_SLOT_ID,
     url: INCOMING_API,
     slots: SLOTS,
     nextArticle: NEXT_ARTICLE,
@@ -155,7 +155,7 @@ const extractInfoFromResponse = async (parsedData) => {
     return { contracts: contractsInfoArr.map(info => info.No), contractIdMap } // возвращаем номер лицевого счета
 }
 
-const getContractsInfoByPhone = async (phoneNumber) => {
+const getContractsInfoByContract = async (contractNumber) => {
     const requestBody = {
         "@": {
             "xmlns:soapenv": "http://schemas.xmlsoap.org/soap/envelope/",
@@ -163,15 +163,15 @@ const getContractsInfoByPhone = async (phoneNumber) => {
         },
         "soapenv:Header": "",
         "soapenv:Body": {
-            "tem:GetContractsInfo_By_Phone": {
-                "tem:PhoneNumber": phoneNumber
+            "tem:FindAllByContractNumber": {
+                "tem:contractNumberDigits": Number(contractNumber)
             }
         }
     }
 
     const xmlData = parseJsonToXml("soapenv:Envelope", requestBody)
     logger.info(`Created xml data: ${JSON.stringify(xmlData)}`)
-    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/GetContractsInfo_By_Phone')
+    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/FindAllByContractNumber')
     logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
     if (!xmlResponse) {
@@ -370,7 +370,7 @@ const getSlots = (mdsInfo, contract) => {
     for (const nom of Object.keys(mdsInfo)) {
         let scaleInfo = mdsInfo[nom]?.MDScales?.MDScaleInfo
         logger.info(`Slots: ${JSON.stringify(scaleInfo)}`)
-         scaleInfo = Array.isArray(scaleInfo) ? scaleInfo[0] : scaleInfo
+        scaleInfo = Array.isArray(scaleInfo) ? scaleInfo[0] : scaleInfo
 
         if (!scaleInfo) {
             continue
@@ -420,19 +420,19 @@ const main = async () => {
     let contractsPagination
 
     if (!storedContracts) {
-        let phoneNumber = "79025151311"//getSlotValueById(PHONE_SLOT_ID)
-        logger.info(`Got phone number ${phoneNumber}`)
+        let contractNumber = getSlotValueById(NUMBER_SLOT_ID)
+        logger.info(`Got contract number ${contractNumber}`)
 
         if (getDebug()) {
-            phoneNumber = "78005553535"
+            contractNumber = "11189"
         }
 
-        if (!phoneNumber) {
-            logger.info(`Phone not found`)
+        if (!contractNumber) {
+            logger.info(`Contract number not found`)
             return [routingToOperatorAnswer]
         }
 
-        const { contracts, contractIdMap } = await getContractsInfoByPhone(phoneNumber) // получили список лицевых счетов
+        const { contracts, contractIdMap } = await getContractsInfoByContract(contractNumber) // получили список лицевых счетов
 
         if (getDebug()) {
             for (let i = 0; i < getDebug().contractsCount; i++) {

@@ -1,0 +1,22 @@
+{
+  "phoneSlotId": "sys_phone",
+  "url": "https://asuse-test.ie.corp/IVR.asmx",
+  "slots": {
+    "authSuccess": "successful_identification",
+    "contract": "account_number",
+    "electro": "number_electricity_meter",
+    "electroLast": "recent_electricity",
+    "electroScale": "scale_electricity",
+    "hw": "number_hot_water",
+    "hwLast": "recent_hot_water",
+    "hwScale": "scale_hot_water",
+    "cw": "number_cold_water",
+    "cwLast": "recent_cold_water",
+    "cwScale": "scale_cold_water",
+    "heating": "number_heating",
+    "heatingLast": "recent_heating",
+    "heatingScale": "scale_heating"
+  },
+  "nextArticle": "article-c45ef64c-075d-4d0e-8da9-98d8914df244",
+  "debug": {}
+}

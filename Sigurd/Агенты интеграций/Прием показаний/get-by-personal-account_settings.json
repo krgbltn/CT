@@ -1,5 +1,5 @@
 {
-  "phoneSlotId": "sys_phone",
+  "numberSlotId": "account_number",
   "url": "https://asuse-test.ie.corp/IVR.asmx",
   "slots": {
     "authSuccess": "successful_identification",

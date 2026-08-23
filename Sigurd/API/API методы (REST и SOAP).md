@@ -4,8 +4,10 @@
 
 | Поверхность | Сервис | Транспорт |
 |-------------|--------|-----------|
-| **REST API** | `webapisbytfl.dev.enplus.digital` | HTTP JSON |
+| **REST API (ФЛ)** | `webapisbytfl.dev.enplus.digital` | HTTP JSON |
+| **REST API (ЮЛ)** | `webapisbytul.dev.enplus.digital` | HTTP JSON |
 | **SOAP API** | `https://asuse-test.ie.corp/IVR.asmx` | SOAP 1.1 XML |
+| **Автообзвон КЦ** | `autocalls.enplus.group` | HTTP JSON, X-API-Key |
 
 ---
 
@@ -1315,6 +1317,115 @@ curl -X POST \
   }' \
   'https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/6907038b-9b49-11e4-a084-d8d385e6fca3/reconciliation_act'
 ```
+
+---
+
+# REST API (ЮЛ)
+
+Раздел `UrSigurd` Swagger-спецификации юрлиц. Развёрнутые описания: `Rest/ur_abonents_by_phone.md`, `Rest/ur_abonents_by_inn.md`, `Rest/ur_info.md`.
+
+Базовый URL:
+
+```
+https://webapisbytul.dev.enplus.digital
+```
+
+## Общие заголовки REST (ЮЛ)
+
+| Заголовок | Значение |
+|-----------|----------|
+| `Accept` | `application/json` |
+| `ES-Request-Source` | `Website` |
+| `Authorization` | `Basic <токен>` — значение уточнить у бэкенда ЮЛ |
+
+## Сводная таблица REST (ЮЛ)
+
+| Метод | URL | Описание |
+|-------|-----|----------|
+| GET | `/api/service/sigurd/ur/abonents_by_phone?phone={phone}` | Идентификационные данные юрлица и его ЛС по номеру телефона |
+| GET | `/api/service/sigurd/ur/abonents_by_inn?inn={inn}` | Идентификационные данные юрлица и его ЛС по ИНН |
+| GET | `/api/service/sigurd/ur/{user_id}/info` | Информация по лицевым счетам идентифицированного клиента |
+
+## abonents_by_phone (ЮЛ)
+
+Поиск юрлица и его лицевых счетов по номеру телефона.
+
+### HTTP-запрос
+
+```
+GET /api/service/sigurd/ur/abonents_by_phone?phone={phone}
+```
+
+### Параметры запроса
+
+| Параметр | Тип | Описание |
+|----------|-----|----------|
+| `phone` | string | Номер телефона абонента |
+
+### Модель ответа
+
+Массив `CompanyObjectAuthData { UserId (string), IsRegistered (boolean), WebProperties (Array[CompanyContractObjectAuthData { ContractId, ContractNo }]) }`.
+
+## abonents_by_inn (ЮЛ)
+
+Поиск юрлица и его лицевых счетов по ИНН.
+
+### HTTP-запрос
+
+```
+GET /api/service/sigurd/ur/abonents_by_inn?inn={inn}
+```
+
+### Параметры запроса
+
+| Параметр | Тип | Описание |
+|----------|-----|----------|
+| `inn` | string | ИНН организации |
+
+### Модель ответа
+
+Массив `CompanyObjectAuthData` — как в abonents_by_phone.
+
+## ur_info (ЮЛ)
+
+Информация по лицевым счетам идентифицированного клиента-юрлица.
+
+### HTTP-запрос
+
+```
+GET /api/service/sigurd/ur/{user_id}/info
+```
+
+### Параметры пути
+
+| Параметр | Тип | Описание |
+|----------|-----|----------|
+| `user_id` | string (uuid) | Идентификатор пользователя из abonents_by_phone / abonents_by_inn |
+
+### Модель ответа
+
+Массив `ContractInfo { id, number, contract_date (дд.мм.гггг), status, service (integer), service_name, department_id, division_id, balance (минус — долг, плюс — переплата), business_process_status (None \| Signing \| Checking \| UnderConsideration \| Signed \| Active \| Revoked), is_tech_connection_active, allowed_actions (Array[string]), is_temporary, hidden }`.
+
+---
+
+# Сервис автообзвона КЦ
+
+Внешний относительно Sigurd сервис для Голосового меню КЦ. Полное описание: `KC/debt_call.md`. Авторизация — заголовок `X-API-Key` (ключ выдаётся отдельно и в документации не публикуется).
+
+Базовый URL:
+
+```
+https://autocalls.enplus.group
+```
+
+## Сводная таблица (автообзвон КЦ)
+
+| Метод | URL | Описание |
+|-------|-----|----------|
+| GET | `/api/kc/debt-call?ls={ls}&days={days}&ul={ul}` | Был ли успешный дозвон о задолженности за N суток — поиск по лицевому счёту |
+| GET | `/api/kc/debt-call?phone={phone}&days={days}&ul={ul}` | То же по телефону абонента; в ответе возвращается `ls` для озвучивания |
+
+Параметры: `ls` или `phone` (одно из двух), `days` — глубина 1…90 суток (по умолчанию 3), `ul` — `1` только ЮЛ / `0` только ФЛ / пусто — все. Ответ 200 в том числе при «не найдено» (`debt_call.exists = false`); 400/401/403/503 — ветка «данных нет», не повторять. Таймаут 3 с. Даты в поясе Иркутск (UTC+8).
 
 ---
 

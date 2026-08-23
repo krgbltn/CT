@@ -1,7 +1,7 @@
-// https://cloud.craft-talk.ru/webchat/channel_4c4159d
+// prod
 
 const {
-    numberSlotId: NUMBER_SLOT_ID,
+    phoneSlotId: PHONE_SLOT_ID,
     url: INCOMING_API,
     slots: SLOTS,
     nextArticle: NEXT_ARTICLE,
@@ -21,8 +21,8 @@ const getDebug = () => {
 const routingToOperatorAnswer = agentApi.makeTextReply("/switchredirect routingagent")
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
-        slot => slot.slot_id === slotId
-    )?.value
+    slot => slot.slot_id === slotId
+)?.value
 
 
 function createConfig(method, url, headers, data) {
@@ -97,29 +97,29 @@ const extractInfoFromResponse = async (parsedData) => {
                                 {
                                     "ID": "0e114d18-62b6-11e7-80de-00237d360000",
                                     "No": "103800120",
-                                    "Adress": "Нижний Новгород, ул.Челюскинцев, д.107, кв.917",
+                                    "Adress": "               ,   .           ,  .107,   .917",
                                     "Residents": "5",
                                     "FullArea": "19.17",
                                     "DateUpdate": "2022-11-03T15:36:43.76",
-                                    "Stove": "тип плиты не указан",
-                                    "Status": "Действует",
-                                    "AbonentName": "Марина",
-                                    "FirstName": "Тестовая",
-                                    "Patronimic": "Сергеевна",
+                                    "Stove": "                   ",
+                                    "Status": "         ",
+                                    "AbonentName": "      ",
+                                    "FirstName": "        ",
+                                    "Patronimic": "         ",
                                     "DivisionID": "9bad477b-26ee-11dc-8782-000423d10000"
                                 },
                                 {
                                     "ID": "4d21e098-fe41-11e6-80ce-002481f90000",
-                                    "No": "ЕТСОО200763",
-                                    "Adress": "Иркутск, ул.Бородина, д.79б, кв.17а",
+                                    "No": "     200763",
+                                    "Adress": "       ,   .        ,  .79 ,   .17 ",
                                     "Residents": "1",
                                     "FullArea": "19.60",
                                     "DateUpdate": "2022-07-08T11:50:24.923",
-                                    "Stove": "тип плиты не указан",
-                                    "Status": "Действует",
-                                    "AbonentName": "Анна",
-                                    "FirstName": "Перетест",
-                                    "Patronimic": "Михайловна",
+                                    "Stove": "                   ",
+                                    "Status": "         ",
+                                    "AbonentName": "    ",
+                                    "FirstName": "        ",
+                                    "Patronimic": "          ",
                                     "DivisionID": "f59a8382-235d-11e9-80c2-9457a550000"
                                 }
                             ]
@@ -142,7 +142,7 @@ const extractInfoFromResponse = async (parsedData) => {
     const contractsInfoArr = Array.isArray(contractsInfo)
         ? contractsInfo
         : (contractsInfo ? [contractsInfo] : [])
-    // сохраняем в стор ключ - номер лиц счета, знач - ид лиц счета
+    //                       -                ,      -
     const contractIdMap = contractsInfoArr.reduce((acc, cur) => {
         acc[cur.No] = cur.ID
         return acc
@@ -152,10 +152,10 @@ const extractInfoFromResponse = async (parsedData) => {
         CONTRACTS_KEY,
         JSON.stringify(contractIdMap)
     )
-    return { contracts: contractsInfoArr.map(info => info.No), contractIdMap } // возвращаем номер лицевого счета
+    return { contracts: contractsInfoArr.map(info => info.No), contractIdMap } //
 }
 
-const getContractsInfoByContract = async (contractNumber) => {
+const getContractsInfoByPhone = async (phoneNumber) => {
     const requestBody = {
         "@": {
             "xmlns:soapenv": "http://schemas.xmlsoap.org/soap/envelope/",
@@ -163,15 +163,15 @@ const getContractsInfoByContract = async (contractNumber) => {
         },
         "soapenv:Header": "",
         "soapenv:Body": {
-            "tem:FindAllByContractNumber": {
-                "tem:contractNumberDigits": Number(contractNumber)
+            "tem:GetContractsInfo_By_Phone": {
+                "tem:PhoneNumber": phoneNumber
             }
         }
     }
 
     const xmlData = parseJsonToXml("soapenv:Envelope", requestBody)
     logger.info(`Created xml data: ${JSON.stringify(xmlData)}`)
-    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/FindAllByContractNumber')
+    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/GetContractsInfo_By_Phone')
     logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
     if (!xmlResponse) {
@@ -183,10 +183,10 @@ const getContractsInfoByContract = async (contractNumber) => {
 }
 
 /**
-1 – ЭЭ
-2 – ГВС
-4 – ХВС
-21 – Отопление
+1
+2
+4
+21
  */
 const NOMENCLATURES = [1, 2, 4, 21]
 
@@ -204,12 +204,12 @@ const extractMdInfoFromResponse = async (parsedData) => {
                         "MDInfo": [
                             {
                                 "MDSerialNumber": "981",
-                                "MDInstallationLocation": "Кухня",
+                                "MDInstallationLocation": "     ",
                                 "MDNextVerificationDeadline": "2031-11-24T00:00:00",
                                 "MDScales": {
                                     "MDScaleInfo": {
                                         "MDScaleID": "7C46D77E-D2DE-11E9-80C2-9457A553D5EB",
-                                        "MDScaleName": "м3",
+                                        "MDScaleName": " 3",
                                         "MDSDigitsAfterDot": "3",
                                         "LastReadings": "2",
                                         "LastReadingsDate": "2025-12-20T14:20:35.973",
@@ -220,12 +220,12 @@ const extractMdInfoFromResponse = async (parsedData) => {
                             },
                             {
                                 "MDSerialNumber": "007",
-                                "MDInstallationLocation": "Санузел",
+                                "MDInstallationLocation": "       ",
                                 "MDNextVerificationDeadline": "2031-11-24T00:00:00",
                                 "MDScales": {
                                     "MDScaleInfo": {
                                         "MDScaleID": "A1E01E62-D2DE-11E9-80C2-9457A553D5EB",
-                                        "MDScaleName": "м3",
+                                        "MDScaleName": " 3",
                                         "MDSDigitsAfterDot": "3",
                                         "LastReadings": "40",
                                         "LastReadingsDate": "2025-12-20T14:21:06.77",
@@ -255,7 +255,7 @@ const extractMdInfoFromResponse = async (parsedData) => {
     return mdInfoArr[0]
 }
 
-// получаем данные счетчиков по лицевому счету
+//
 const getMDInfo = async (contractId, nomenclatureCode) => {
     const requestBody = {
         "@": {
@@ -279,12 +279,12 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
     if (getDebug()) {
         return {
             "MDSerialNumber": "007",
-            "MDInstallationLocation": "Санузел",
+            "MDInstallationLocation": "       ",
             "MDNextVerificationDeadline": "2031-11-24T00:00:00",
             "MDScales": {
                 "MDScaleInfo": {
                     "MDScaleID": "A1E01E62-D2DE-11E9-80C2-9457A553D5EB",
-                    "MDScaleName": "м3",
+                    "MDScaleName": " 3",
                     "MDSDigitsAfterDot": "3",
                     "LastReadings": "40",
                     "LastReadingsDate": "2025-12-20T14:21:06.77",
@@ -336,12 +336,12 @@ const getSlots = (mdsInfo, contract) => {
     /**
      * {
             "MDSerialNumber": "981",
-            "MDInstallationLocation": "Кухня",
+            "MDInstallationLocation": "     ",
             "MDNextVerificationDeadline": "2031-11-24T00:00:00",
             "MDScales": {
                 "MDScaleInfo": {
                     "MDScaleID": "7C46D77E-D2DE-11E9-80C2-9457A553D5EB",
-                    "MDScaleName": "м3",
+                    "MDScaleName": " 3",
                     "MDSDigitsAfterDot": "3",
                     "LastReadings": "2",
                     "LastReadingsDate": "2025-12-20T14:20:35.973",
@@ -368,7 +368,9 @@ const getSlots = (mdsInfo, contract) => {
     }
 
     for (const nom of Object.keys(mdsInfo)) {
-        const scaleInfo = mdsInfo[nom]?.MDScales?.MDScaleInfo
+        let scaleInfo = mdsInfo[nom]?.MDScales?.MDScaleInfo
+        logger.info(`Slots: ${JSON.stringify(scaleInfo)}`)
+        scaleInfo = Array.isArray(scaleInfo) ? scaleInfo[0] : scaleInfo
 
         if (!scaleInfo) {
             continue
@@ -418,19 +420,19 @@ const main = async () => {
     let contractsPagination
 
     if (!storedContracts) {
-        let contractNumber = getSlotValueById(NUMBER_SLOT_ID)
-        logger.info(`Got contract number ${contractNumber}`)
+        let phoneNumber = "89501074005"//getSlotValueById(PHONE_SLOT_ID)
+        logger.info(`Got phone number ${phoneNumber}`)
 
         if (getDebug()) {
-            contractNumber = "11189"
+            phoneNumber = "78005553535"
         }
 
-        if (!contractNumber) {
-            logger.info(`Contract number not found`)
+        if (!phoneNumber) {
+            logger.info(`Phone not found`)
             return [routingToOperatorAnswer]
         }
 
-        const { contracts, contractIdMap } = await getContractsInfoByContract(contractNumber) // получили список лицевых счетов
+        const { contracts, contractIdMap } = await getContractsInfoByPhone(phoneNumber) //
 
         if (getDebug()) {
             for (let i = 0; i < getDebug().contractsCount; i++) {
