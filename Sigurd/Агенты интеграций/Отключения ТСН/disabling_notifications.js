@@ -40,6 +40,23 @@ const renderTemplateString = (template) => {
 			if (value !== undefined && value !== null && value !== "") {
 				return value
 			}
+			continue
+		}
+
+		let hasEmptyValue = false
+		const renderedValue = templatePart.replace(/\{\{([\s\S]*?)}}/g, (_, expression) => {
+			const value = getTemplateValue(expression)
+
+			if (value === undefined || value === null || value === "") {
+				hasEmptyValue = true
+				return ""
+			}
+
+			return typeof value === "object" ? JSON.stringify(value) : value.toString()
+		})
+
+		if (!hasEmptyValue) {
+			return renderedValue
 		}
 	}
 
