@@ -34,6 +34,7 @@ phone — номер телефона (из слота `phone`)
 - user_id_tst — идентификатор лицевого счёта (UUID)
 - contract_no — номер лицевого счёта
 - address — полный адрес
+- city — город из `GET /info.account.house.address_object.city`
 - house_type — тип дома (OTHER/MKD/PRIVATE), из GET /disconnection_report_info
 - id_step — внутренний слот машины состояний (confirm_single / ask_multiple)
 - id_selected_index — индекс выбранного контракта
@@ -42,6 +43,7 @@ phone — номер телефона (из слота `phone`)
 ## Дополнительные запросы
 
 GET /{user_id}/disconnection_report_info — для получения house_type (тип дома)
+GET /{user_id}/info — для получения city (город из account.house.address_object.city)
 
 ## Логика
 

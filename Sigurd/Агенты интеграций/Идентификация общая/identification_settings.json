@@ -10,6 +10,7 @@
   ],
   "authorizationToken": "Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==",
   "disconnectionReportUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{user_id}/disconnection_report_info",
+  "infoUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{user_id}/info",
   "headers": {
     "ES-Request-Source": "Website",
     "Accept": "application/json"

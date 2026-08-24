@@ -9,6 +9,7 @@ const {
 	nextArticle,
 	operatorArticle,
 	disconnectionReportUrl,
+	infoUrl,
 	stub,
 	stubResponse
 } = agentSettings
@@ -231,6 +232,32 @@ const fetchHouseType = async (userId) => {
 	}
 }
 
+// --- Запрос города из карточки ЛС ---
+const fetchCity = async (userId) => {
+	if (!infoUrl || !userId) return undefined
+
+	if (stub && stubResponse) {
+		return "Иркутск"
+	}
+
+	try {
+		const requestUrl = infoUrl.replace("{user_id}", userId)
+		const requestHeaders = authorizationToken
+			? { ...headers, 'Authorization': authorizationToken }
+			: headers
+		const res = await axios({
+			url: requestUrl,
+			method: "get",
+			headers: requestHeaders,
+			httpsAgent: new https.Agent({ rejectUnauthorized: false })
+		})
+		return res?.data?.account?.house?.address_object?.city
+	} catch (error) {
+		logger.error({ stack: error.stack }, `Error when fetching city: ${error}`)
+		return undefined
+	}
+}
+
 // --- Слова для исключения при сравнении адресов ---
 const ADDRESS_STOPWORDS = [
 	'дом', 'ул', 'улица', 'кв', 'квартира',
@@ -281,8 +308,10 @@ const main = async () => {
 				const contract = contracts[idx]
 				if (!contract) return [operatorTransferReply()]
 				const filledSlots = fillSlotsFromContract(contract)
-				const houseType = await fetchHouseType(filledSlots.user_id)
+				const houseType = await fetchHouseType(filledSlots.user_id_tst)
 				if (houseType) filledSlots.house_type = houseType
+				const city = await fetchCity(filledSlots.user_id_tst)
+				if (city) filledSlots.city = city
 				logger.info(`Single contract confirmed, filled slots: ${JSON.stringify(filledSlots)}`)
 				return [nextArticleReply(filledSlots)]
 			}
@@ -301,8 +330,10 @@ const main = async () => {
 
 			if (matchedContract) {
 				const filledSlots = fillSlotsFromContract(matchedContract)
-				const houseType = await fetchHouseType(filledSlots.user_id)
+				const houseType = await fetchHouseType(filledSlots.user_id_tst)
 				if (houseType) filledSlots.house_type = houseType
+				const city = await fetchCity(filledSlots.user_id_tst)
+				if (city) filledSlots.city = city
 				logger.info(`Matched by address, filled slots: ${JSON.stringify(filledSlots)}`)
 				return [nextArticleReply(filledSlots)]
 			}
