@@ -11,8 +11,10 @@ const {
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(slot => slot.slot_id === slotId)?.value
 
-const nextArticleReply = (slots) =>
-	agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${nextArticle}"`, undefined, undefined, slots)
+const nextArticleReply = (slots) => {
+	const targetArticle = getSlotValueById("next_article") || nextArticle
+	return agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${targetArticle}"`, undefined, undefined, slots)
+}
 
 const operatorTransferReply = () =>
 	agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${operatorArticle}"`)
