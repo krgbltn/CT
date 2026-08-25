@@ -83,9 +83,9 @@ const sendRequest = async (requestUrl) => {
 }
 
 const main = async () => {
-	const userId = getSlotValueById("user_id_tst")
+	const userId = getSlotValueById("uid")
 	if (!userId) {
-		logger.warn('No user_id_tst found')
+		logger.warn('No uid found')
 		return [operatorTransferReply()]
 	}
 

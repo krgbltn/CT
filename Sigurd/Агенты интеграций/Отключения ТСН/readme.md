@@ -29,11 +29,11 @@
 - WebProperties.Address
 
 JSONPath для slotsMapping:
-- user_id_tst = [0].UserId
+- uid = [0].UserId
 - contract_no = [0].WebProperties.ContractNo
 - address = [0].WebProperties.Address
 
-Заполняемые слоты: user_id_tst, contract_no, address
+Заполняемые слоты: uid, contract_no, address
 
 Дополнительно: GET /{user_id}/disconnection_report_info для получения house_type.
 
@@ -120,7 +120,7 @@ JSONPath для slotsMapping:
 - REST GET /{user_id}/notifications — проверка наличия уведомлений
 - REST GET /{user_id}/info — получение ФИО
 
-Входные данные: user_id_tst (из слота, заполняется идентификацией)
+Входные данные: uid (из слота, заполняется идентификацией)
 
 Поля ответа info:
 - first_name, last_name, second_name

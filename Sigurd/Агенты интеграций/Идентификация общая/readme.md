@@ -25,15 +25,16 @@ phone — номер телефона (из слота `phone`)
 
 ## JSONPath для slotsMapping
 
-- user_id_tst = [0].UserId
+- uid = [0].UserId
 - contract_no = [0].WebProperties.ContractNo
 - address = [0].WebProperties.Address
 
 ## Заполняемые слоты
 
-- user_id_tst — идентификатор лицевого счёта (UUID)
+- uid — идентификатор лицевого счёта (UUID)
 - contract_no — номер лицевого счёта
 - address — полный адрес
+- status_ls — статус ЛС из `GET /info.status`
 - city — город из `GET /info.account.house.address_object.city`
 - house_type — тип дома (OTHER/MKD/PRIVATE), из GET /disconnection_report_info
 - id_step — внутренний слот машины состояний (confirm_single / ask_multiple)
@@ -64,6 +65,7 @@ GET /{user_id}/info — для получения city (город из account.
 #### confirm_single (один ЛС, ожидаем подтверждение)
 
 - Положительный ответ (да/ага/верно и т.д.) → заполнить слоты из контракта, получить house_type, перейти на nextArticle
+- Положительный ответ (да/ага/верно и т.д.) → заполнить слоты из контракта, получить status_ls, house_type, перейти на nextArticle
 - Отрицательный ответ (нет/не/другой и т.д.) → перевод на оператора
 - Непонятный ответ → повторить вопрос
 
@@ -73,6 +75,7 @@ GET /{user_id}/info — для получения city (город из account.
   - Разбить текст на слова, исключить стоп-слова и слова короче 3 символов
   - Проверить, что все слова найдены в адресе контракта
 - Если совпадение найдено → заполнить слоты, получить house_type, перейти на nextArticle
+- Если совпадение найдено → заполнить слоты, получить status_ls, house_type, перейти на nextArticle
 - Если совпадения нет → перевод на оператора
 
 ## Настройки (agentSettings)

@@ -44,16 +44,16 @@ const sendRequest = async (requestUrl) => {
 }
 
 const main = async () => {
-	const userId = getSlotValueById('user_id_tst')
+	const userId = getSlotValueById('uid')
 
 	if (!userId) {
-		logger.warn('user_id_tst slot is empty')
+		logger.warn('uid slot is empty')
 		return [operatorTransferReply()]
 	}
 
-	logger.info(`Using user_id_tst: ${userId}`)
+	logger.info(`Using uid: ${userId}`)
 
-	const infoRequestUrl = infoUrl.replace('{{slots.user_id_tst}}', userId)
+	const infoRequestUrl = infoUrl.replace('{{slots.uid}}', userId)
 	logger.info(`Info request url: ${infoRequestUrl}`)
 
 	const infoData = await sendRequest(infoRequestUrl)

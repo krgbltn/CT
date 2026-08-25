@@ -162,7 +162,7 @@ const main = async () => {
 	}
 
 	let filledSlots = fillSlotsFromRequest(firstContract)
-	filledSlots.user_id_tst = normalizeSlotValue(userId)
+	filledSlots.uid = normalizeSlotValue(userId)
 	filledSlots.final_answer = '1'
 
 	logger.info(`Filled slots: ${JSON.stringify(filledSlots)}`)

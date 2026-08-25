@@ -26,13 +26,13 @@
 - house → requestModel.houseName
 
 Поля ответа:
-- [0].UserId → user_id_tst
+- [0].UserId → uid
 - [0].WebProperties.ContractNo → contract_no
 
 JSONPath для slotsMapping:
 - contract_no = WebProperties.ContractNo
 
-Заполняемые слоты: user_id_tst, contract_no, final_answer
+Заполняемые слоты: uid, contract_no, final_answer
 
 ### Логика final_answer
 
@@ -56,7 +56,7 @@ JSONPath для slotsMapping:
 
 Метод API: REST GET /{user_id}/info
 
-Входные данные: user_id_tst (из слота)
+Входные данные: uid (из слота)
 
 Поля ответа:
 - status — статус ЛС ("Действует" / "Выключен")
@@ -65,7 +65,7 @@ JSONPath для slotsMapping:
 
 Метод API: REST GET /{user_id}/disconnection_report_info
 
-Входные данные: user_id_tst (из слота)
+Входные данные: uid (из слота)
 
 Поля ответа:
 - housetype — тип дома (OTHER / MKD / PRIVATE)
@@ -84,7 +84,7 @@ JSONPath для slotsMapping:
 
 ### Обработка ошибок
 
-- user_id_tst пустой → перевод на оператора
+- uid пустой → перевод на оператора
 - Ошибка запроса → перевод на оператора
 
 Перевод на оператора при ошибке: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"

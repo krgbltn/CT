@@ -19,7 +19,7 @@
 
 Метод API: REST GET /{user_id}/disconnections_electro
 
-Входные данные: user_id_tst (из слота)
+Входные данные: uid (из слота)
 
 Поля ответа:
 - disconnection.text — текст отключения
@@ -54,11 +54,10 @@ JSONPath для slotsMapping:
 
 Метод API: REST POST /{user_id}/disconnection_report_info
 
-Входные данные: user_id_tst (из слота)
+Входные данные: uid (из слота)
 
 Тело запроса (requestBody):
-- is_building (boolean) — отсутствие ЭЭ во всём доме / у соседей. Из слота is_building, fallback false
-- is_counter (boolean) — об отключении счётчика. Из слота is_counter, fallback false
+- is_building (boolean) — всегда `true`: заявка оформляется как отсутствие ЭЭ во всём доме / у соседей
 - message (string enum) — причина: NoPower / Invalid / FrequentShutdowns / Other / LightFlashes / NoPhase / LowVoltage. Из слота message, fallback NoPower
 - comment (string) — комментарий. Из слота comment
 - phone (string) — номер телефона. Из слота phone

@@ -258,6 +258,32 @@ const fetchCity = async (userId) => {
 	}
 }
 
+// --- Запрос status из карточки ЛС ---
+const fetchStatus = async (userId) => {
+	if (!infoUrl || !userId) return undefined
+
+	if (stub && stubResponse) {
+		return "Действует"
+	}
+
+	try {
+		const requestUrl = infoUrl.replace("{user_id}", userId)
+		const requestHeaders = authorizationToken
+			? { ...headers, 'Authorization': authorizationToken }
+			: headers
+		const res = await axios({
+			url: requestUrl,
+			method: "get",
+			headers: requestHeaders,
+			httpsAgent: new https.Agent({ rejectUnauthorized: false })
+		})
+		return res?.data?.status
+	} catch (error) {
+		logger.error({ stack: error.stack }, `Error when fetching status: ${error}`)
+		return undefined
+	}
+}
+
 // --- Слова для исключения при сравнении адресов ---
 const ADDRESS_STOPWORDS = [
 	'дом', 'ул', 'улица', 'кв', 'квартира',
@@ -308,9 +334,11 @@ const main = async () => {
 				const contract = contracts[idx]
 				if (!contract) return [operatorTransferReply()]
 				const filledSlots = fillSlotsFromContract(contract)
-				const houseType = await fetchHouseType(filledSlots.user_id_tst)
+				const status = await fetchStatus(filledSlots.uid)
+				if (status) filledSlots.status_ls = status
+				const houseType = await fetchHouseType(filledSlots.uid)
 				if (houseType) filledSlots.house_type = houseType
-				const city = await fetchCity(filledSlots.user_id_tst)
+				const city = await fetchCity(filledSlots.uid)
 				if (city) filledSlots.city = city
 				logger.info(`Single contract confirmed, filled slots: ${JSON.stringify(filledSlots)}`)
 				return [nextArticleReply(filledSlots)]
@@ -330,9 +358,11 @@ const main = async () => {
 
 			if (matchedContract) {
 				const filledSlots = fillSlotsFromContract(matchedContract)
-				const houseType = await fetchHouseType(filledSlots.user_id_tst)
+				const status = await fetchStatus(filledSlots.uid)
+				if (status) filledSlots.status_ls = status
+				const houseType = await fetchHouseType(filledSlots.uid)
 				if (houseType) filledSlots.house_type = houseType
-				const city = await fetchCity(filledSlots.user_id_tst)
+				const city = await fetchCity(filledSlots.uid)
 				if (city) filledSlots.city = city
 				logger.info(`Matched by address, filled slots: ${JSON.stringify(filledSlots)}`)
 				return [nextArticleReply(filledSlots)]

@@ -18,7 +18,7 @@
 
 Метод API: REST GET /info (`/api/service/sigurd/fl/{user_id}/info`)
 
-Входные данные: user_id_tst (из слота, заполняется идентификацией)
+Входные данные: uid (из слота, заполняется идентификацией)
 
 Поля ответа:
 - account.is_owner_registered — признак регистрации владельца в ЛК (boolean)
