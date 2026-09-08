@@ -1,4 +1,4 @@
-// prod
+﻿// prod
 
 const {
     phoneSlotId: PHONE_SLOT_ID,
@@ -25,6 +25,8 @@ const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
 )?.value
 
 const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
+
+const classifier = () => getSlotValueById("classifier")
 
 
 function createConfig(method, url, headers, data) {
@@ -457,7 +459,7 @@ const main = async () => {
         logger.info(`Empty contracts stored or got`)
         const slots = getSlots(undefined, undefined)
         return [
-            agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+            agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
         ]
     }
 
@@ -469,7 +471,7 @@ const main = async () => {
     await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
 
     return [
-        agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+        agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
     ]
 }
 

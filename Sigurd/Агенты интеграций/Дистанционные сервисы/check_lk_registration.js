@@ -1,3 +1,5 @@
+const classifier = () => getSlotValueById("classifier")
+
 const {
 	url,
 	method = "post",
@@ -12,11 +14,11 @@ const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(sl
 
 const nextArticleReply = (slots) => {
 	const targetArticle = getSlotValueById("next_article") || nextArticle
-	return agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${targetArticle}"`, undefined, undefined, slots)
+	return agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${targetArticle}"`, undefined, undefined, slots)
 }
 
 const operatorTransferReply = () =>
-	agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${operatorArticle}"`)
+	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`)
 
 const normalizePath = (path) => {
 	if (path === undefined || path === null || path === "" || path === "$") {

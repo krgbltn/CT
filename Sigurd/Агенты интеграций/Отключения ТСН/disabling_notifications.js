@@ -9,13 +9,15 @@ const {
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(slot => slot.slot_id === slotId)?.value
 
+const classifier = () => getSlotValueById("classifier")
+
 const nextArticleReply = (slots) => {
 	const targetArticle = getSlotValueById("next_article") || nextArticle
-	return agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${targetArticle}"`, undefined, undefined, slots)
+	return agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${targetArticle}"`, undefined, undefined, slots)
 }
 
 const operatorTransferReply = () =>
-	agentApi.makeTextReply(`/switchredirect aiassist2 intent_id="${operatorArticle}"`)
+	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`)
 
 const getTemplateValue = (expression) => {
 	const valuePath = expression.trim()
