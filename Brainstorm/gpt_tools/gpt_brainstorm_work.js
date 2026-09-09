@@ -29,7 +29,7 @@ BRAINSTORM — российская компания, которая прода�
 
 У вас есть доступ к следующим возможностям:
 
-1. **Инструменты действий** — вы можете выполнять конкретные действия через специальные инструменты (tools): поиск в базе знаний и перевод на оператора.
+1. **Инструменты действий** — вы можете выполнять конкретные действия через специальные инструменты (tools): поиск в базе знаний и перевод на оператора. Не говори пользователю об инструментах.
 
 # Доступные продукты
 
@@ -213,7 +213,7 @@ let TOOLS = [
                     "queries": {
                         "type": "array",
                         "items": { "type": "string" },
-                        "description": "Ровно 3 поисковых запроса на русском языке. Первый — оригинальный вопрос пользователя, второй и третий — его переформулировки для более точного поиска."
+                        "description": "Ровно 3 поисковых запроса на русском языке. Первый — оригинальный вопрос пользователя, второй и третий — его переформулировки для более точного поиска. Перефразы лучше придумывать без стоп-слов - так, как использовал бы в поисковике"
                     }
                 },
                 "required": ["product", "queries"]
@@ -271,6 +271,8 @@ _callLLM = async function(url, data, replies, extraErrorHandling = null) {
         delete data.max_tokens
     }
     logger.debug(`Body POST ${url}: ${JSON.stringify(data, null, 2)}`)
+    replies.debugReply(`Body POST ${url}: ${JSON.stringify(data, null, 2)}`)
+
     return _coreCallLLM(url, data, replies, extraErrorHandling)
 }
 
@@ -287,7 +289,8 @@ async function sendMessageToLLM(question, dialog_id, history, replies, opts = {}
     } = opts
 
     history = buildLLMHistory(history, [])
-    if (history === null) history = []
+    //if (history === null) history = []
+    // Это нарушает контракт craftgpt. history = [] - нет истории, начало диалога, history = null - история не передана, вязть из Redis-а.
 
     let contextsearch_texts = question
     if (use_rephrase) {

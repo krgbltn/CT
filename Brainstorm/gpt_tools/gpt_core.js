@@ -53,24 +53,24 @@ let {
 // --- Validators ---
 
 function validateHttpUrl(url) {
-  if (typeof url !== 'string') {
-    throw new TypeError('URL должен быть строкой')
-  }
-  if (!/^https?:\/\//i.test(url)) {
-    throw new Error('URL должен начинаться с http:// или https://')
-  }
-  return true
+    if (typeof url !== 'string') {
+        throw new TypeError('URL должен быть строкой')
+    }
+    if (!/^https?:\/\//i.test(url)) {
+        throw new Error('URL должен начинаться с http:// или https://')
+    }
+    return true
 }
 
 
 // --- Utilities ---
 
 let TRANS_MAP = {
-'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
-'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
-'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
-'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
-'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+    'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+    'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+    'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
+    'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
 }
 let CYRILLIC_REGEX = new RegExp(`[${Object.keys(TRANS_MAP).join('')}]`, 'g')
 
@@ -1509,7 +1509,7 @@ class SlotManager {
         const slotsBlock = userSlots.length > 0
             ? userSlots.map(s =>
                 `- ${s.slotId}. - ${s.slotDescription}: **${s.slotValue ?? 'не заполнено'}**`
-              ).join('\n')
+            ).join('\n')
             : '- Нет заполненных слотов'
         return template.replace(
             this.placeholder,

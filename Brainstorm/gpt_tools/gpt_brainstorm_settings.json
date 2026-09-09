@@ -29,9 +29,8 @@
 	"agent_parameters": {
 		"DEBUG": false,
 		"DO_REPHRASE": false,
-		"ENABLE_THINKING_SMALLTALK": false,
-		"ENABLE_THINKING_RAG": false,
-		"SHOW_THINKING": false,
+		"ENABLE_THINKING_SMALLTALK": true,
+		"SHOW_THINKING": true,
 		"MAX_CYCLES": 5,
 		"SMALLTALK_IF_NO_CONTEXT": true,
 		"SHOW_REFERENCES": false,
