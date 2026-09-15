@@ -1,5 +1,7 @@
 {
   "phoneSlotId": "sys_phone",
+  "useHardcodedPhone": true,
+  "hardcodedPhone": "89501074005",
   "url": "https://asuse-test.ie.corp/IVR.asmx",
   "slots": {
     "authSuccess": "successful_identification",

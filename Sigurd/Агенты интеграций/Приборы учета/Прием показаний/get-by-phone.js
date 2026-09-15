@@ -5,7 +5,9 @@ const {
     url: INCOMING_API,
     slots: SLOTS,
     nextArticle: NEXT_ARTICLE,
-    debug: DEBUG
+    debug: DEBUG,
+    useHardcodedPhone: USE_HARDCODED_PHONE,
+    hardcodedPhone: HARDCODED_PHONE
 } = agentSettings
 
 const getDebug = () => {
@@ -24,9 +26,9 @@ const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
     slot => slot.slot_id === slotId
 )?.value
 
-const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
+const getNextArticle = () => NEXT_ARTICLE
 
-const classifier = () => getSlotValueById("classifier")
+const CLASSIFIER = "ai_pribor"
 
 
 function createConfig(method, url, headers, data) {
@@ -40,7 +42,8 @@ function createConfig(method, url, headers, data) {
 }
 
 async function sendRequest(data, soapAction) {
-    logger.info('Start sending request')
+    logger.info(`Start sending request: soapAction=${soapAction}, url=${INCOMING_API}`)
+    logger.info(`SOAP request XML: ${data}`)
 
     const headers = {
         'Content-Type': 'text/xml; charset=utf-8',
@@ -56,6 +59,7 @@ async function sendRequest(data, soapAction) {
             logger.error(`Bad request : status - ${response.status} - ${response.syscall} ${response.code} ${response.hostname}`)
         } else {
             logger.info(`Send status : ${response.status}`)
+            logger.info(`SOAP raw response: ${response.data}`)
             return response.data
         }
     } catch (error) {
@@ -183,7 +187,10 @@ const getContractsInfoByPhone = async (phoneNumber) => {
     }
 
     const parsedResponse = await parseXmlToJson(xmlResponse)
-    return await extractInfoFromResponse(parsedResponse)
+    logger.info(`GetContractsInfo_By_Phone parsed response: ${JSON.stringify(parsedResponse)}`)
+    const result = await extractInfoFromResponse(parsedResponse)
+    logger.info(`GetContractsInfo_By_Phone extracted contracts: ${JSON.stringify(result)}`)
+    return result
 }
 
 /**
@@ -304,7 +311,10 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
     }
 
     const parsedResponse = await parseXmlToJson(xmlResponse)
-    return await extractMdInfoFromResponse(parsedResponse)
+    logger.info(`GetMDInfo parsed response for nomenclature ${nomenclatureCode}: ${JSON.stringify(parsedResponse)}`)
+    const result = await extractMdInfoFromResponse(parsedResponse)
+    logger.info(`GetMDInfo extracted meter for nomenclature ${nomenclatureCode}: ${JSON.stringify(result)}`)
+    return result
 }
 
 const getMDSInfo = async (contractId) => {
@@ -423,13 +433,13 @@ const main = async () => {
     storedContracts = storedContracts ? JSON.parse(storedContracts) : ""
     let contractsPagination
 
-    if (!storedContracts) {
-        let phoneNumber = "89501074005"//getSlotValueById(PHONE_SLOT_ID)
-        logger.info(`Got phone number ${phoneNumber}`)
+    logger.info(`Start main: storedContracts=${JSON.stringify(storedContracts)}, classifier=${CLASSIFIER}, nextArticle=${getNextArticle()}`)
 
-        if (getDebug()) {
-            phoneNumber = "78005553535"
-        }
+    if (!storedContracts) {
+        const phoneNumber = USE_HARDCODED_PHONE
+            ? HARDCODED_PHONE
+            : getSlotValueById(PHONE_SLOT_ID)
+        logger.info(`Got phone number ${phoneNumber}, source=${USE_HARDCODED_PHONE ? "hardcoded" : `slot:${PHONE_SLOT_ID}`}`)
 
         if (!phoneNumber) {
             logger.info(`Phone not found`)
@@ -437,6 +447,7 @@ const main = async () => {
         }
 
         const { contracts, contractIdMap } = await getContractsInfoByPhone(phoneNumber) //
+        logger.info(`Contracts received for phone ${phoneNumber}: ${JSON.stringify({ contracts, contractIdMap })}`)
 
         if (getDebug()) {
             for (let i = 0; i < getDebug().contractsCount; i++) {
@@ -449,29 +460,44 @@ const main = async () => {
 
         contractsPagination = { max: contracts.length, current: 1 }
         await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
+        logger.info(`Contracts pagination initialized: ${JSON.stringify(contractsPagination)}`)
         storedContracts = contractIdMap
     } else {
         contractsPagination = JSON.parse(await agentStorage.dialogStorage.get(CONTRACTS_PAGINATION_KEY))
         contractsPagination.current++
+        logger.info(`Contracts pagination incremented: ${JSON.stringify(contractsPagination)}`)
     }
 
     if (Object.keys(storedContracts).length === 0) {
         logger.info(`Empty contracts stored or got`)
         const slots = getSlots(undefined, undefined)
+        logger.info(`Redirect payload for empty contracts: ${JSON.stringify({ classifier: CLASSIFIER, nextArticle: getNextArticle(), slots })}`)
         return [
-            agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+            agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
         ]
     }
 
-    const mdsInfo = await getMDSInfo(Object.values(storedContracts)[contractsPagination.current - 1])
+    const selectedContractId = Object.values(storedContracts)[contractsPagination.current - 1]
+    const selectedContractNo = Object.keys(storedContracts)[contractsPagination.current - 1]
+    logger.info(`Selected contract: ${JSON.stringify({ selectedContractNo, selectedContractId, contractsPagination })}`)
+    const mdsInfo = await getMDSInfo(selectedContractId)
     logger.info(`Got mdsInfo ${JSON.stringify(mdsInfo)}`)
     const slots = getSlots(mdsInfo, Object.keys(storedContracts)[contractsPagination.current - 1])
     logger.info(`Filled slots: ${JSON.stringify(slots)}`)
 
     await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
+    logger.info(`Redirect payload: ${JSON.stringify({
+        classifier: CLASSIFIER,
+        nextArticle: getNextArticle(),
+        selectedContractNo,
+        selectedContractId,
+        contractsPagination,
+        mdsInfo,
+        slots
+    })}`)
 
     return [
-        agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+        agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
     ]
 }
 

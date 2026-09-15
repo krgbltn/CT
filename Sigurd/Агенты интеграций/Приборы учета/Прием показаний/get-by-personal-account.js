@@ -24,9 +24,9 @@ const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
         slot => slot.slot_id === slotId
     )?.value
 
-const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
+const getNextArticle = () => NEXT_ARTICLE
 
-const classifier = () => getSlotValueById("classifier")
+const CLASSIFIER = "ai_pribor"
 
 
 function createConfig(method, url, headers, data) {
@@ -142,7 +142,7 @@ const extractInfoFromResponse = async (parsedData) => {
         return []
     }
 
-    const contractsInfo = body["GetContractsInfo_By_PhoneResponse"]?.["GetContractsInfo_By_PhoneResult"]?.["ContractInfo"]
+    const contractsInfo = body["FindAllByContractNumberResponse"]?.["FindAllByContractNumberResult"]?.["ContractInfo"]
     const contractsInfoArr = Array.isArray(contractsInfo)
         ? contractsInfo
         : (contractsInfo ? [contractsInfo] : [])
@@ -459,7 +459,7 @@ const main = async () => {
         logger.info(`Empty contracts stored or got`)
         const slots = getSlots(undefined, undefined)
         return [
-            agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+            agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
         ]
     }
 
@@ -471,7 +471,7 @@ const main = async () => {
     await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
 
     return [
-        agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+        agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
     ]
 }
 
