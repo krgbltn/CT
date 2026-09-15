@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetContractsBalance_ByPhoneNumberResponse xmlns="http://tempuri.org/">
+            <GetContractsBalance_ByPhoneNumberResult>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>2706</ContractNumber>
+                    <Settlement>Братск</Settlement>
+                    <Address>Братск, Улица Лозовая, дом 3</Address>
+                    <ContragentName>ООО "Байкальская энергетическая компания"</ContragentName>
+                    <DicServiceGroupName>По услуге Теплоснабжения</DicServiceGroupName>
+                    <Balance>7825.28</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>2706</ContractNumber>
+                    <Settlement>Братск</Settlement>
+                    <Address>Братск, Улица Лозовая, дом 3</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По услуге Водоотведения</DicServiceGroupName>
+                    <Balance>331.00</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>2706</ContractNumber>
+                    <Settlement>Братск</Settlement>
+                    <Address>Братск, Улица Лозовая, дом 3</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По услуге Холодного водоснабжения</DicServiceGroupName>
+                    <Balance>258.85</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>2706</ContractNumber>
+                    <Settlement>Братск</Settlement>
+                    <Address>Братск, Улица Лозовая, дом 3</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По прочим услугам</DicServiceGroupName>
+                    <Balance>1251.34</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+            </GetContractsBalance_ByPhoneNumberResult>
+        </GetContractsBalance_ByPhoneNumberResponse>
+    </soap:Body>
+</soap:Envelope>

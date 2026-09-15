@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetContractsBalance_ByContractIDResponse xmlns="http://tempuri.org/">
+            <GetContractsBalance_ByContractIDResult>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>7455009</ContractNumber>
+                    <Settlement>Братск, Гидростроитель</Settlement>
+                    <Address>Переулок Черемховский 2-й, дом 14</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По прочим услугам</DicServiceGroupName>
+                    <Balance>3556.73</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+            </GetContractsBalance_ByContractIDResult>
+        </GetContractsBalance_ByContractIDResponse>
+    </soap:Body>
+</soap:Envelope>

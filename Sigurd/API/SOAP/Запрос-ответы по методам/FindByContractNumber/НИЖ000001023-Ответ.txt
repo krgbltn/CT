@@ -1,0 +1,104 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <FindByContractNumberResponse xmlns="http://tempuri.org/">
+         <FindByContractNumberResult>
+            <ContractCityAndAddress>
+               <ID>b9ec9bc1-d591-11e2-b3f3-001f29ceb871</ID>
+               <City>Байкальск</City>
+               <Address>Микрорайон Гагарина, дом 204, квартира 38</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>f81f2914-0d42-11e8-80be-9457a553d5eb</ID>
+               <City>Гидростроитель</City>
+               <Address>Улица Горького, дом 10, квартира 23</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>9c11ee6a-a8ab-11e2-ab44-001f29ceb871</ID>
+               <City>Железногорск-Илимский</City>
+               <Address>Квартал 10-й, дом 6, квартира 15</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>a838e72a-c46a-11e2-bc30-001f29ceb871</ID>
+               <City>Зима</City>
+               <Address>Улица Трактовая, дом 81А</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>4a1fbd46-3e48-11e9-80c2-9457a553d5eb</ID>
+               <City>Иркутск</City>
+               <Address>Улица Шпачека, дом 12, 9, квартира 37</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>bb35f421-3428-11e3-bf38-001f29ceb871</ID>
+               <City>Киренск</City>
+               <Address>Улица Коммунистическая, дом 19, квартира 2</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>54de60e8-88cd-11ee-8868-a036bc73e06a</ID>
+               <City>Куйтун</City>
+               <Address>Улица Саянская, дом 22</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>1747ae91-8fd3-11e8-80be-9457a553d5eb</ID>
+               <City>Лесной</City>
+               <Address>Переулок Люблинский, дом 2</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>fd8f1df8-c46d-11e2-bc30-001f29ceb871</ID>
+               <City>Саянск</City>
+               <Address>Микрорайон Юбилейный, дом 42, квартира 63</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>a501aef1-1434-11e1-bfd9-001e0bc27598</ID>
+               <City>Тайшет</City>
+               <Address>Улица Гагарина, дом 2, квартира 37</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>0c9fb5ab-2233-11e3-bf38-001f29ceb871</ID>
+               <City>Тулун</City>
+               <Address>Улица Ленина, дом 8, квартира 75</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>adeba0a3-0514-11e6-80c7-d8d385e69d7c</ID>
+               <City>Усолье-Сибирское</City>
+               <Address>Улица Машиностроителей, дом 20, 2, квартира 8</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>c323b23c-9312-11e2-be6b-0018717a3e54</ID>
+               <City>Усолье-Сибирское</City>
+               <Address>Улица Новаторов, дом 1</Address>
+               <SerialNumberOverCity>2</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>0f55799c-32e1-11e3-bf38-001f29ceb871</ID>
+               <City>Усть-Кут</City>
+               <Address>Улица Речников, дом 53, квартира 52</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>986c4d7f-91ce-11e3-93e9-001f29ceb871</ID>
+               <City>Усть-Ордынский</City>
+               <Address>Улица 8 Марта, дом 16, квартира 1</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>dd88bbec-d596-11e2-b3f3-001f29ceb871</ID>
+               <City>Шелехов</City>
+               <Address>Квартал 1-й, дом 1, квартира 23</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+         </FindByContractNumberResult>
+      </FindByContractNumberResponse>
+   </soap:Body>
+</soap:Envelope>

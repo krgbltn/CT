@@ -1,0 +1,14 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <FindByContractNumberResponse xmlns="http://tempuri.org/">
+         <FindByContractNumberResult>
+            <ContractCityAndAddress>
+               <ID>7dc89e76-92f1-11e2-8708-0050569b0089</ID>
+               <City>Гидростроитель</City>
+               <Address>Переулок Черемховский 2-й, дом 14</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+         </FindByContractNumberResult>
+      </FindByContractNumberResponse>
+   </soap:Body>
+</soap:Envelope>

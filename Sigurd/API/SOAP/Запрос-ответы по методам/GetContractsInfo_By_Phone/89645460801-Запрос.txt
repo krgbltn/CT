@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tem:GetContractsInfo_By_Phone>
+         <tem:PhoneNumber>89645460801</tem:PhoneNumber>
+      </tem:GetContractsInfo_By_Phone>
+   </soapenv:Body>
+</soapenv:Envelope>

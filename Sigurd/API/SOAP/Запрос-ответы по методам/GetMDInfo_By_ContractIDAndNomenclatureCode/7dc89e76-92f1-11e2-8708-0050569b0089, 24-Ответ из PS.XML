@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDInfo_By_ContractIDAndNomenclatureCodeResponse xmlns="http://tempuri.org/">
+            <GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+                <MDInfo>
+                    <MDSerialNumber>173</MDSerialNumber>
+                    <MDInstallationLocation />
+                    <MDNextVerificationDeadline>2026-01-01T00:00:00</MDNextVerificationDeadline>
+                    <MDScales>
+                        <MDScaleInfo>
+                            <MDScaleID>01A0DE8C-0076-11E6-80C9-D8D385E68D54</MDScaleID>
+                            <MDScaleName>День</MDScaleName>
+                            <MDSDigitsAfterDot>0</MDSDigitsAfterDot>
+                            <LastReadings>161542</LastReadings>
+                            <LastReadingsDate>2025-09-25T11:52:50</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>161548</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                        <MDScaleInfo>
+                            <MDScaleID>01A0DE8D-0076-11E6-80C9-D8D385E68D54</MDScaleID>
+                            <MDScaleName>Ночь</MDScaleName>
+                            <MDSDigitsAfterDot>0</MDSDigitsAfterDot>
+                            <LastReadings>91716</LastReadings>
+                            <LastReadingsDate>2025-09-25T11:52:50</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>91722</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                    </MDScales>
+                </MDInfo>
+            </GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+        </GetMDInfo_By_ContractIDAndNomenclatureCodeResponse>
+    </soap:Body>
+</soap:Envelope>

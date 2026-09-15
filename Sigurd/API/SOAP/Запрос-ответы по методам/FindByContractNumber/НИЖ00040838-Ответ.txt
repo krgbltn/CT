@@ -1,0 +1,26 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <FindByContractNumberResponse xmlns="http://tempuri.org/">
+         <FindByContractNumberResult>
+            <ContractCityAndAddress>
+               <ID>3fcb24c6-9302-11e2-be6b-0018717a3e54</ID>
+               <City>Большая Елань</City>
+               <Address>Улица Восточная 1-я, дом 17</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>cb19c04c-fda6-11e6-80ce-002481f90c3a</ID>
+               <City>Железногорск-Илимский</City>
+               <Address>Квартал 10-й, дом 2, квартира 109</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>82e96278-9315-11e2-be6b-0018717a3e54</ID>
+               <City>Тайтурка</City>
+               <Address>Улица Пеньковского, дом 13, квартира 16</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+         </FindByContractNumberResult>
+      </FindByContractNumberResponse>
+   </soap:Body>
+</soap:Envelope>

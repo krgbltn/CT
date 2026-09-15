@@ -1,0 +1,26 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <FindByContractNumberResponse xmlns="http://tempuri.org/">
+         <FindByContractNumberResult>
+            <ContractCityAndAddress>
+               <ID>ff673400-9315-11e2-be6b-0018717a3e54</ID>
+               <City>Тайтурка</City>
+               <Address>Улица Советская, дом 1</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>bfe97892-9301-11e2-be6b-0018717a3e54</ID>
+               <City>Целоты</City>
+               <Address>Улица Октябрьская, дом 21</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>4a6722c6-9235-11e2-8708-0050569b0089</ID>
+               <City>Энергетик</City>
+               <Address>Улица Приморская, дом 61, квартира 74</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+         </FindByContractNumberResult>
+      </FindByContractNumberResponse>
+   </soap:Body>
+</soap:Envelope>

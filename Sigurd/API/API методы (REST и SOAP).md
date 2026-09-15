@@ -1845,7 +1845,7 @@ SOAPAction: http://tempuri.org/GetMDInfo_By_ContractIDAndNomenclatureCode
 | Параметр | Тип | Обязательный | Описание |
 |----------|-----|-------------|----------|
 | `ContractStrGUID` | string (uuid) | да | Идентификатор ЛС |
-| `NomenclatureCode` | string | да | Код номенклатуры (услуги), напр. `2` (электроэнергия) |
+| `NomenclatureCode` | string | да | Код номенклатуры услуги. В примерах: `1` - отопление, `2` - ГВС, `21` - ХВС, `24` - электроэнергия. |
 
 ### Пример запроса (SOAP 1.1)
 

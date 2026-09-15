@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDsWarningInfo_ByTelResponse xmlns="http://tempuri.org/">
+            <GetMDsWarningInfo_ByTelResult>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>28034</LastReadings>
+                    <NextVerificationDeadline>2029-12-24T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>17534</LastReadings>
+                    <NextVerificationDeadline>2030-01-01T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</AddressOfMD>
+                    <DicServiceGroupNumber>2</DicServiceGroupNumber>
+                    <LastReadings>188</LastReadings>
+                    <NextVerificationDeadline>2026-04-22T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>NeedsToBeVerificatedSoon</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</AddressOfMD>
+                    <DicServiceGroupNumber>2</DicServiceGroupNumber>
+                    <LastReadings>424</LastReadings>
+                    <NextVerificationDeadline>2026-04-22T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>NeedsToBeVerificatedSoon</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</AddressOfMD>
+                    <DicServiceGroupNumber>2</DicServiceGroupNumber>
+                    <LastReadings>628</LastReadings>
+                    <NextVerificationDeadline>2030-05-25T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</AddressOfMD>
+                    <DicServiceGroupNumber>4</DicServiceGroupNumber>
+                    <LastReadings>258</LastReadings>
+                    <NextVerificationDeadline>2026-04-22T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>NeedsToBeVerificatedSoon</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</AddressOfMD>
+                    <DicServiceGroupNumber>4</DicServiceGroupNumber>
+                    <LastReadings>1080</LastReadings>
+                    <NextVerificationDeadline>2026-04-22T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>NeedsToBeVerificatedSoon</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</AddressOfMD>
+                    <DicServiceGroupNumber>4</DicServiceGroupNumber>
+                    <LastReadings>887</LastReadings>
+                    <NextVerificationDeadline>2030-05-25T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+            </GetMDsWarningInfo_ByTelResult>
+        </GetMDsWarningInfo_ByTelResponse>
+    </soap:Body>
+</soap:Envelope>

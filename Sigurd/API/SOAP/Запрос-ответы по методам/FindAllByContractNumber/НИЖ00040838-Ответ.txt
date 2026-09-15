@@ -1,0 +1,53 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <FindAllByContractNumberResponse xmlns="http://tempuri.org/">
+         <FindAllByContractNumberResult>
+            <ContractInfo>
+               <ID>3fcb24c6-9302-11e2-be6b-0018717a3e54</ID>
+               <No>УСОО00040838</No>
+               <Adress>Улица Восточная 1-я, дом 17</Adress>
+               <City>Большая Елань</City>
+               <Residents>8</Residents>
+               <FullArea>0.00</FullArea>
+               <DateUpdate>2019-10-05T14:16:34.83</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Ирина</AbonentName>
+               <FirstName>Саркисян</FirstName>
+               <Patronimic>Александровна</Patronimic>
+               <DivisionID>ce968640-0345-11e0-b953-001f29686bf0</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>cb19c04c-fda6-11e6-80ce-002481f90c3a</ID>
+               <No>НИЖ00040838</No>
+               <Adress>Квартал 10-й, дом 2, квартира 109</Adress>
+               <City>Железногорск-Илимский</City>
+               <Residents>3</Residents>
+               <FullArea>72.70</FullArea>
+               <DateUpdate>2026-03-13T09:54:36.327</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Галина</AbonentName>
+               <FirstName>Левковец</FirstName>
+               <Patronimic>Степановна</Patronimic>
+               <DivisionID>040c6b55-a89f-11e2-ab44-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>82e96278-9315-11e2-be6b-0018717a3e54</ID>
+               <No>КСОО00040838</No>
+               <Adress>Улица Пеньковского, дом 13, квартира 16</Adress>
+               <City>Тайтурка</City>
+               <Residents>1</Residents>
+               <FullArea>60.00</FullArea>
+               <DateUpdate>2019-10-15T04:38:24.607</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>А</AbonentName>
+               <FirstName>Филатова</FirstName>
+               <Patronimic>И</Patronimic>
+               <DivisionID>ce968640-0345-11e0-b953-001f29686bf0</DivisionID>
+            </ContractInfo>
+         </FindAllByContractNumberResult>
+      </FindAllByContractNumberResponse>
+   </soap:Body>
+</soap:Envelope>

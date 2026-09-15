@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <GetMDInfo_By_ContractIDAndNomenclatureCode xmlns="http://tempuri.org/">
+            <ContractStrGUID>7dc89e76-92f1-11e2-8708-0050569b0089</ContractStrGUID>
+            <NomenclatureCode>24</NomenclatureCode>
+        </GetMDInfo_By_ContractIDAndNomenclatureCode>
+    </soap:Body>
+</soap:Envelope>

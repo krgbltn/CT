@@ -1,0 +1,53 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <FindAllByContractNumberResponse xmlns="http://tempuri.org/">
+         <FindAllByContractNumberResult>
+            <ContractInfo>
+               <ID>ff673400-9315-11e2-be6b-0018717a3e54</ID>
+               <No>КСОО00041893</No>
+               <Adress>Улица Советская, дом 1</Adress>
+               <City>Тайтурка</City>
+               <Residents>2</Residents>
+               <FullArea>0.00</FullArea>
+               <DateUpdate>2019-10-05T16:17:23.04</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Нина</AbonentName>
+               <FirstName>Перетолчина</FirstName>
+               <Patronimic>Михайловна</Patronimic>
+               <DivisionID>ce968640-0345-11e0-b953-001f29686bf0</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>bfe97892-9301-11e2-be6b-0018717a3e54</ID>
+               <No>УСОО00041893</No>
+               <Adress>Улица Октябрьская, дом 21</Adress>
+               <City>Целоты</City>
+               <Residents>3</Residents>
+               <FullArea>0.00</FullArea>
+               <DateUpdate>2019-10-05T14:10:20.547</DateUpdate>
+               <Stove>Газовая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Валентина</AbonentName>
+               <FirstName>Иванова</FirstName>
+               <Patronimic>Васильевна</Patronimic>
+               <DivisionID>ce968640-0345-11e0-b953-001f29686bf0</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>4a6722c6-9235-11e2-8708-0050569b0089</ID>
+               <No>41893</No>
+               <Adress>Улица Приморская, дом 61, квартира 74</Adress>
+               <City>Энергетик</City>
+               <Residents>4</Residents>
+               <FullArea>65.10</FullArea>
+               <DateUpdate>2026-03-13T09:30:03.72</DateUpdate>
+               <Stove>Электрическая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Евгений</AbonentName>
+               <FirstName>Соколов</FirstName>
+               <Patronimic>Васильевич</Patronimic>
+               <DivisionID>d343ff05-91ee-11e2-8708-0050569b0089</DivisionID>
+            </ContractInfo>
+         </FindAllByContractNumberResult>
+      </FindAllByContractNumberResponse>
+   </soap:Body>
+</soap:Envelope>

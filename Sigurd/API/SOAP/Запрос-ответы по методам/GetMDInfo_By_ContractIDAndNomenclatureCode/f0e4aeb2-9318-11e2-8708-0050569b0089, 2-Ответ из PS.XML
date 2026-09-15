@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDInfo_By_ContractIDAndNomenclatureCodeResponse xmlns="http://tempuri.org/">
+            <GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+                <MDInfo>
+                    <MDSerialNumber>916</MDSerialNumber>
+                    <MDInstallationLocation />
+                    <MDNextVerificationDeadline>2026-02-05T00:00:00</MDNextVerificationDeadline>
+                    <MDScales>
+                        <MDScaleInfo>
+                            <MDScaleID>B29C7BC9-E121-11EA-A2C0-70FD45BC401B</MDScaleID>
+                            <MDScaleName>Гкал</MDScaleName>
+                            <MDSDigitsAfterDot>0</MDSDigitsAfterDot>
+                            <LastReadings>0</LastReadings>
+                            <LastReadingsDate>2025-09-24T08:52:52</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>612</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                        <MDScaleInfo>
+                            <MDScaleID>B29C7BCA-E121-11EA-A2C0-70FD45BC401B</MDScaleID>
+                            <MDScaleName>м3</MDScaleName>
+                            <MDSDigitsAfterDot>0</MDSDigitsAfterDot>
+                            <LastReadings>0</LastReadings>
+                            <LastReadingsDate>2025-09-24T08:52:52</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>420</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                    </MDScales>
+                </MDInfo>
+            </GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+        </GetMDInfo_By_ContractIDAndNomenclatureCodeResponse>
+    </soap:Body>
+</soap:Envelope>

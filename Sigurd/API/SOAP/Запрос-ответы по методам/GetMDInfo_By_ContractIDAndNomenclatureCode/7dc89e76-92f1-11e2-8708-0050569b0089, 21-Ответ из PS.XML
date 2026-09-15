@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDInfo_By_ContractIDAndNomenclatureCodeResponse xmlns="http://tempuri.org/">
+            <GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+                <MDInfo>
+                    <MDSerialNumber>940</MDSerialNumber>
+                    <MDInstallationLocation />
+                    <MDNextVerificationDeadline>2030-12-05T00:00:00</MDNextVerificationDeadline>
+                    <MDScales>
+                        <MDScaleInfo>
+                            <MDScaleID>7605E078-630E-11EB-A2CE-70FD45BC401B</MDScaleID>
+                            <MDScaleName>м3  ХВС</MDScaleName>
+                            <MDSDigitsAfterDot>3</MDSDigitsAfterDot>
+                            <LastReadings>722</LastReadings>
+                            <LastReadingsDate>2025-09-24T08:38:00</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>1328</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                    </MDScales>
+                </MDInfo>
+            </GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+        </GetMDInfo_By_ContractIDAndNomenclatureCodeResponse>
+    </soap:Body>
+</soap:Envelope>

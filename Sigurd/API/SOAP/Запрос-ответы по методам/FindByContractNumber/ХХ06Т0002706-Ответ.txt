@@ -1,0 +1,86 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <FindByContractNumberResponse xmlns="http://tempuri.org/">
+         <FindByContractNumberResult>
+            <ContractCityAndAddress>
+               <ID>ddc79b6c-d591-11e2-b3f3-001f29ceb871</ID>
+               <City>Байкальск</City>
+               <Address>Микрорайон Гагарина, дом 151А, квартира 22</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>2d52ef7b-b4bc-11e8-80be-9457a553d5eb</ID>
+               <City>Белогорск</City>
+               <Address>Улица Луговая, дом 1</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>b3a7508a-d81c-11e0-a88f-001e0bc27598</ID>
+               <City>Белореченский</City>
+               <Address>Рабочий поселок Белореченский, дом 43, квартира 50</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>3447fede-a8af-11e2-ab44-001f29ceb871</ID>
+               <City>Железногорск-Илимский</City>
+               <Address>Квартал 3-й, дом 14, квартира 20</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>e93f0cb7-c46a-11e2-bc30-001f29ceb871</ID>
+               <City>Зима</City>
+               <Address>Микрорайон Ангарский, дом 5, квартира 83</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>5e11b17a-9b20-11e4-a084-d8d385e6fca3</ID>
+               <City>Иркутск</City>
+               <Address>Улица Александра Невского, дом 2, квартира 15</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>50e34730-3429-11e3-bf38-001f29ceb871</ID>
+               <City>Киренск</City>
+               <Address>Улица Воронинская, дом 17, квартира 8</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>db6db8a8-c468-11e2-bc30-001f29ceb871</ID>
+               <City>Саянск</City>
+               <Address>Микрорайон Юбилейный, дом 29, квартира 76</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>f991fafe-142f-11e1-bfd9-001e0bc27598</ID>
+               <City>Тайшет</City>
+               <Address>Улица Свободы, дом 4, квартира 58</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>04721e73-2232-11e3-bf38-001f29ceb871</ID>
+               <City>Тулун</City>
+               <Address>Улица Мира, дом 8, квартира 329</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>e0ccc80e-32e1-11e3-bf38-001f29ceb871</ID>
+               <City>Усть-Кут</City>
+               <Address>Улица Горького, дом 52, квартира 46</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>ed6ffdad-91c2-11e3-93e9-001f29ceb871</ID>
+               <City>Усть-Ордынский</City>
+               <Address>Улица 50 лет Октября, дом 23, квартира 1</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+            <ContractCityAndAddress>
+               <ID>05c274d8-da72-11e2-a1f0-001e0bc27598</ID>
+               <City>Черемхово</City>
+               <Address>Улица Щербакова, дом 36</Address>
+               <SerialNumberOverCity>1</SerialNumberOverCity>
+            </ContractCityAndAddress>
+         </FindByContractNumberResult>
+      </FindByContractNumberResponse>
+   </soap:Body>
+</soap:Envelope>

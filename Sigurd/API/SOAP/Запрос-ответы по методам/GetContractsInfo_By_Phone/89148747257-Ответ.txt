@@ -1,0 +1,23 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <GetContractsInfo_By_PhoneResponse xmlns="http://tempuri.org/">
+         <GetContractsInfo_By_PhoneResult>
+            <ContractInfo>
+               <ID>7d25e68d-a8d7-11e2-ab44-001f29ceb871</ID>
+               <No>НОООН0005497</No>
+               <Adress>Улица Микрорайонная, дом 6, квартира 1</Adress>
+               <City>Железногорск-Илимский</City>
+               <Residents>2</Residents>
+               <FullArea>127.90</FullArea>
+               <DateUpdate>2026-03-13T10:23:45.043</DateUpdate>
+               <Stove>Электрическая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Наталья</AbonentName>
+               <FirstName>Исакова</FirstName>
+               <Patronimic>Николаевна</Patronimic>
+               <DivisionID>040c6b55-a89f-11e2-ab44-001f29ceb871</DivisionID>
+            </ContractInfo>
+         </GetContractsInfo_By_PhoneResult>
+      </GetContractsInfo_By_PhoneResponse>
+   </soap:Body>
+</soap:Envelope>

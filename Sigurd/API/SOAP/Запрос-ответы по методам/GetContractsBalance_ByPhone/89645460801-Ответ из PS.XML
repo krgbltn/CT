@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetContractsBalance_ByPhoneNumberResponse xmlns="http://tempuri.org/">
+            <GetContractsBalance_ByPhoneNumberResult>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>1023</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</Address>
+                    <ContragentName>ООО "Байкальская энергетическая компания"</ContragentName>
+                    <DicServiceGroupName>По услуге Теплоснабжения</DicServiceGroupName>
+                    <Balance>2270.58</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>1023</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По услуге Водоотведения</DicServiceGroupName>
+                    <Balance>80.04</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>1023</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По услуге Холодного водоснабжения</DicServiceGroupName>
+                    <Balance>77.37</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>1023</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По Жилищно коммунальным услугам</DicServiceGroupName>
+                    <Balance>434.21</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>1023</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По прочим услугам</DicServiceGroupName>
+                    <Balance>1579.05</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>40838</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</Address>
+                    <ContragentName>ООО "Байкальская энергетическая компания"</ContragentName>
+                    <DicServiceGroupName>По услуге Теплоснабжения</DicServiceGroupName>
+                    <Balance>2345.95</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>40838</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По услуге Водоотведения</DicServiceGroupName>
+                    <Balance>240.12</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>40838</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По услуге Холодного водоснабжения</DicServiceGroupName>
+                    <Balance>180.53</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>40838</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По Жилищно коммунальным услугам</DicServiceGroupName>
+                    <Balance>558.28</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>40838</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Квартал 10-й, дом 2, квартира 109</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По прочим услугам</DicServiceGroupName>
+                    <Balance>1768.18</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+            </GetContractsBalance_ByPhoneNumberResult>
+        </GetContractsBalance_ByPhoneNumberResponse>
+    </soap:Body>
+</soap:Envelope>

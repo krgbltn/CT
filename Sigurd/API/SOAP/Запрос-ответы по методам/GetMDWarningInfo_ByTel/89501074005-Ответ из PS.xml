@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDsWarningInfo_ByTelResponse xmlns="http://tempuri.org/">
+            <GetMDsWarningInfo_ByTelResult>
+                <MDWarningInfo>
+                    <AddressOfMD>Братск, Улица Лозовая, дом 3</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>122304</LastReadings>
+                    <NextVerificationDeadline>2023-07-01T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Expired</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Братск, Улица Лозовая, дом 3</AddressOfMD>
+                    <DicServiceGroupNumber>2</DicServiceGroupNumber>
+                    <LastReadings>0</LastReadings>
+                    <NextVerificationDeadline>2026-02-05T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Expired</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Братск, Улица Лозовая, дом 3</AddressOfMD>
+                    <DicServiceGroupNumber>4</DicServiceGroupNumber>
+                    <LastReadings>406</LastReadings>
+                    <NextVerificationDeadline>2027-04-16T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Братск, Улица Лозовая, дом 3</AddressOfMD>
+                    <DicServiceGroupNumber>4</DicServiceGroupNumber>
+                    <LastReadings>860</LastReadings>
+                    <NextVerificationDeadline>2027-04-16T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Братск, Улица Лозовая, дом 3</AddressOfMD>
+                    <DicServiceGroupNumber>6</DicServiceGroupNumber>
+                    <LastReadings>0</LastReadings>
+                    <NextVerificationDeadline>2026-02-05T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Expired</VerificationStatus>
+                </MDWarningInfo>
+            </GetMDsWarningInfo_ByTelResult>
+        </GetMDsWarningInfo_ByTelResponse>
+    </soap:Body>
+</soap:Envelope>

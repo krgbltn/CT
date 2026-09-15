@@ -1,0 +1,38 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <GetContractsInfo_By_PhoneResponse xmlns="http://tempuri.org/">
+         <GetContractsInfo_By_PhoneResult>
+            <ContractInfo>
+               <ID>4a6722c6-9235-11e2-8708-0050569b0089</ID>
+               <No>41893</No>
+               <Adress>Улица Приморская, дом 61, квартира 74</Adress>
+               <City>Братск, Энергетик</City>
+               <Residents>4</Residents>
+               <FullArea>65.10</FullArea>
+               <DateUpdate>2026-03-13T09:30:03.72</DateUpdate>
+               <Stove>Электрическая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Евгений</AbonentName>
+               <FirstName>Соколов</FirstName>
+               <Patronimic>Васильевич</Patronimic>
+               <DivisionID>d343ff05-91ee-11e2-8708-0050569b0089</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>7dc89e76-92f1-11e2-8708-0050569b0089</ID>
+               <No>БРГД07455009</No>
+               <Adress>Переулок Черемховский 2-й, дом 14</Adress>
+               <City>Братск, Гидростроитель</City>
+               <Residents>3</Residents>
+               <FullArea>62.60</FullArea>
+               <DateUpdate>2026-03-13T09:22:27.283</DateUpdate>
+               <Stove>Электрическая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Евгений</AbonentName>
+               <FirstName>Соколов</FirstName>
+               <Patronimic>Васильевич</Patronimic>
+               <DivisionID>d343ff05-91ee-11e2-8708-0050569b0089</DivisionID>
+            </ContractInfo>
+         </GetContractsInfo_By_PhoneResult>
+      </GetContractsInfo_By_PhoneResponse>
+   </soap:Body>
+</soap:Envelope>

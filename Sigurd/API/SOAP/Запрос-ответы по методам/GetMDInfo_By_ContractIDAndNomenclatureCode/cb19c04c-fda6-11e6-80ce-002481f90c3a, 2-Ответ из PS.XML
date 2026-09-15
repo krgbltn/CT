@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDInfo_By_ContractIDAndNomenclatureCodeResponse xmlns="http://tempuri.org/">
+            <GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+                <MDInfo>
+                    <MDSerialNumber>506</MDSerialNumber>
+                    <MDInstallationLocation>Кухня</MDInstallationLocation>
+                    <MDNextVerificationDeadline>2026-04-22T00:00:00</MDNextVerificationDeadline>
+                    <MDScales>
+                        <MDScaleInfo>
+                            <MDScaleID>CE60745A-0E9D-11E7-80CE-002481F90C3A</MDScaleID>
+                            <MDScaleName>м3</MDScaleName>
+                            <MDSDigitsAfterDot>3</MDSDigitsAfterDot>
+                            <LastReadings>188</LastReadings>
+                            <LastReadingsDate>2025-10-11T16:30:23</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>538</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                    </MDScales>
+                </MDInfo>
+                <MDInfo>
+                    <MDSerialNumber>512</MDSerialNumber>
+                    <MDInstallationLocation>Туалет</MDInstallationLocation>
+                    <MDNextVerificationDeadline>2026-04-22T00:00:00</MDNextVerificationDeadline>
+                    <MDScales>
+                        <MDScaleInfo>
+                            <MDScaleID>47A2618E-0E9C-11E7-80CE-002481F90C3A</MDScaleID>
+                            <MDScaleName>м3</MDScaleName>
+                            <MDSDigitsAfterDot>3</MDSDigitsAfterDot>
+                            <LastReadings>424</LastReadings>
+                            <LastReadingsDate>2025-10-11T16:27:38</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>774</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                    </MDScales>
+                </MDInfo>
+            </GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+        </GetMDInfo_By_ContractIDAndNomenclatureCodeResponse>
+    </soap:Body>
+</soap:Envelope>

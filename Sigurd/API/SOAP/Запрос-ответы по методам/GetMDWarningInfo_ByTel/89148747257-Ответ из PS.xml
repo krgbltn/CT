@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDsWarningInfo_ByTelResponse xmlns="http://tempuri.org/">
+            <GetMDsWarningInfo_ByTelResult>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Улица Микрорайонная, дом 6, квартира 1</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>147330.7</LastReadings>
+                    <NextVerificationDeadline>2032-02-19T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Улица Микрорайонная, дом 6, квартира 1</AddressOfMD>
+                    <DicServiceGroupNumber>2</DicServiceGroupNumber>
+                    <LastReadings>134</LastReadings>
+                    <NextVerificationDeadline>2027-06-01T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Улица Микрорайонная, дом 6, квартира 1</AddressOfMD>
+                    <DicServiceGroupNumber>6</DicServiceGroupNumber>
+                    <LastReadings>0</LastReadings>
+                    <NextVerificationDeadline>2025-06-02T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Expired</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Улица Микрорайонная, дом 6, квартира 1</AddressOfMD>
+                    <DicServiceGroupNumber>6</DicServiceGroupNumber>
+                    <LastReadings>155</LastReadings>
+                    <NextVerificationDeadline>2025-06-02T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Expired</VerificationStatus>
+                </MDWarningInfo>
+            </GetMDsWarningInfo_ByTelResult>
+        </GetMDsWarningInfo_ByTelResponse>
+    </soap:Body>
+</soap:Envelope>

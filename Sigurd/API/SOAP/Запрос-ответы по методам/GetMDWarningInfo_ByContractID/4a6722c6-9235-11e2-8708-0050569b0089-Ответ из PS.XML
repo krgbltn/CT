@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDsWarningInfo_ByContractIDResponse xmlns="http://tempuri.org/">
+            <GetMDsWarningInfo_ByContractIDResult>
+                <MDWarningInfo>
+                    <AddressOfMD>Энергетик, Улица Приморская, дом 61, квартира 74</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>0.116</LastReadings>
+                    <NextVerificationDeadline>2029-12-04T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Энергетик, Улица Приморская, дом 61, квартира 74</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>1</LastReadings>
+                    <NextVerificationDeadline>2029-12-04T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Энергетик, Улица Приморская, дом 61, квартира 74</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>198</LastReadings>
+                    <NextVerificationDeadline>2034-01-01T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+            </GetMDsWarningInfo_ByContractIDResult>
+        </GetMDsWarningInfo_ByContractIDResponse>
+    </soap:Body>
+</soap:Envelope>

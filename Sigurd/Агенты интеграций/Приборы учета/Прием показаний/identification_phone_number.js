@@ -194,13 +194,22 @@ const getContractsInfoByPhone = async (phoneNumber) => {
     return result
 }
 
-/**
-1
-2
-4
-21
- */
-const NOMENCLATURES = [1, 2, 4, 21]
+const NOMENCLATURES = [1, 2, 21, 24]
+
+const getScaleInfo = (mdInfo, nomenclatureCode) => {
+    const scales = mdInfo?.MDScales?.MDScaleInfo
+    const scalesArr = Array.isArray(scales) ? scales : (scales ? [scales] : [])
+
+    if (nomenclatureCode === 1) {
+        return scalesArr.find(scale => String(scale.MDScaleName).toLowerCase().includes("гкал"))
+    }
+
+    if (nomenclatureCode === 2) {
+        return scalesArr.find(scale => String(scale.MDScaleName).toLowerCase().includes("м3"))
+    }
+
+    return scalesArr[0]
+}
 
 const extractMdInfoFromResponse = async (parsedData) => {
     /*
@@ -289,6 +298,12 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
     logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
     if (getDebug()) {
+        const debugScaleNames = {
+            1: "Гкал",
+            2: "м3",
+            21: "м3 ХВС",
+            24: "кВт.ч"
+        }
         return {
             "MDSerialNumber": "007",
             "MDInstallationLocation": "       ",
@@ -296,7 +311,7 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
             "MDScales": {
                 "MDScaleInfo": {
                     "MDScaleID": "A1E01E62-D2DE-11E9-80C2-9457A553D5EB",
-                    "MDScaleName": " 3",
+                    "MDScaleName": debugScaleNames[nomenclatureCode],
                     "MDSDigitsAfterDot": "3",
                     "LastReadings": "40",
                     "LastReadingsDate": "2025-12-20T14:21:06.77",
@@ -383,9 +398,8 @@ const getSlots = (mdsInfo, contract) => {
     }
 
     for (const nom of Object.keys(mdsInfo)) {
-        let scaleInfo = mdsInfo[nom]?.MDScales?.MDScaleInfo
-        logger.info(`Slots: ${JSON.stringify(scaleInfo)}`)
-        scaleInfo = Array.isArray(scaleInfo) ? scaleInfo[0] : scaleInfo
+        const scaleInfo = getScaleInfo(mdsInfo[nom], Number(nom))
+        logger.info(`Selected scale for nomenclature ${nom}: ${JSON.stringify(scaleInfo)}`)
 
         if (!scaleInfo) {
             continue
@@ -393,11 +407,11 @@ const getSlots = (mdsInfo, contract) => {
 
         switch (Number(nom)) {
             case 1:
-                if (!getDebug() || getDebug().electricity) {
-                    slots[SLOTS.electro] = mdsInfo[nom].MDSerialNumber
-                    slots[SLOTS.electroLast] = scaleInfo.LastReadings
-                    slots[SLOTS.electroScale] = "true"
-                    slots[SLOTS.electroScaleId] = scaleInfo.MDScaleID
+                if (!getDebug() || getDebug().heating) {
+                    slots[SLOTS.heating] = mdsInfo[nom].MDSerialNumber
+                    slots[SLOTS.heatingLast] = scaleInfo.LastReadings
+                    slots[SLOTS.heatingScale] = "true"
+                    slots[SLOTS.heatingScaleId] = scaleInfo.MDScaleID
                 }
                 break
 
@@ -410,7 +424,7 @@ const getSlots = (mdsInfo, contract) => {
                 }
                 break
 
-            case 4:
+            case 21:
                 if (!getDebug() || getDebug().coldWater) {
                     slots[SLOTS.cw] = mdsInfo[nom].MDSerialNumber
                     slots[SLOTS.cwLast] = scaleInfo.LastReadings
@@ -419,12 +433,12 @@ const getSlots = (mdsInfo, contract) => {
                 }
                 break
 
-            case 21:
-                if (!getDebug() || getDebug().heating) {
-                    slots[SLOTS.heating] = mdsInfo[nom].MDSerialNumber
-                    slots[SLOTS.heatingLast] = scaleInfo.LastReadings
-                    slots[SLOTS.heatingScale] = "true" //scaleInfo.MaxAcceptableNewMDReadingValue
-                    slots[SLOTS.heatingScaleId] = scaleInfo.MDScaleID
+            case 24:
+                if (!getDebug() || getDebug().electricity) {
+                    slots[SLOTS.electro] = mdsInfo[nom].MDSerialNumber
+                    slots[SLOTS.electroLast] = scaleInfo.LastReadings
+                    slots[SLOTS.electroScale] = "true"
+                    slots[SLOTS.electroScaleId] = scaleInfo.MDScaleID
                 }
                 break
         }

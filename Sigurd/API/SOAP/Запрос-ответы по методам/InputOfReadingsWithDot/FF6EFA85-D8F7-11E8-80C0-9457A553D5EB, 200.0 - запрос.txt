@@ -1,0 +1,11 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tem:InputOfReadingsWithDot>
+         <!--Optional:-->
+         <tem:MDScale_ID>FF6EFA85-D8F7-11E8-80C0-9457A553D5EB</tem:MDScale_ID>
+         <!--Optional:-->
+         <tem:MDScale_NewReadings>200.0</tem:MDScale_NewReadings>
+      </tem:InputOfReadingsWithDot>
+   </soapenv:Body>
+</soapenv:Envelope>

@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDInfo_By_ContractIDAndNomenclatureCodeResponse xmlns="http://tempuri.org/">
+            <GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+                <MDInfo>
+                    <MDSerialNumber>041</MDSerialNumber>
+                    <MDInstallationLocation>Ввод в дом</MDInstallationLocation>
+                    <MDNextVerificationDeadline>2025-06-02T00:00:00</MDNextVerificationDeadline>
+                    <MDScales>
+                        <MDScaleInfo>
+                            <MDScaleID>A5CDE332-056F-11EC-90F0-9440C93C4853</MDScaleID>
+                            <MDScaleName>Гкал</MDScaleName>
+                            <MDSDigitsAfterDot>3</MDSDigitsAfterDot>
+                            <LastReadings>155</LastReadings>
+                            <LastReadingsDate>2025-09-24T20:27:27</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>515</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                        <MDScaleInfo>
+                            <MDScaleID>A5CDE333-056F-11EC-90F0-9440C93C4853</MDScaleID>
+                            <MDScaleName>м3</MDScaleName>
+                            <MDSDigitsAfterDot>0</MDSDigitsAfterDot>
+                            <LastReadings>0</LastReadings>
+                            <LastReadingsDate>2025-09-24T20:27:27</LastReadingsDate>
+                            <ReadingsExist>true</ReadingsExist>
+                            <MaxAcceptableNewMDReadingValue>9999</MaxAcceptableNewMDReadingValue>
+                        </MDScaleInfo>
+                    </MDScales>
+                </MDInfo>
+            </GetMDInfo_By_ContractIDAndNomenclatureCodeResult>
+        </GetMDInfo_By_ContractIDAndNomenclatureCodeResponse>
+    </soap:Body>
+</soap:Envelope>

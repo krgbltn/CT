@@ -1,0 +1,248 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <FindAllByContractNumberResponse xmlns="http://tempuri.org/">
+         <FindAllByContractNumberResult>
+            <ContractInfo>
+               <ID>b9ec9bc1-d591-11e2-b3f3-001f29ceb871</ID>
+               <No>КЛОО00001023</No>
+               <Adress>Микрорайон Гагарина, дом 204, квартира 38</Adress>
+               <City>Байкальск</City>
+               <Residents>1</Residents>
+               <FullArea>33.70</FullArea>
+               <DateUpdate>2017-03-11T06:32:30.797</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Владимир</AbonentName>
+               <FirstName>Кулешов</FirstName>
+               <Patronimic>Георгиевич</Patronimic>
+               <DivisionID>47acbfdf-d587-11e2-b3f3-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>f81f2914-0d42-11e8-80be-9457a553d5eb</ID>
+               <No>БРОО0001023</No>
+               <Adress>Улица Горького, дом 10, квартира 23</Adress>
+               <City>Гидростроитель</City>
+               <Residents>3</Residents>
+               <FullArea>35.90</FullArea>
+               <DateUpdate>2019-09-24T12:59:13.517</DateUpdate>
+               <Stove>Электрическая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Елена</AbonentName>
+               <FirstName>Козырева</FirstName>
+               <Patronimic>Михайловна</Patronimic>
+               <DivisionID>d343ff05-91ee-11e2-8708-0050569b0089</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>9c11ee6a-a8ab-11e2-ab44-001f29ceb871</ID>
+               <No>НИЖ000001023</No>
+               <Adress>Квартал 10-й, дом 6, квартира 15</Adress>
+               <City>Железногорск-Илимский</City>
+               <Residents>1</Residents>
+               <FullArea>67.40</FullArea>
+               <DateUpdate>2026-03-13T09:52:41.967</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Евгений</AbonentName>
+               <FirstName>Левковец</FirstName>
+               <Patronimic>Сергеевич</Patronimic>
+               <DivisionID>040c6b55-a89f-11e2-ab44-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>a838e72a-c46a-11e2-bc30-001f29ceb871</ID>
+               <No>КЗОО00001023</No>
+               <Adress>Улица Трактовая, дом 81А</Adress>
+               <City>Зима</City>
+               <Residents>2</Residents>
+               <FullArea>0.00</FullArea>
+               <DateUpdate>2015-10-15T12:48:14.117</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Евгений</AbonentName>
+               <FirstName>Чернявский</FirstName>
+               <Patronimic>Викторович</Patronimic>
+               <DivisionID>bf3e8edf-c462-11e2-bc30-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>4a1fbd46-3e48-11e9-80c2-9457a553d5eb</ID>
+               <No>СУЖК00001023</No>
+               <Adress>Улица Шпачека, дом 12, 9, квартира 37</Adress>
+               <City>Иркутск</City>
+               <Residents>1</Residents>
+               <FullArea>52.00</FullArea>
+               <DateUpdate>2019-04-09T12:35:25.977</DateUpdate>
+               <Stove>Электрическая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Рамиль</AbonentName>
+               <FirstName>Алиев</FirstName>
+               <Patronimic>Фахраддин Оглы</Patronimic>
+               <DivisionID>f59a8382-235d-11e9-80c2-9457a553d5eb</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>bb35f421-3428-11e3-bf38-001f29ceb871</ID>
+               <No>КРОО00001023</No>
+               <Adress>Улица Коммунистическая, дом 19, квартира 2</Adress>
+               <City>Киренск</City>
+               <Residents>2</Residents>
+               <FullArea>33.00</FullArea>
+               <DateUpdate>2015-02-22T03:44:25.743</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Елена</AbonentName>
+               <FirstName>Залуцкая</FirstName>
+               <Patronimic>Владимировна</Patronimic>
+               <DivisionID>9cae9be4-3416-11e3-bf38-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>54de60e8-88cd-11ee-8868-a036bc73e06a</ID>
+               <No>ИСТИ00001023</No>
+               <Adress>Улица Саянская, дом 22</Adress>
+               <City>Куйтун</City>
+               <Residents>0</Residents>
+               <FullArea>0.00</FullArea>
+               <DateUpdate>2026-02-06T08:54:36.373</DateUpdate>
+               <Stove>Электрическая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Ирина</AbonentName>
+               <FirstName>Шашкеева</FirstName>
+               <Patronimic>Никаноровна</Patronimic>
+               <DivisionID>28dc1268-2211-11e3-bf38-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>1747ae91-8fd3-11e8-80be-9457a553d5eb</ID>
+               <No>ЭСИН0001 023</No>
+               <Adress>Переулок Люблинский, дом 2</Adress>
+               <City>Лесной</City>
+               <Residents>1</Residents>
+               <FullArea>0.00</FullArea>
+               <DateUpdate>2019-05-15T20:38:42.9</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Юлия</AbonentName>
+               <FirstName>Каморина</FirstName>
+               <Patronimic>Владимировна</Patronimic>
+               <DivisionID>1b7c2c35-bfc2-11e3-8cc7-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>fd8f1df8-c46d-11e2-bc30-001f29ceb871</ID>
+               <No>КЯОО00001023</No>
+               <Adress>Микрорайон Юбилейный, дом 42, квартира 63</Adress>
+               <City>Саянск</City>
+               <Residents>1</Residents>
+               <FullArea>53.20</FullArea>
+               <DateUpdate>2019-06-24T15:47:15.753</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Людмила</AbonentName>
+               <FirstName>Вельмакина</FirstName>
+               <Patronimic>Васильевна</Patronimic>
+               <DivisionID>bf3e8edf-c462-11e2-bc30-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>a501aef1-1434-11e1-bfd9-001e0bc27598</ID>
+               <No>ТШТ00001023</No>
+               <Adress>Улица Гагарина, дом 2, квартира 37</Adress>
+               <City>Тайшет</City>
+               <Residents>1</Residents>
+               <FullArea>42.90</FullArea>
+               <DateUpdate>2019-10-17T10:00:43.687</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Людмила</AbonentName>
+               <FirstName>Мозговая</FirstName>
+               <Patronimic>Олеговна</Patronimic>
+               <DivisionID>aa875404-0fe4-11e1-b07d-001e0bc27598</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>0c9fb5ab-2233-11e3-bf38-001f29ceb871</ID>
+               <No>КУОО00001023</No>
+               <Adress>Улица Ленина, дом 8, квартира 75</Adress>
+               <City>Тулун</City>
+               <Residents>1</Residents>
+               <FullArea>63.50</FullArea>
+               <DateUpdate>2018-12-26T20:48:36.867</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Елена</AbonentName>
+               <FirstName>Васильева</FirstName>
+               <Patronimic>Яковлевна</Patronimic>
+               <DivisionID>28dc1268-2211-11e3-bf38-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>adeba0a3-0514-11e6-80c7-d8d385e69d7c</ID>
+               <No>УАТ000001023</No>
+               <Adress>Улица Машиностроителей, дом 20, 2, квартира 8</Adress>
+               <City>Усолье-Сибирское</City>
+               <Residents>0</Residents>
+               <FullArea>49.10</FullArea>
+               <DateUpdate>2019-10-15T20:05:07.49</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Александр</AbonentName>
+               <FirstName>Крылов</FirstName>
+               <Patronimic>Сергеевич</Patronimic>
+               <DivisionID>c168c9ae-9ba9-11e0-9655-001a4bec5a7e</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>c323b23c-9312-11e2-be6b-0018717a3e54</ID>
+               <No>КСООЭ0001023</No>
+               <Adress>Улица Новаторов, дом 1</Adress>
+               <City>Усолье-Сибирское</City>
+               <Residents>4</Residents>
+               <FullArea>42.10</FullArea>
+               <DateUpdate>2019-10-05T15:32:24.13</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Иван</AbonentName>
+               <FirstName>Коробов</FirstName>
+               <Patronimic>Иванович</Patronimic>
+               <DivisionID>ce968640-0345-11e0-b953-001f29686bf0</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>0f55799c-32e1-11e3-bf38-001f29ceb871</ID>
+               <No>ККОО00001023</No>
+               <Adress>Улица Речников, дом 53, квартира 52</Adress>
+               <City>Усть-Кут</City>
+               <Residents>2</Residents>
+               <FullArea>43.10</FullArea>
+               <DateUpdate>2018-10-04T02:20:47.907</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Ольга</AbonentName>
+               <FirstName>Жмурова</FirstName>
+               <Patronimic>Валерьевна</Patronimic>
+               <DivisionID>747e9859-32d0-11e3-bf38-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>986c4d7f-91ce-11e3-93e9-001f29ceb871</ID>
+               <No>КООО00001023</No>
+               <Adress>Улица 8 Марта, дом 16, квартира 1</Adress>
+               <City>Усть-Ордынский</City>
+               <Residents>1</Residents>
+               <FullArea>67.00</FullArea>
+               <DateUpdate>2018-10-03T20:44:49.357</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Наталья</AbonentName>
+               <FirstName>Егорова</FirstName>
+               <Patronimic>Андреевна</Patronimic>
+               <DivisionID>a2a728c2-90cc-11e3-93e9-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>dd88bbec-d596-11e2-b3f3-001f29ceb871</ID>
+               <No>ШСГО00001023</No>
+               <Adress>Квартал 1-й, дом 1, квартира 23</Adress>
+               <City>Шелехов</City>
+               <Residents>1</Residents>
+               <FullArea>26.10</FullArea>
+               <DateUpdate>2019-06-20T17:05:29.63</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Татьяна</AbonentName>
+               <FirstName>Моторина</FirstName>
+               <Patronimic>Викторовна</Patronimic>
+               <DivisionID>6ef8b819-d587-11e2-b3f3-001f29ceb871</DivisionID>
+            </ContractInfo>
+         </FindAllByContractNumberResult>
+      </FindAllByContractNumberResponse>
+   </soap:Body>
+</soap:Envelope>

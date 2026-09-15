@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetContractsBalance_ByPhoneNumberResponse xmlns="http://tempuri.org/">
+            <GetContractsBalance_ByPhoneNumberResult>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>5497</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Улица Микрорайонная, дом 6, квартира 1</Address>
+                    <ContragentName>ООО "Байкальская энергетическая компания"</ContragentName>
+                    <DicServiceGroupName>По услуге Теплоснабжения</DicServiceGroupName>
+                    <Balance>3740.42</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>5497</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Улица Микрорайонная, дом 6, квартира 1</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По услуге Водоотведения</DicServiceGroupName>
+                    <Balance>307.89</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>5497</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Улица Микрорайонная, дом 6, квартира 1</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По услуге Холодного водоснабжения</DicServiceGroupName>
+                    <Balance>330.37</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>5497</ContractNumber>
+                    <Settlement>Железногорск-Илимский</Settlement>
+                    <Address>Железногорск-Илимский, Улица Микрорайонная, дом 6, квартира 1</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По прочим услугам</DicServiceGroupName>
+                    <Balance>902.46</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+            </GetContractsBalance_ByPhoneNumberResult>
+        </GetContractsBalance_ByPhoneNumberResponse>
+    </soap:Body>
+</soap:Envelope>

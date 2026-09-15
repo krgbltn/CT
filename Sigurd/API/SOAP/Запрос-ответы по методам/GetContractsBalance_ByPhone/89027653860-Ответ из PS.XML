@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetContractsBalance_ByPhoneNumberResponse xmlns="http://tempuri.org/">
+            <GetContractsBalance_ByPhoneNumberResult>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>7455009</ContractNumber>
+                    <Settlement>Братск, Гидростроитель</Settlement>
+                    <Address>Братск, Гидростроитель, Переулок Черемховский 2-й, дом 14</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По прочим услугам</DicServiceGroupName>
+                    <Balance>3556.73</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>41893</ContractNumber>
+                    <Settlement>Братск, Энергетик</Settlement>
+                    <Address>Братск, Энергетик, Улица Приморская, дом 61, квартира 74</Address>
+                    <ContragentName>ООО "Байкальская энергетическая компания"</ContragentName>
+                    <DicServiceGroupName>По услуге Теплоснабжения</DicServiceGroupName>
+                    <Balance>3863.10</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>41893</ContractNumber>
+                    <Settlement>Братск, Энергетик</Settlement>
+                    <Address>Братск, Энергетик, Улица Приморская, дом 61, квартира 74</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По прочим услугам</DicServiceGroupName>
+                    <Balance>7.12</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+            </GetContractsBalance_ByPhoneNumberResult>
+        </GetContractsBalance_ByPhoneNumberResponse>
+    </soap:Body>
+</soap:Envelope>

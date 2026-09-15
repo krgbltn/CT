@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetContractsBalance_ByContractIDResponse xmlns="http://tempuri.org/">
+            <GetContractsBalance_ByContractIDResult>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>41893</ContractNumber>
+                    <Settlement>Братск, Энергетик</Settlement>
+                    <Address>Улица Приморская, дом 61, квартира 74</Address>
+                    <ContragentName>ООО "Байкальская энергетическая компания"</ContragentName>
+                    <DicServiceGroupName>По услуге Теплоснабжения</DicServiceGroupName>
+                    <Balance>3863.10</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                <ContractAddressAndBalanceByDicServiceGroupAndContragent>
+                    <ContractNumber>41893</ContractNumber>
+                    <Settlement>Братск, Энергетик</Settlement>
+                    <Address>Улица Приморская, дом 61, квартира 74</Address>
+                    <ContragentName>другими поставщиками услуг</ContragentName>
+                    <DicServiceGroupName>По прочим услугам</DicServiceGroupName>
+                    <Balance>7.12</Balance>
+                </ContractAddressAndBalanceByDicServiceGroupAndContragent>
+            </GetContractsBalance_ByContractIDResult>
+        </GetContractsBalance_ByContractIDResponse>
+    </soap:Body>
+</soap:Envelope>

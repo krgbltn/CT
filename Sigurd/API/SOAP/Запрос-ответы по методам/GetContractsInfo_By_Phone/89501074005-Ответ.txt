@@ -1,0 +1,23 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <GetContractsInfo_By_PhoneResponse xmlns="http://tempuri.org/">
+         <GetContractsInfo_By_PhoneResult>
+            <ContractInfo>
+               <ID>f0e4aeb2-9318-11e2-8708-0050569b0089</ID>
+               <No>ХХ06Т0002706</No>
+               <Adress>Улица Лозовая, дом 3</Adress>
+               <City>Братск</City>
+               <Residents>2</Residents>
+               <FullArea>205.60</FullArea>
+               <DateUpdate>2026-03-13T10:00:50.623</DateUpdate>
+               <Stove>Электрическая</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Елена</AbonentName>
+               <FirstName>Молчанова</FirstName>
+               <Patronimic>Николаевна</Patronimic>
+               <DivisionID>81632451-16f5-11e4-90a7-d8d385e60d7d</DivisionID>
+            </ContractInfo>
+         </GetContractsInfo_By_PhoneResult>
+      </GetContractsInfo_By_PhoneResponse>
+   </soap:Body>
+</soap:Envelope>

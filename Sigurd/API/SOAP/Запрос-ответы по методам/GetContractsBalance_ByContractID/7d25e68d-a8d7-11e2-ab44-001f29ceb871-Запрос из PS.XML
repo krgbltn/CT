@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetContractsBalance_ByContractID xmlns="http://tempuri.org/">
+            <ContractID>7d25e68d-a8d7-11e2-ab44-001f29ceb871</ContractID>
+        </GetContractsBalance_ByContractID>
+    </soap:Body>
+</soap:Envelope>

@@ -1,0 +1,38 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <soap:Body>
+      <GetContractsInfo_By_PhoneResponse xmlns="http://tempuri.org/">
+         <GetContractsInfo_By_PhoneResult>
+            <ContractInfo>
+               <ID>cb19c04c-fda6-11e6-80ce-002481f90c3a</ID>
+               <No>НИЖ00040838</No>
+               <Adress>Квартал 10-й, дом 2, квартира 109</Adress>
+               <City>Железногорск-Илимский</City>
+               <Residents>3</Residents>
+               <FullArea>72.70</FullArea>
+               <DateUpdate>2026-03-13T09:54:36.327</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Галина</AbonentName>
+               <FirstName>Левковец</FirstName>
+               <Patronimic>Степановна</Patronimic>
+               <DivisionID>040c6b55-a89f-11e2-ab44-001f29ceb871</DivisionID>
+            </ContractInfo>
+            <ContractInfo>
+               <ID>9c11ee6a-a8ab-11e2-ab44-001f29ceb871</ID>
+               <No>НИЖ000001023</No>
+               <Adress>Квартал 10-й, дом 6, квартира 15</Adress>
+               <City>Железногорск-Илимский</City>
+               <Residents>1</Residents>
+               <FullArea>67.40</FullArea>
+               <DateUpdate>2026-03-13T09:52:41.967</DateUpdate>
+               <Stove>тип плиты не указан</Stove>
+               <Status>Действует</Status>
+               <AbonentName>Евгений</AbonentName>
+               <FirstName>Левковец</FirstName>
+               <Patronimic>Сергеевич</Patronimic>
+               <DivisionID>040c6b55-a89f-11e2-ab44-001f29ceb871</DivisionID>
+            </ContractInfo>
+         </GetContractsInfo_By_PhoneResult>
+      </GetContractsInfo_By_PhoneResponse>
+   </soap:Body>
+</soap:Envelope>

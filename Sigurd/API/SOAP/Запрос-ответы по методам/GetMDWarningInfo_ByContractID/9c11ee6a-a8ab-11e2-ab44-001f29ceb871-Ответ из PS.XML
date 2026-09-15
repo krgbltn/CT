@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <GetMDsWarningInfo_ByContractIDResponse xmlns="http://tempuri.org/">
+            <GetMDsWarningInfo_ByContractIDResult>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>17534</LastReadings>
+                    <NextVerificationDeadline>2030-01-01T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>628</LastReadings>
+                    <NextVerificationDeadline>2030-05-25T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+                <MDWarningInfo>
+                    <AddressOfMD>Железногорск-Илимский, Квартал 10-й, дом 6, квартира 15</AddressOfMD>
+                    <DicServiceGroupNumber xsi:nil="true" />
+                    <LastReadings>887</LastReadings>
+                    <NextVerificationDeadline>2030-05-25T00:00:00</NextVerificationDeadline>
+                    <IsReadingsTooOld>true</IsReadingsTooOld>
+                    <VerificationStatus>Verificated</VerificationStatus>
+                </MDWarningInfo>
+            </GetMDsWarningInfo_ByContractIDResult>
+        </GetMDsWarningInfo_ByContractIDResponse>
+    </soap:Body>
+</soap:Envelope>
