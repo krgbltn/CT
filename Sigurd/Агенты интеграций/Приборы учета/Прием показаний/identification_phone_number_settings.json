@@ -2,6 +2,7 @@
   "phoneSlotId": "sys_phone",
   "useHardcodedPhone": true,
   "hardcodedPhone": "89501074005",
+  "returnLookupAgent": "identification_phone_number",
   "url": "https://asuse-test.ie.corp/IVR.asmx",
   "slots": {
     "authSuccess": "successful_identification",
@@ -9,15 +10,21 @@
     "electro": "number_electricity_meter",
     "electroLast": "recent_electricity",
     "electroScale": "scale_electricity",
+    "electroScaleId": "scale_id_electricity",
     "hw": "number_hot_water",
     "hwLast": "recent_hot_water",
     "hwScale": "scale_hot_water",
+    "hwScaleId": "scale_id_hot_water",
     "cw": "number_cold_water",
     "cwLast": "recent_cold_water",
     "cwScale": "scale_cold_water",
+    "cwScaleId": "scale_id_cold_water",
     "heating": "number_heating",
     "heatingLast": "recent_heating",
-    "heatingScale": "scale_heating"
+    "heatingScale": "scale_heating",
+    "heatingScaleId": "scale_id_heating",
+    "hasNextAccount": "has_next_account",
+    "returnLookupAgent": "readings_lookup_agent"
   },
   "nextArticle": "article-c45ef64c-075d-4d0e-8da9-98d8914df244",
   "debug": {}

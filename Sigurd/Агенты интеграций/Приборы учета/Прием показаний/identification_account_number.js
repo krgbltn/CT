@@ -1,13 +1,12 @@
 ﻿// prod
 
 const {
-    phoneSlotId: PHONE_SLOT_ID,
+    numberSlotId: NUMBER_SLOT_ID,
     url: INCOMING_API,
     slots: SLOTS,
     nextArticle: NEXT_ARTICLE,
     debug: DEBUG,
-    useHardcodedPhone: USE_HARDCODED_PHONE,
-    hardcodedPhone: HARDCODED_PHONE
+    returnLookupAgent: RETURN_LOOKUP_AGENT
 } = agentSettings
 
 const getDebug = () => {
@@ -23,8 +22,8 @@ const getDebug = () => {
 const routingToOperatorAnswer = agentApi.makeTextReply("/switchredirect routingagent")
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
-    slot => slot.slot_id === slotId
-)?.value
+        slot => slot.slot_id === slotId
+    )?.value
 
 const getNextArticle = () => NEXT_ARTICLE
 
@@ -42,8 +41,7 @@ function createConfig(method, url, headers, data) {
 }
 
 async function sendRequest(data, soapAction) {
-    logger.info(`Start sending request: soapAction=${soapAction}, url=${INCOMING_API}`)
-    logger.info(`SOAP request XML: ${data}`)
+    logger.info('Start sending request')
 
     const headers = {
         'Content-Type': 'text/xml; charset=utf-8',
@@ -59,7 +57,6 @@ async function sendRequest(data, soapAction) {
             logger.error(`Bad request : status - ${response.status} - ${response.syscall} ${response.code} ${response.hostname}`)
         } else {
             logger.info(`Send status : ${response.status}`)
-            logger.info(`SOAP raw response: ${response.data}`)
             return response.data
         }
     } catch (error) {
@@ -105,29 +102,29 @@ const extractInfoFromResponse = async (parsedData) => {
                                 {
                                     "ID": "0e114d18-62b6-11e7-80de-00237d360000",
                                     "No": "103800120",
-                                    "Adress": "               ,   .           ,  .107,   .917",
+                                    "Adress": "Нижний Новгород, ул.Челюскинцев, д.107, кв.917",
                                     "Residents": "5",
                                     "FullArea": "19.17",
                                     "DateUpdate": "2022-11-03T15:36:43.76",
-                                    "Stove": "                   ",
-                                    "Status": "         ",
-                                    "AbonentName": "      ",
-                                    "FirstName": "        ",
-                                    "Patronimic": "         ",
+                                    "Stove": "тип плиты не указан",
+                                    "Status": "Действует",
+                                    "AbonentName": "Марина",
+                                    "FirstName": "Тестовая",
+                                    "Patronimic": "Сергеевна",
                                     "DivisionID": "9bad477b-26ee-11dc-8782-000423d10000"
                                 },
                                 {
                                     "ID": "4d21e098-fe41-11e6-80ce-002481f90000",
-                                    "No": "     200763",
-                                    "Adress": "       ,   .        ,  .79 ,   .17 ",
+                                    "No": "ЕТСОО200763",
+                                    "Adress": "Иркутск, ул.Бородина, д.79б, кв.17а",
                                     "Residents": "1",
                                     "FullArea": "19.60",
                                     "DateUpdate": "2022-07-08T11:50:24.923",
-                                    "Stove": "                   ",
-                                    "Status": "         ",
-                                    "AbonentName": "    ",
-                                    "FirstName": "        ",
-                                    "Patronimic": "          ",
+                                    "Stove": "тип плиты не указан",
+                                    "Status": "Действует",
+                                    "AbonentName": "Анна",
+                                    "FirstName": "Перетест",
+                                    "Patronimic": "Михайловна",
                                     "DivisionID": "f59a8382-235d-11e9-80c2-9457a550000"
                                 }
                             ]
@@ -146,11 +143,11 @@ const extractInfoFromResponse = async (parsedData) => {
         return []
     }
 
-    const contractsInfo = body["GetContractsInfo_By_PhoneResponse"]?.["GetContractsInfo_By_PhoneResult"]?.["ContractInfo"]
+    const contractsInfo = body["FindAllByContractNumberResponse"]?.["FindAllByContractNumberResult"]?.["ContractInfo"]
     const contractsInfoArr = Array.isArray(contractsInfo)
         ? contractsInfo
         : (contractsInfo ? [contractsInfo] : [])
-    //                       -                ,      -
+    // сохраняем в стор ключ - номер лиц счета, знач - ид лиц счета
     const contractIdMap = contractsInfoArr.reduce((acc, cur) => {
         acc[cur.No] = cur.ID
         return acc
@@ -160,10 +157,10 @@ const extractInfoFromResponse = async (parsedData) => {
         CONTRACTS_KEY,
         JSON.stringify(contractIdMap)
     )
-    return { contracts: contractsInfoArr.map(info => info.No), contractIdMap } //
+    return { contracts: contractsInfoArr.map(info => info.No), contractIdMap } // возвращаем номер лицевого счета
 }
 
-const getContractsInfoByPhone = async (phoneNumber) => {
+const getContractsInfoByContract = async (contractNumber) => {
     const requestBody = {
         "@": {
             "xmlns:soapenv": "http://schemas.xmlsoap.org/soap/envelope/",
@@ -171,15 +168,15 @@ const getContractsInfoByPhone = async (phoneNumber) => {
         },
         "soapenv:Header": "",
         "soapenv:Body": {
-            "tem:GetContractsInfo_By_Phone": {
-                "tem:PhoneNumber": phoneNumber
+            "tem:FindAllByContractNumber": {
+                "tem:contractNumberDigits": Number(contractNumber)
             }
         }
     }
 
     const xmlData = parseJsonToXml("soapenv:Envelope", requestBody)
     logger.info(`Created xml data: ${JSON.stringify(xmlData)}`)
-    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/GetContractsInfo_By_Phone')
+    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/FindAllByContractNumber')
     logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
     if (!xmlResponse) {
@@ -187,17 +184,14 @@ const getContractsInfoByPhone = async (phoneNumber) => {
     }
 
     const parsedResponse = await parseXmlToJson(xmlResponse)
-    logger.info(`GetContractsInfo_By_Phone parsed response: ${JSON.stringify(parsedResponse)}`)
-    const result = await extractInfoFromResponse(parsedResponse)
-    logger.info(`GetContractsInfo_By_Phone extracted contracts: ${JSON.stringify(result)}`)
-    return result
+    return await extractInfoFromResponse(parsedResponse)
 }
 
 /**
-1
-2
-4
-21
+1 – ЭЭ
+2 – ГВС
+4 – ХВС
+21 – Отопление
  */
 const NOMENCLATURES = [1, 2, 4, 21]
 
@@ -215,12 +209,12 @@ const extractMdInfoFromResponse = async (parsedData) => {
                         "MDInfo": [
                             {
                                 "MDSerialNumber": "981",
-                                "MDInstallationLocation": "     ",
+                                "MDInstallationLocation": "Кухня",
                                 "MDNextVerificationDeadline": "2031-11-24T00:00:00",
                                 "MDScales": {
                                     "MDScaleInfo": {
                                         "MDScaleID": "7C46D77E-D2DE-11E9-80C2-9457A553D5EB",
-                                        "MDScaleName": " 3",
+                                        "MDScaleName": "м3",
                                         "MDSDigitsAfterDot": "3",
                                         "LastReadings": "2",
                                         "LastReadingsDate": "2025-12-20T14:20:35.973",
@@ -231,12 +225,12 @@ const extractMdInfoFromResponse = async (parsedData) => {
                             },
                             {
                                 "MDSerialNumber": "007",
-                                "MDInstallationLocation": "       ",
+                                "MDInstallationLocation": "Санузел",
                                 "MDNextVerificationDeadline": "2031-11-24T00:00:00",
                                 "MDScales": {
                                     "MDScaleInfo": {
                                         "MDScaleID": "A1E01E62-D2DE-11E9-80C2-9457A553D5EB",
-                                        "MDScaleName": " 3",
+                                        "MDScaleName": "м3",
                                         "MDSDigitsAfterDot": "3",
                                         "LastReadings": "40",
                                         "LastReadingsDate": "2025-12-20T14:21:06.77",
@@ -266,7 +260,7 @@ const extractMdInfoFromResponse = async (parsedData) => {
     return mdInfoArr[0]
 }
 
-//
+// получаем данные счетчиков по лицевому счету
 const getMDInfo = async (contractId, nomenclatureCode) => {
     const requestBody = {
         "@": {
@@ -290,12 +284,12 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
     if (getDebug()) {
         return {
             "MDSerialNumber": "007",
-            "MDInstallationLocation": "       ",
+            "MDInstallationLocation": "Санузел",
             "MDNextVerificationDeadline": "2031-11-24T00:00:00",
             "MDScales": {
                 "MDScaleInfo": {
                     "MDScaleID": "A1E01E62-D2DE-11E9-80C2-9457A553D5EB",
-                    "MDScaleName": " 3",
+                    "MDScaleName": "м3",
                     "MDSDigitsAfterDot": "3",
                     "LastReadings": "40",
                     "LastReadingsDate": "2025-12-20T14:21:06.77",
@@ -311,10 +305,7 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
     }
 
     const parsedResponse = await parseXmlToJson(xmlResponse)
-    logger.info(`GetMDInfo parsed response for nomenclature ${nomenclatureCode}: ${JSON.stringify(parsedResponse)}`)
-    const result = await extractMdInfoFromResponse(parsedResponse)
-    logger.info(`GetMDInfo extracted meter for nomenclature ${nomenclatureCode}: ${JSON.stringify(result)}`)
-    return result
+    return await extractMdInfoFromResponse(parsedResponse)
 }
 
 const getMDSInfo = async (contractId) => {
@@ -350,12 +341,12 @@ const getSlots = (mdsInfo, contract) => {
     /**
      * {
             "MDSerialNumber": "981",
-            "MDInstallationLocation": "     ",
+            "MDInstallationLocation": "Кухня",
             "MDNextVerificationDeadline": "2031-11-24T00:00:00",
             "MDScales": {
                 "MDScaleInfo": {
                     "MDScaleID": "7C46D77E-D2DE-11E9-80C2-9457A553D5EB",
-                    "MDScaleName": " 3",
+                    "MDScaleName": "м3",
                     "MDSDigitsAfterDot": "3",
                     "LastReadings": "2",
                     "LastReadingsDate": "2025-12-20T14:20:35.973",
@@ -396,6 +387,7 @@ const getSlots = (mdsInfo, contract) => {
                     slots[SLOTS.electro] = mdsInfo[nom].MDSerialNumber
                     slots[SLOTS.electroLast] = scaleInfo.LastReadings
                     slots[SLOTS.electroScale] = "true"
+                    slots[SLOTS.electroScaleId] = scaleInfo.MDScaleID
                 }
                 break
 
@@ -404,6 +396,7 @@ const getSlots = (mdsInfo, contract) => {
                     slots[SLOTS.hw] = mdsInfo[nom].MDSerialNumber
                     slots[SLOTS.hwLast] = scaleInfo.LastReadings
                     slots[SLOTS.hwScale] = "true"
+                    slots[SLOTS.hwScaleId] = scaleInfo.MDScaleID
                 }
                 break
 
@@ -412,6 +405,7 @@ const getSlots = (mdsInfo, contract) => {
                     slots[SLOTS.cw] = mdsInfo[nom].MDSerialNumber
                     slots[SLOTS.cwLast] = scaleInfo.LastReadings
                     slots[SLOTS.cwScale] = "true"
+                    slots[SLOTS.cwScaleId] = scaleInfo.MDScaleID
                 }
                 break
 
@@ -420,6 +414,7 @@ const getSlots = (mdsInfo, contract) => {
                     slots[SLOTS.heating] = mdsInfo[nom].MDSerialNumber
                     slots[SLOTS.heatingLast] = scaleInfo.LastReadings
                     slots[SLOTS.heatingScale] = "true" //scaleInfo.MaxAcceptableNewMDReadingValue
+                    slots[SLOTS.heatingScaleId] = scaleInfo.MDScaleID
                 }
                 break
         }
@@ -433,21 +428,20 @@ const main = async () => {
     storedContracts = storedContracts ? JSON.parse(storedContracts) : ""
     let contractsPagination
 
-    logger.info(`Start main: storedContracts=${JSON.stringify(storedContracts)}, classifier=${CLASSIFIER}, nextArticle=${getNextArticle()}`)
-
     if (!storedContracts) {
-        const phoneNumber = USE_HARDCODED_PHONE
-            ? HARDCODED_PHONE
-            : getSlotValueById(PHONE_SLOT_ID)
-        logger.info(`Got phone number ${phoneNumber}, source=${USE_HARDCODED_PHONE ? "hardcoded" : `slot:${PHONE_SLOT_ID}`}`)
+        let contractNumber = getSlotValueById(NUMBER_SLOT_ID)
+        logger.info(`Got contract number ${contractNumber}`)
 
-        if (!phoneNumber) {
-            logger.info(`Phone not found`)
+        if (getDebug()) {
+            contractNumber = "11189"
+        }
+
+        if (!contractNumber) {
+            logger.info(`Contract number not found`)
             return [routingToOperatorAnswer]
         }
 
-        const { contracts, contractIdMap } = await getContractsInfoByPhone(phoneNumber) //
-        logger.info(`Contracts received for phone ${phoneNumber}: ${JSON.stringify({ contracts, contractIdMap })}`)
+        const { contracts, contractIdMap } = await getContractsInfoByContract(contractNumber) // получили список лицевых счетов
 
         if (getDebug()) {
             for (let i = 0; i < getDebug().contractsCount; i++) {
@@ -460,41 +454,28 @@ const main = async () => {
 
         contractsPagination = { max: contracts.length, current: 1 }
         await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
-        logger.info(`Contracts pagination initialized: ${JSON.stringify(contractsPagination)}`)
         storedContracts = contractIdMap
     } else {
         contractsPagination = JSON.parse(await agentStorage.dialogStorage.get(CONTRACTS_PAGINATION_KEY))
         contractsPagination.current++
-        logger.info(`Contracts pagination incremented: ${JSON.stringify(contractsPagination)}`)
     }
 
     if (Object.keys(storedContracts).length === 0) {
         logger.info(`Empty contracts stored or got`)
         const slots = getSlots(undefined, undefined)
-        logger.info(`Redirect payload for empty contracts: ${JSON.stringify({ classifier: CLASSIFIER, nextArticle: getNextArticle(), slots })}`)
         return [
             agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
         ]
     }
 
-    const selectedContractId = Object.values(storedContracts)[contractsPagination.current - 1]
-    const selectedContractNo = Object.keys(storedContracts)[contractsPagination.current - 1]
-    logger.info(`Selected contract: ${JSON.stringify({ selectedContractNo, selectedContractId, contractsPagination })}`)
-    const mdsInfo = await getMDSInfo(selectedContractId)
+    const mdsInfo = await getMDSInfo(Object.values(storedContracts)[contractsPagination.current - 1])
     logger.info(`Got mdsInfo ${JSON.stringify(mdsInfo)}`)
     const slots = getSlots(mdsInfo, Object.keys(storedContracts)[contractsPagination.current - 1])
+    slots[SLOTS.hasNextAccount] = String(contractsPagination.current < contractsPagination.max)
+    slots[SLOTS.returnLookupAgent] = RETURN_LOOKUP_AGENT
     logger.info(`Filled slots: ${JSON.stringify(slots)}`)
 
     await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
-    logger.info(`Redirect payload: ${JSON.stringify({
-        classifier: CLASSIFIER,
-        nextArticle: getNextArticle(),
-        selectedContractNo,
-        selectedContractId,
-        contractsPagination,
-        mdsInfo,
-        slots
-    })}`)
 
     return [
         agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)

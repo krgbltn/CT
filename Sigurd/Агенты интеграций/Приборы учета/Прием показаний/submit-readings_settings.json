@@ -1,0 +1,19 @@
+{
+  "url": "https://asuse-test.ie.corp/IVR.asmx",
+  "aiAgent": "ai_pribor",
+  "routingAgent": "routingagent",
+  "nextArticle": "article-c45ef64c-075d-4d0e-8da9-98d8914df244",
+  "debug": false,
+  "slots": {
+    "electroScaleId": "scale_id_electricity",
+    "electroReadings": "readings_electricity",
+    "hwScaleId": "scale_id_hot_water",
+    "hwReadings": "readings_hot_water",
+    "cwScaleId": "scale_id_cold_water",
+    "cwReadings": "readings_cold_water",
+    "heatingScaleId": "scale_id_heating",
+    "heatingReadings": "readings_heating",
+    "hasNextAccount": "has_next_account",
+    "returnLookupAgent": "readings_lookup_agent"
+  }
+}
