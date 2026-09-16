@@ -4,7 +4,8 @@ const {
     aiAgent: AI_AGENT,
     routingAgent: ROUTING_AGENT,
     nextArticle: NEXT_ARTICLE,
-    debug: DEBUG
+    debug: DEBUG,
+    continueNextAccount: CONTINUE_NEXT_ACCOUNT
 } = agentSettings
 
 const SOAP_ACTION = "http://tempuri.org/InputOfReadingsWithDot"
@@ -123,9 +124,9 @@ async function main() {
     const results = await Promise.all(readingsToSubmit.map(submitReading))
     logger.info(`All readings submitted successfully: ${JSON.stringify(results)}`)
 
-    const hasNextAccount = getSlotValueById(SLOTS.hasNextAccount) === "true"
+    const hasNextAccount = CONTINUE_NEXT_ACCOUNT && getSlotValueById(SLOTS.hasNextAccount) === "true"
     const returnLookupAgent = getSlotValueById(SLOTS.returnLookupAgent)
-    logger.info(`Next account check: hasNextAccount=${hasNextAccount}, returnLookupAgent=${returnLookupAgent}`)
+    logger.info(`Next account check: enabled=${CONTINUE_NEXT_ACCOUNT === true}, hasNextAccount=${hasNextAccount}, returnLookupAgent=${returnLookupAgent}`)
 
     if (hasNextAccount) {
         if (!returnLookupAgent) {

@@ -4,6 +4,7 @@
   "routingAgent": "routingagent",
   "nextArticle": "article-c45ef64c-075d-4d0e-8da9-98d8914df244",
   "debug": false,
+  "continueNextAccount": false,
   "slots": {
     "electroScaleId": "scale_id_electricity",
     "electroReadings": "readings_electricity",
