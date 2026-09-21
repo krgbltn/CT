@@ -30,6 +30,7 @@
 		"DEBUG": false,
 		"DO_REPHRASE": false,
 		"ENABLE_THINKING_SMALLTALK": false,
+		"ENABLE_THINKING_RAG": false,
 		"SHOW_THINKING": false,
 		"MAX_CYCLES": 5,
 		"SMALLTALK_IF_NO_CONTEXT": true,
@@ -67,12 +68,31 @@
 			"name": "LAUNCH",
 			"description": "Диагностическое оборудование LAUNCH (X-431 PAD/PRO, BST, CReader, ADAS)",
 			"queue": "диагностическое"
+		},
+		"iceman": {
+			"name": "ICEMAN",
+			"description": "Обслуживание авто кондиционеров ICEMAN (АС8000S, АС7000S, АС7000S Basic, АС7500S, AC2000N, AC3000N)",
+			"queue": "сервисное"
+		},
+		"injman": {
+			"name": "INJMAN",
+			"description": "Обслуживание системы питания ДВС INJMAN",
+			"queue": "сервисное"
+		},
+		"serviceman": {
+			"name": "SERVICEMAN",
+			"description": "Замена технических жидкостей SERVICEMAN",
+			"queue": "сервисное"
 		}
 	},
 	"articles": {
 		"TRANSFER_FOR_OPERATOR": {
 			"ID": "article-319a599c-5931-42a4-aeae-6aa55f9970c9",
 			"NAME": "Перевод на оператора"
+		},
+		"SENSOR_SELECTION": {
+			"ID": "article-e09e0555-8fb5-48ed-9fab-c00d23feffb8",
+			"NAME": "Подбор датчика по парт-номеру или модели авто"
 		}
 	}
 }
