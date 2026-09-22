@@ -1,6 +1,7 @@
 {
 	"api": {
 		"base_url": "https://cloud.craft-talk.ru",
+		"url_mediator_service": "http://opbot-botmediator:8080",
 		"url_context_search": "http://contextsearch:8801",
 		"url_llm": "http://craftgpt:3020",
 		"llm_auth_token": "SKfLcuNKrmGzbP9pKgVpi7aMq8ciESn1Xgzm6xAq8y8"
@@ -36,7 +37,8 @@
 		"SMALLTALK_IF_NO_CONTEXT": true,
 		"SHOW_REFERENCES": false,
 		"SHOW_CONTEXT": false,
-		"USE_HISTORY": true
+		"USE_HISTORY": true,
+		"HISTORY_FROM_BOT_MEDIATOR": true
 	},
 	"standard_messages": {
 		"DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",

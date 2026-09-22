@@ -194,7 +194,12 @@ ${PRODUCT_LIST_PROMPT}
 После поиска отвечайте только на основании информации, возвращённой этим поиском.
 Используйте только контекст выбранного \`product\`, учитывайте бренд и модель оборудования, отвечайте кратко и по существу, используйте Markdown.
 
-После ответа предлагайте вариант развития диалога на основе контекста поиска и предыдущих вопросов клиента. Если найденный контекст содержит смежный вопрос по той же теме (например, после вопроса «Какие тестеры АКБ AUTEL есть в линейке?» в контексте есть вопрос «Какой AUTEL выбрать для проверки аккумуляторов и системы зарядки?»), предложите его, например: "Также могу подсказать: ...?". Если подходящего варианта нет — завершите ответ фразой «Могу ли чем-то ещё помочь?».
+Если найденная статья точно соответствует запросу пользователя (например, пользователь просит «Инструкция по эксплуатации АС8000S», а в результате есть статья «Инструкция по эксплуатации АС8000S»), сразу ответьте ссылкой на эту статью и кратко опишите её содержание. Не задавайте уточняющих вопросов и не просите пользователя выбрать операцию, если подходящая статья уже найдена.
+
+Если поиск вернул несколько статей, не начинайте ответ с формулировок «Найдены документы», «Основная инструкция» или «Дополнительные материалы». Расскажите о каждой подходящей статье естественно и отдельно: укажите ссылку на неё и кратко объясните, чем она может помочь клиенту.
+Не упоминайте кнопки, меню, переходы, навигацию и другие элементы интерфейса базы знаний или статьи. Не переносите в ответ служебные элементы статьи.
+
+После ответа предлагайте вариант развития диалога на основе контекста поиска и предыдущих вопросов клиента. Если найденный контекст содержит смежный вопрос по той же теме (например, после вопроса «Какие тестеры АКБ AUTEL есть в линейке?» в контексте есть вопрос «Какой AUTEL выбрать для проверки аккумуляторов и системы зарядки?»), предложите его, например: "Также могу подсказать: ...?". Если подходящего варианта нет — завершите ответ фразой «Могу ли чем-то ещё помочь?». 
 
 # Запрет смешивания информации
 
@@ -238,6 +243,8 @@ ${PRODUCT_LIST_PROMPT}
 - Не показывайте ход рассуждений.
 - Не добавляйте к ответу текст вопроса пользователя.
 - Не добавляйте кнопки.
+- Не упоминайте кнопки, меню, переходы и навигацию по статьям или базе знаний.
+- Не используйте формулировки «Найдены документы», «Основная инструкция» и «Дополнительные материалы» как шаблонную структуру ответа.
 - Не выдумывайте цены, характеристики, сроки, совместимость или инструкции.
 - Не используйте информацию, которой нет в найденном контексте.
 - Не используйте формулировки «не могу», «не могу сделать», «не знаю» — при нехватке информации запросите у клиента дополнительные сведения или попросите переформулировать вопрос.
@@ -265,6 +272,24 @@ const RAG_DOCUMENT_TEMPLATE = `## {title}:
 \`\`\`
 `
 const RAG_JOIN_SEP = "\n\n...\n\n"
+
+function removeArticleNavigation(content) {
+    return String(content || '')
+        .replace(/<pre><code[^>]*language-buttons[\s\S]*?<\/code><\/pre>/gi, '')
+        .trim()
+}
+
+function sanitizeResponse(response) {
+    if (!response?.answer) return response
+
+    return {
+        ...response,
+        answer: response.answer
+            .replace(/(?:^|\n)\s*(?:для перехода|чтобы перейти)[^\n.!?]*(?:кнопк|меню)[^\n.!?]*[.!?]?/giu, '')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim(),
+    }
+}
 
 
 // === Prompt & Model config ===
@@ -310,7 +335,7 @@ async function search_in_knowledge_base({ product, queries }) {
     logger.info(`Set queue slot: ${queueValue} for product: ${recordType}`)
 
     return context.map(c =>
-        `## ${c.title}:\n\`\`\`\n${c.content}\n\`\`\``
+        `## ${c.title}:\n\`\`\`\n${removeArticleNavigation(c.content)}\n\`\`\``
     ).join("\n\n...\n\n")
 }
 
@@ -499,6 +524,7 @@ async function sendMessageToLLM(question, dialog_id, history, replies, opts = {}
             response = await rag(question, buildSyntheticContext(question), dialog_id, history, replies)
         } else if (use_smalltalk) {
             response = await smalltalk(question, dialog_id, history, replies)
+            response = sanitizeResponse(response)
             await _printResponse(response, replies)
             return response
         } else {
@@ -509,6 +535,7 @@ async function sendMessageToLLM(question, dialog_id, history, replies, opts = {}
         response = await rag(question, context, dialog_id, history, replies)
     }
 
+    response = sanitizeResponse(response)
     response = enrichResponseArticleLinks(
         response,
         sourceHighlightValidationRangesByArticle,
@@ -543,6 +570,19 @@ async function sendMessageToLLM(question, dialog_id, history, replies, opts = {}
 // === _main ===
 
 async function _main(replies) {
+    const question = String(message.message.text || '').toLowerCase()
+    if (question.includes('менеджер') || question.includes('оператор')) {
+        const redisClient = new RedisQueue(
+            agentStorage.dialogStorage,
+            replies.deleteSlot,
+            replies.debugReply
+        )
+        await redisClient.clearQueue()
+
+        const redirect = await transfer_to_operator({})
+        throw new SwitchRedirectPropagate(redirect)
+    }
+
     return _mainBody(replies, {
         use_rag: false,
         use_rephrase: false,

@@ -569,7 +569,20 @@ async function getDialogsHistory(customerId, omniUserId) {
  * Сами type 30 не трогаем — они нужны processScenarios.
  */
 async function getMediatorHistoryForQuery(dialog_id, question, customerId, omniUserId) {
-    const history = await getDialogsHistory(customerId, omniUserId)
+    const conversationId = getConversationId()
+    let history = conversationId
+        ? await getDialogsHistory(customerId, omniUserId)
+        : []
+
+    // Some mediator messages do not contain conversation_id even when the
+    // request is a continuation. In that case load the active dialog directly.
+    if ((!history || history.length === 0) && dialog_id) {
+        history = await getDialog(dialog_id)
+        logger.info(`История загружена по dialog_id: ${JSON.stringify(dialog_id)}`)
+    } else {
+        logger.info(`История загружена по conversation_id: ${JSON.stringify(conversationId)}`)
+    }
+
     if (!history || history.length === 0) return history
     let lastIdx = history.length - 1
     while (lastIdx >= 0 && history[lastIdx].type === 30) lastIdx--
@@ -2254,8 +2267,14 @@ async function runToolsLoop(question, dialog_id, history, replies, sendMessageTo
         // подхватывается isThinking при SHOW_THINKING=true.
         let currentHistory = history
         if (history !== null && dialog_id) {
-            const freshHistory = await getDialogsHistory(message.user.customer_id, message.user.omni_user_id)
-            const processed = processScenarios(freshHistory, fullQueue, ROUTE_TO_SELF_AGENT)
+            const conversationId = getConversationId()
+            const freshHistory = conversationId
+                ? await getDialogsHistory(message.user.customer_id, message.user.omni_user_id)
+                : []
+            const mediatorHistory = freshHistory?.length
+                ? freshHistory
+                : await getDialog(dialog_id)
+            const processed = processScenarios(mediatorHistory || [], fullQueue, ROUTE_TO_SELF_AGENT)
             currentHistory = processed.history
         }
         const llmHistory = buildLLMHistory(currentHistory, fullQueue)
@@ -2271,6 +2290,11 @@ async function runToolsLoop(question, dialog_id, history, replies, sendMessageTo
     try {
         response = await redisClient.processQueue(queue, commitFcResults, replies)
     } catch (error) {
+        if (error instanceof SwitchRedirectPropagate) {
+            await redisClient.clearQueue()
+            throw error
+        }
+
         if (error instanceof ScenarioNotReadyError) {
             if (question) {
                 await replies.markdownReply(MESSAGE_WHILE_WAITING_ERROR)
