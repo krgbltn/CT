@@ -117,7 +117,7 @@
 **4. Создать канал с типом integration_channel**<br>
 **5. Указать в настройках канала "Токен для входящих сообщений". Можно оставить пустым.**<br>
 **6. В поле "Вебхук" в настройках канала указать:**<br><br>
-http://\<HOST\>/integration_channel <br>
+http://opbot-jsagent:3366/integration_channel <br>
 **\<HOST\>** - host jsagent, например, opbot-jsagent:3366<br><br>
 **7. В поле "Настройки канала" указать:**
 
