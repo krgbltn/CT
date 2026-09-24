@@ -1,8 +1,10 @@
 {
   "phoneSlotId": "sys_phone",
-  "useHardcodedPhone": true,
+  "useHardcodedPhone": false,
   "hardcodedPhone": "89501074005",
   "returnLookupAgent": "identification_phone_number",
+  "aiAgent": "ai_pribor",
+  "routingAgent": "routingagent",
   "url": "https://asuse-test.ie.corp/IVR.asmx",
   "slots": {
     "authSuccess": "successful_identification",

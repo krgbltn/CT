@@ -4,6 +4,8 @@ const {
     phoneSlotId: PHONE_SLOT_ID,
     url: INCOMING_API,
     slots: SLOTS,
+    aiAgent: AI_AGENT,
+    routingAgent: ROUTING_AGENT,
     nextArticle: NEXT_ARTICLE,
     debug: DEBUG,
     useHardcodedPhone: USE_HARDCODED_PHONE,
@@ -21,15 +23,15 @@ const getDebug = () => {
     } : undefined
 }
 
-const routingToOperatorAnswer = agentApi.makeTextReply("/switchredirect routingagent")
+const routingToOperatorAnswer = agentApi.makeTextReply(`/switchredirect ${ROUTING_AGENT}`)
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
     slot => slot.slot_id === slotId
 )?.value
 
-const getNextArticle = () => NEXT_ARTICLE
+const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
 
-const CLASSIFIER = "ai_pribor"
+const getClassifier = () => getSlotValueById("classifier") || AI_AGENT
 
 
 function createConfig(method, url, headers, data) {
@@ -452,7 +454,7 @@ const main = async () => {
     storedContracts = storedContracts ? JSON.parse(storedContracts) : ""
     let contractsPagination
 
-    logger.info(`Start main: storedContracts=${JSON.stringify(storedContracts)}, classifier=${CLASSIFIER}, nextArticle=${getNextArticle()}`)
+    logger.info(`Start main: storedContracts=${JSON.stringify(storedContracts)}, classifier=${getClassifier()}, nextArticle=${getNextArticle()}`)
 
     if (!storedContracts) {
         const phoneNumber = USE_HARDCODED_PHONE
@@ -490,9 +492,9 @@ const main = async () => {
     if (Object.keys(storedContracts).length === 0) {
         logger.info(`Empty contracts stored or got`)
         const slots = getSlots(undefined, undefined)
-        logger.info(`Redirect payload for empty contracts: ${JSON.stringify({ classifier: CLASSIFIER, nextArticle: getNextArticle(), slots })}`)
+        logger.info(`Redirect payload for empty contracts: ${JSON.stringify({ classifier: getClassifier(), nextArticle: getNextArticle(), slots })}`)
         return [
-            agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+            agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
         ]
     }
 
@@ -508,7 +510,7 @@ const main = async () => {
 
     await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
     logger.info(`Redirect payload: ${JSON.stringify({
-        classifier: CLASSIFIER,
+        classifier: getClassifier(),
         nextArticle: getNextArticle(),
         selectedContractNo,
         selectedContractId,
@@ -518,7 +520,7 @@ const main = async () => {
     })}`)
 
     return [
-        agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+        agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
     ]
 }
 

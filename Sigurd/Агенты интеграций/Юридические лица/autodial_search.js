@@ -5,6 +5,7 @@ const {
 	phoneSlotId,
 	slots: SLOTS,
 	nextArticle,
+	operatorArticle,
 	timeoutMs
 } = agentSettings
 
@@ -17,7 +18,8 @@ const nextArticleReply = (slots) => {
 	return agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${targetArticle}"`, undefined, undefined, slots)
 }
 
-const routingToOperatorAnswer = agentApi.makeTextReply("/switchredirect routingagent")
+const operatorTransferReply = () =>
+	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`)
 
 const normalizePath = (path) => {
 	if (path === undefined || path === null || path === "" || path === "$") {
@@ -164,7 +166,7 @@ const main = async () => {
 
 	if (!isFilledValue(phone)) {
 		logger.warn('Phone slot is empty')
-		return [routingToOperatorAnswer]
+		return [operatorTransferReply()]
 	}
 
 	const requestUrl = createRequestUrl()
@@ -174,7 +176,7 @@ const main = async () => {
 
 	if (!responseData) {
 		logger.warn('No response data or request failed')
-		return [routingToOperatorAnswer]
+		return [operatorTransferReply()]
 	}
 
 	logger.info(`Got response data: ${JSON.stringify(responseData || {})}`)
@@ -189,5 +191,5 @@ main()
 	.then(res => resolve(res))
 	.catch(error => {
 		logger.error({ stack: error.stack }, `Error when execute main func. ${error}`)
-		resolve([routingToOperatorAnswer])
+		resolve([operatorTransferReply()])
 	})

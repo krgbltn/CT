@@ -21,8 +21,6 @@ const nextArticleReply = (slots) => {
 const operatorTransferReply = () =>
 	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`)
 
-const routingToOperatorAnswer = agentApi.makeTextReply("/switchredirect routingagent")
-
 const normalizePath = (path) => {
 	if (path === undefined || path === null || path === "" || path === "$") {
 		return []
@@ -174,7 +172,7 @@ const main = async () => {
 
 	if (!isFilledValue(inn)) {
 		logger.warn('INN slot is empty')
-		return [routingToOperatorAnswer]
+		return [operatorTransferReply()]
 	}
 
 	const requestUrl = createRequestUrl()

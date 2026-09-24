@@ -4,6 +4,8 @@ const {
     numberSlotId: NUMBER_SLOT_ID,
     url: INCOMING_API,
     slots: SLOTS,
+    aiAgent: AI_AGENT,
+    routingAgent: ROUTING_AGENT,
     nextArticle: NEXT_ARTICLE,
     debug: DEBUG,
     returnLookupAgent: RETURN_LOOKUP_AGENT
@@ -19,15 +21,15 @@ const getDebug = () => {
     } : undefined
 }
 
-const routingToOperatorAnswer = agentApi.makeTextReply("/switchredirect routingagent")
+const routingToOperatorAnswer = agentApi.makeTextReply(`/switchredirect ${ROUTING_AGENT}`)
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
         slot => slot.slot_id === slotId
     )?.value
 
-const getNextArticle = () => NEXT_ARTICLE
+const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
 
-const CLASSIFIER = "ai_pribor"
+const getClassifier = () => getSlotValueById("classifier") || AI_AGENT
 
 
 function createConfig(method, url, headers, data) {
@@ -478,7 +480,7 @@ const main = async () => {
         logger.info(`Empty contracts stored or got`)
         const slots = getSlots(undefined, undefined)
         return [
-            agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+            agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
         ]
     }
 
@@ -492,7 +494,7 @@ const main = async () => {
     await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
 
     return [
-        agentApi.makeTextReply(`/switchredirect ${CLASSIFIER} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+        agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
     ]
 }
 

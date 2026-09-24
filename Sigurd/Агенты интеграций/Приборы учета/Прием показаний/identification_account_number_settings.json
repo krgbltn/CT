@@ -1,6 +1,8 @@
 {
   "numberSlotId": "account_number",
   "returnLookupAgent": "identification_account_number",
+  "aiAgent": "ai_pribor",
+  "routingAgent": "routingagent",
   "url": "https://asuse-test.ie.corp/IVR.asmx",
   "slots": {
     "authSuccess": "successful_identification",

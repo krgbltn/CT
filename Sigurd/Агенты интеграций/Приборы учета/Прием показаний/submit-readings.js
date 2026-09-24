@@ -14,6 +14,9 @@ const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
     slot => slot.slot_id === slotId
 )?.value
 
+const getClassifier = () => getSlotValueById("classifier") || AI_AGENT
+const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
+
 const parseJsonToXml = (tag, data) => js2xmlparser.parse(tag, data)
 
 function createConfig(data) {
@@ -137,7 +140,7 @@ async function main() {
     }
 
     return [
-        agentApi.makeTextReply(`/switchredirect ${AI_AGENT} intent_id="${NEXT_ARTICLE}"`)
+        agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`)
     ]
 }
 
