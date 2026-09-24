@@ -32,7 +32,7 @@ JSONPath для slotsMapping:
 - 1 — владелец зарегистрирован в ЛК (is_owner_registered = true)
 - 2 — владелец не зарегистрирован в ЛК (is_owner_registered = false или отсутствует)
 
-Перевод на оператора при ошибке: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
 ---
 

@@ -35,8 +35,7 @@
 - 2 — по ИНН ничего не найдено (пустой массив) либо у юрлица нет ЛС
 
 Перевод на оператора:
-- пустой слот inn — /switchredirect routingagent
-- ошибка запроса / пустой ответ — /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+- пустой слот inn, ошибка запроса или пустой ответ — переход через `classifier` в статью `operatorArticle`
 
 При нескольких ЛС берётся первая запись WebProperties.
 
@@ -63,7 +62,7 @@
 - 2 — дозвона не было (debt_call.exists = false)
 
 Перевод на оператора:
-- пустой слот phone_ul, ошибка запроса, таймаут или коды 400/401/403/503 — /switchredirect routingagent
+- пустой слот phone_ul, ошибка запроса, таймаут или коды 400/401/403/503 — переход через `classifier` в статью `operatorArticle`
 
 Таймаут запроса: 3 секунды (timeoutMs в настройках)
 

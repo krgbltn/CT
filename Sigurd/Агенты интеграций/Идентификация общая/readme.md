@@ -92,7 +92,7 @@ GET /{user_id}/info — для получения city (город из account.
 
 ## Перевод на оператора
 
-/switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+Диалог направляется через `classifier` в статью `operatorArticle`.
 
 Срабатывает при:
 - Ошибка запроса к API

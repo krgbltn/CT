@@ -42,7 +42,7 @@ JSONPath для slotsMapping:
 - Несколько лицевых счетов — просим назвать адрес, fuzzy-сопоставление (ask_multiple)
 - При ошибке или неудаче — перевод на оператора
 
-Перевод на оператора: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
 ---
 
@@ -77,7 +77,7 @@ JSONPath для slotsMapping:
 - 2 — есть долг (без отключения)
 - 3 — нет отключения и долга
 
-Перевод на оператора при ошибке: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
 ---
 
@@ -106,7 +106,7 @@ JSONPath для slotsMapping:
 - 2 — плановая работа ещё идёт (текущая дата < date_end), назвать дату окончания
 - 3 — нет данных об отключении или отсутствует date_end
 
-Перевод на оператора при ошибке: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
 ---
 
@@ -142,7 +142,7 @@ JSONPath для slotsMapping:
 
 Письмо: network@es.irkutskenergo.ru, тема "Нет оповещения"
 
-Перевод на оператора при ошибке: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
 ---
 

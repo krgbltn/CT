@@ -193,14 +193,6 @@ function fixEmptyMarkdownLink(_, fullUrl, filename) {
 	return `[${filename}](${fullUrl})`
 }
 
-function getFilenameFromUrl(url) {
-	try {
-		return new URL(url).pathname.split("/").pop() || "file"
-	} catch (error) {
-		return "file"
-	}
-}
-
 function formatText(text) {
 	const underlineMarkdownPattern = /__(.+?)__/g // Ищем блоки текста с подчеркиванием в ct
 	const underlineMaxPattern = "++$1++" // блоки текста с подчеркиванием в max
@@ -213,13 +205,11 @@ function removeButtonsFromText(text, complexAnswer) {
 	const buttonPattern = /```buttons[\s\S]*?```/g // Ищем блоки кнопок (с пометкой buttons)
 	const buttonPattern2 = /::::[\s\S]*?(?=\n::::|\n```|$)/g // Ищем блоки кнопок с ::::
 	const internalArticlePattern = /buttons\n::\n.*?```/gi // Ищем блоки вложенные статьи
-	const markdownImagePattern = /!\[[^\]]*]\(https?:\/\/[^\s)]+\)/g // Изображения отправляются отдельными вложениями
 	const imageHyperLinkPattern = /\[\]\((https?:\/\/[^\s)]+\/([^/\s)]+))\)/g // Ищем ссылки на изображения
 
 	let cleanedText = text
 		.replace(buttonPattern, "") // удаляем кнопки
 		.replace(internalArticlePattern, "") // удаляем вложенные статьи
-		.replace(markdownImagePattern, "") // изображения уже добавлены в attachments
 		.replace(imageHyperLinkPattern, fixEmptyMarkdownLink) // чиним пустые ссылки
 		.replace(/\\+/g, "") // удаляем экранирующие слеши
 		.replace(/\n[ \t]*\n(?![ \t]*\n)/g, "\n") // схлопывает лишние пустые строки
@@ -449,10 +439,6 @@ async function preprocessMessage(msg) {
 				case "TextAnswer":
 					break
 				case "FileAnswer":
-					await addMediaAttachments(attachments, [{
-						attachment_url: markdownAnswer.url,
-						attachment_name: markdownAnswer.description || getFilenameFromUrl(markdownAnswer.url)
-					}])
 					break
 				case "ButtonsAnswer":
 					addInlineButtonsFromText(attachments, markdownAnswer.buttonsAnswer?.buttons)

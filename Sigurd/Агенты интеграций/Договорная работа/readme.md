@@ -42,7 +42,7 @@ JSONPath для slotsMapping:
 Обработка ошибок:
 - Ошибка запроса → перевод на оператора
 
-Перевод на оператора при ошибке: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
 ---
 
@@ -87,7 +87,7 @@ JSONPath для slotsMapping:
 - uid пустой → перевод на оператора
 - Ошибка запроса → перевод на оператора
 
-Перевод на оператора при ошибке: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
 ---
 

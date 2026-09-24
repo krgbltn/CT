@@ -41,7 +41,7 @@ targetArticle: из слота next_article (fallback: nextArticle из наст
 | 3 | ОКЭ | ОГУЭП Облкоммунэнерго |
 | 4 | Другое | Нет нужного источника |
 
-Перевод на оператора при ошибке: /switchredirect aiassist2 intent_id="article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d"
+При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
 ---
 
