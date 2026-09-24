@@ -11,7 +11,8 @@ const {
 	disconnectionReportUrl,
 	infoUrl,
 	stub,
-	stubResponse
+	stubResponse,
+	city1Values = []
 } = agentSettings
 
 // --- Утилиты для работы со слотами и message ---
@@ -208,6 +209,14 @@ const extractStreetAddress = (fullAddress) => {
 	return parts.slice(startIndex).join(', ')
 }
 
+const getCity1 = (address) => {
+	const normalizedAddress = (address || '').toLowerCase()
+	return city1Values
+		.slice()
+		.sort((first, second) => second.length - first.length)
+		.find(city => normalizedAddress.includes(city.toLowerCase()))
+}
+
 // --- Запрос house_type из disconnection_report_info ---
 const fetchHouseType = async (userId) => {
 	if (!disconnectionReportUrl || !userId) return undefined
@@ -336,6 +345,8 @@ const main = async () => {
 				const contract = contracts[idx]
 				if (!contract) return [operatorTransferReply()]
 				const filledSlots = fillSlotsFromContract(contract)
+				const city1 = getCity1(contract.WebProperties?.Address)
+				if (city1) filledSlots.city_1 = city1
 				const status = await fetchStatus(filledSlots.uid)
 				if (status) filledSlots.status_ls = status
 				const houseType = await fetchHouseType(filledSlots.uid)
@@ -360,6 +371,8 @@ const main = async () => {
 
 			if (matchedContract) {
 				const filledSlots = fillSlotsFromContract(matchedContract)
+				const city1 = getCity1(matchedContract.WebProperties?.Address)
+				if (city1) filledSlots.city_1 = city1
 				const status = await fetchStatus(filledSlots.uid)
 				if (status) filledSlots.status_ls = status
 				const houseType = await fetchHouseType(filledSlots.uid)
