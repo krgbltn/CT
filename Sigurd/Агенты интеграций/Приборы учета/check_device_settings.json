@@ -1,0 +1,12 @@
+{
+  "infoUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id_tst}}/info",
+  "disconnectionReportUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{user_id}/disconnection_report_info",
+  "method": "get",
+  "nextArticle": "",
+  "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
+  "authorizationToken": "Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==",
+  "headers": {
+    "ES-Request-Source": "Website",
+    "Accept": "application/json"
+  }
+}
