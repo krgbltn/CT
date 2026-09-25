@@ -78,12 +78,12 @@
 		},
 		"injman": {
 			"name": "INJMAN",
-			"description": "Обслуживание системы питания ДВС INJMAN",
+			"description": "Обслуживание системы питания ДВС INJMAN (INJ6000N GDI, INJ6000)",
 			"queue": "сервисное"
 		},
 		"serviceman": {
 			"name": "SERVICEMAN",
-			"description": "Замена технических жидкостей SERVICEMAN",
+			"description": "Замена технических жидкостей SERVICEMAN (ATF4000N, BRK3000, CLT3000)",
 			"queue": "сервисное"
 		}
 	},

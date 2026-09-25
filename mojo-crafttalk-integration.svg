@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
+  <title id="title">Целевая схема интеграции Mojo и CraftTalk</title>
+  <desc id="desc">Поток сообщений из чата Mojo в CraftTalk, ответ бота или оператора обратно в Mojo, а также загрузка истории в базу знаний.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker>
+    <marker id="requiredArrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#be123c"/></marker>
+    <style>
+      .title { font: 700 30px Arial, sans-serif; fill: #172033; }
+      .subtitle { font: 400 17px Arial, sans-serif; fill: #475569; }
+      .section { font: 700 19px Arial, sans-serif; fill: #334155; }
+      .box-title { font: 700 19px Arial, sans-serif; fill: #ffffff; }
+      .box-text { font: 400 15px Arial, sans-serif; fill: #e2e8f0; }
+      .light-title { font: 700 18px Arial, sans-serif; fill: #172033; }
+      .light-text { font: 400 14px Arial, sans-serif; fill: #334155; }
+      .label { font: 600 14px Arial, sans-serif; fill: #334155; }
+      .required { font: 700 14px Arial, sans-serif; fill: #9f1239; }
+      .note { font: 400 14px Arial, sans-serif; fill: #713f12; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="940" fill="#f8fafc"/>
+  <text x="70" y="58" class="title">Целевая интеграция диалогов Mojo и CraftTalk</text>
+  <text x="70" y="88" class="subtitle">Бот отвечает первым; при необходимости оператор продолжает тот же диалог в окне Mojo.</text>
+
+  <rect x="55" y="125" width="1490" height="530" rx="18" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+  <text x="85" y="163" class="section">Рабочий контур диалогов</text>
+
+  <rect x="95" y="260" width="220" height="130" rx="12" fill="#475569"/>
+  <text x="205" y="308" text-anchor="middle" class="box-title">Родитель /</text>
+  <text x="205" y="334" text-anchor="middle" class="box-title">преподаватель</text>
+  <text x="205" y="362" text-anchor="middle" class="box-text">Окно чатов Mojo</text>
+
+  <rect x="410" y="235" width="260" height="180" rx="12" fill="#0f766e"/>
+  <text x="540" y="280" text-anchor="middle" class="box-title">Mojo</text>
+  <text x="540" y="309" text-anchor="middle" class="box-text">Чат Заказчика</text>
+  <text x="540" y="339" text-anchor="middle" class="box-text">chat_id, участники,</text>
+  <text x="540" y="361" text-anchor="middle" class="box-text">история сообщений</text>
+
+  <rect x="770" y="210" width="275" height="125" rx="12" fill="#2563eb"/>
+  <text x="907" y="250" text-anchor="middle" class="box-title">Входящий адаптер</text>
+  <text x="907" y="279" text-anchor="middle" class="box-text">Нормализация события</text>
+  <text x="907" y="303" text-anchor="middle" class="box-text">и создание диалога</text>
+
+  <rect x="1135" y="205" width="285" height="135" rx="12" fill="#7c3aed"/>
+  <text x="1277" y="247" text-anchor="middle" class="box-title">LLM-бот CraftTalk</text>
+  <text x="1277" y="276" text-anchor="middle" class="box-text">База знаний + агент</text>
+  <text x="1277" y="300" text-anchor="middle" class="box-text">Подготовка ответа</text>
+
+  <rect x="770" y="445" width="275" height="125" rx="12" fill="#2563eb"/>
+  <text x="907" y="485" text-anchor="middle" class="box-title">Исходящий адаптер</text>
+  <text x="907" y="514" text-anchor="middle" class="box-text">Отправка ответа</text>
+  <text x="907" y="538" text-anchor="middle" class="box-text">в исходный chat_id</text>
+
+  <path d="M315 325 H410" fill="none" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="362" y="304" text-anchor="middle" class="label">Вопрос</text>
+  <path d="M670 272 H770" fill="none" stroke="#be123c" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#requiredArrow)"/>
+  <text x="720" y="234" text-anchor="middle" class="required">Требуется: webhook</text>
+  <text x="720" y="253" text-anchor="middle" class="required">new_message</text>
+  <path d="M1045 272 H1135" fill="none" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1090" y="252" text-anchor="middle" class="label">Сообщение</text>
+  <path d="M1135 315 C1095 355 1095 485 1045 505" fill="none" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1082" y="402" text-anchor="middle" class="label">Ответ бота</text>
+  <path d="M770 507 H670" fill="none" stroke="#be123c" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#requiredArrow)"/>
+  <text x="720" y="592" text-anchor="middle" class="required">Требуется: POST</text>
+  <text x="720" y="611" text-anchor="middle" class="required">/mojo/chat/messages</text>
+  <path d="M410 507 C355 507 355 390 410 370" fill="none" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M410 370 H315" fill="none" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="360" y="434" text-anchor="middle" class="label">Ответ в тот же чат</text>
+
+  <rect x="55" y="700" width="1490" height="185" rx="18" fill="#fffbeb" stroke="#fde68a" stroke-width="2"/>
+  <text x="85" y="739" class="section">Подготовка базы знаний</text>
+  <rect x="105" y="765" width="330" height="85" rx="12" fill="#a16207"/>
+  <text x="270" y="799" text-anchor="middle" class="box-title">История обращений Mojo</text>
+  <text x="270" y="827" text-anchor="middle" class="box-text">GET /api/v1/mojo/chat/messages</text>
+  <rect x="610" y="765" width="280" height="85" rx="12" fill="#475569"/>
+  <text x="750" y="799" text-anchor="middle" class="box-title">База знаний</text>
+  <text x="750" y="827" text-anchor="middle" class="box-text">Материалы Заказчика</text>
+  <rect x="1065" y="765" width="345" height="85" rx="12" fill="#475569"/>
+  <text x="1237" y="799" text-anchor="middle" class="box-title">Настройка LLM-агента</text>
+  <text x="1237" y="827" text-anchor="middle" class="box-text">На платформе CraftTalk</text>
+  <path d="M435 808 H610" fill="none" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M890 808 H1065" fill="none" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <text x="65" y="920" class="note">Жёлтым отмечен единственный метод чатов, опубликованный в Swagger. Красным пунктиром отмечены методы, которых в текущем API нет и которые нужны для интеграции.</text>
+</svg>
