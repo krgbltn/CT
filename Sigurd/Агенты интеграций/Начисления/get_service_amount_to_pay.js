@@ -45,11 +45,11 @@ const sendRequest = async (requestUrl) => {
 }
 
 const main = async () => {
-	const userId = getSlotValueById('user_id_tst')
+	const userId = getSlotValueById('uid')
 	const serviceName = getSlotValueById('service_name')
 
 	if (!userId) {
-		logger.warn('user_id_tst slot is empty')
+		logger.warn('uid slot is empty')
 		return [operatorTransferReply()]
 	}
 
@@ -58,7 +58,7 @@ const main = async () => {
 		return [operatorTransferReply()]
 	}
 
-	const requestUrl = url.replace('{{slots.user_id_tst}}', userId)
+	const requestUrl = url.replace('{{slots.uid}}', userId)
 	logger.info(`Request url: ${requestUrl}`)
 
 	const responseData = await sendRequest(requestUrl)

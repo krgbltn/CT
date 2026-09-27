@@ -1,0 +1,30 @@
+{
+  "infoUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.uid}}/info",
+  "disconnectionReportUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{user_id}/disconnection_report_info",
+  "method": "get",
+  "nextArticle": "article-aba26765-2c58-47c8-b5c3-7aca6143c44f",
+  "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
+  "authorizationToken": "",
+  "headers": {
+    "ES-Request-Source": "Website",
+    "Accept": "application/json"
+  },
+  "serviceNames": {
+    "Электроэнергия": {
+      "accounts": ["Электроэнергия"],
+      "devices": ["Электроснабжение", "Электроэнергия"]
+    },
+    "Холодное водоснабжение": {
+      "accounts": ["ХВС", "Холодное водоснабжение"],
+      "devices": ["ХВС", "Холодное водоснабжение"]
+    },
+    "Горячее водоснабжение": {
+      "accounts": ["ГВС", "Горячее водоснабжение"],
+      "devices": ["ГВС", "Горячее водоснабжение"]
+    },
+    "Отопление": {
+      "accounts": ["Отопление"],
+      "devices": ["Отопление"]
+    }
+  }
+}

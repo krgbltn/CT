@@ -1,5 +1,5 @@
 {
-  "infoUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id_tst}}/info",
+  "infoUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.uid}}/info",
   "disconnectionReportUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{user_id}/disconnection_report_info",
   "method": "get",
   "nextArticle": "",

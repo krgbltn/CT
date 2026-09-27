@@ -23,7 +23,7 @@
 
 | Поле | Описание |
 |------|----------|
-| `url` | URL запроса, поддерживает шаблоны `{{slots.x}}` / `{{message.x}}`, напр. `https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id_tst}}/info` |
+| `url` | URL запроса, поддерживает шаблоны `{{slots.x}}` / `{{message.x}}`, напр. `https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.uid}}/info` |
 | `method` | HTTP-метод (по умолчанию `"post"`) |
 | `headers` | HTTP-заголовки: `Accept`, `ES-Request-Source`, `Authorization` и т.д. |
 | `requestBody` | Тело запроса (объект). Шаблоны работают рекурсивно во всех строковых значениях, включая вложенные объекты и массивы |
@@ -58,7 +58,7 @@
 
 ```json
 {
-  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.user_id_tst}}/info",
+  "url": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.uid}}/info",
   "method": "get",
   "headers": {
     "Accept": "application/json",

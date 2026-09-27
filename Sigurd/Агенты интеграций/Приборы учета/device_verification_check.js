@@ -3,6 +3,7 @@ const {
 	method = "get",
 	headers = {},
 	authorizationToken,
+	serviceNames = {},
 	nextArticle,
 	operatorArticle
 } = agentSettings
@@ -18,6 +19,8 @@ const nextArticleReply = (slots) => {
 
 const operatorTransferReply = () =>
 	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`)
+
+const normalizeName = (value) => typeof value === 'string' ? value.trim().toLowerCase() : ''
 
 const normalizeSlotValue = (value) => {
 	if (typeof value === "object") {
@@ -45,20 +48,21 @@ const sendRequest = async (requestUrl) => {
 }
 
 const main = async () => {
-	const userId = getSlotValueById('user_id_tst')
-	const deviceId = getSlotValueById('device')
+	const userId = getSlotValueById('uid')
+	const serviceType = getSlotValueById('service_type')
+	const names = serviceNames[serviceType]
 
 	if (!userId) {
-		logger.warn('user_id_tst slot is empty')
+		logger.warn('uid slot is empty')
 		return [operatorTransferReply()]
 	}
 
-	if (!deviceId) {
-		logger.warn('device slot is empty')
+	if (!names || !Array.isArray(names)) {
+		logger.warn(`Unknown service_type: ${serviceType}`)
 		return [operatorTransferReply()]
 	}
 
-	const requestUrl = url.replace('{{slots.user_id_tst}}', userId)
+	const requestUrl = url.replace('{{slots.uid}}', encodeURIComponent(userId))
 	logger.info(`Request url: ${requestUrl}`)
 
 	const responseData = await sendRequest(requestUrl)
@@ -72,12 +76,12 @@ const main = async () => {
 
 	const devices = responseData?.account?.devices
 	const device = Array.isArray(devices)
-		? devices.find(d => d.id === deviceId)
+		? devices.find(d => names.some(name => normalizeName(d?.service_name).includes(normalizeName(name))))
 		: undefined
 
 	if (!device) {
-		logger.info(`Device with id '${deviceId}' not found`)
-		const filledSlots = { final_answer: '3' }
+		logger.info(`Device for service_type '${serviceType}' not found`)
+		const filledSlots = { final_answer: '2' }
 		return [nextArticleReply(filledSlots)]
 	}
 
@@ -86,21 +90,16 @@ const main = async () => {
 
 	if (!nextCheck) {
 		logger.info('No next_check date for device')
-		const filledSlots = { final_answer: '3' }
+		const filledSlots = { final_answer: '2' }
 		return [nextArticleReply(filledSlots)]
 	}
 
-	const now = new Date()
-	const nextCheckDate = new Date(nextCheck)
-	const finalAnswer = nextCheckDate > now ? '1' : '2'
-
 	const filledSlots = {
-		device: normalizeSlotValue(deviceId),
 		next_check: normalizeSlotValue(nextCheck),
-		final_answer: finalAnswer
+		final_answer: '1'
 	}
 
-	logger.info(`Final answer: ${finalAnswer}`)
+	logger.info(`Final answer: ${filledSlots.final_answer}`)
 	logger.info(`All slots: ${JSON.stringify(filledSlots)}`)
 
 	return [nextArticleReply(filledSlots)]
