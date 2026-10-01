@@ -1,0 +1,88 @@
+{
+  "__declaration__": [
+    {
+      "id": "apiUrl",
+      "type": "string",
+      "name": "URL API обращений"
+    },
+    {
+      "id": "apiToken",
+      "type": "string",
+      "name": "Bearer-токен API"
+    },
+    {
+      "id": "aiAssistAgentId",
+      "type": "string",
+      "name": "ID агента базы знаний",
+      "description": "Экземпляр aiassist2, на который будет переключён диалог после успешной отправки."
+    },
+    {
+      "id": "articleId",
+      "type": "string",
+      "name": "ID статьи после отправки"
+    },
+    {
+      "id": "errorArticleId",
+      "type": "string",
+      "name": "ID статьи при ошибке отправки"
+    },
+    {
+      "id": "slotIds",
+      "type": "object",
+      "name": "Идентификаторы слотов",
+      "description": "Сопоставление полей API с идентификаторами слотов CraftTalk."
+    },
+    {
+      "id": "debugMode",
+      "type": "boolean",
+      "name": "Режим отладки",
+      "description": "Отправляет debugRequestBody вместо значений текущего сообщения и слотов."
+    },
+    {
+      "id": "debugRequestBody",
+      "type": "object",
+      "name": "Тестовое тело запроса"
+    },
+    {
+      "id": "maxRetries",
+      "type": "number",
+      "name": "Число повторов при 503"
+    },
+    {
+      "id": "retryDelayMs",
+      "type": "number",
+      "name": "Пауза между повторами, мс"
+    }
+  ],
+  "apiUrl": "https://crafttalk.appliedai.tech/v1/appeals",
+  "apiToken": "w5Dgpi0SlamgJl1yRyfBE7bfJi4oXGIfL7X8_m8k4Mg",
+  "aiAssistAgentId": "aiassist2",
+  "articleId": "article-14185e06-7d7d-4cde-8c7e-7830d6bd5690",
+  "errorArticleId": "article-14185e06-7d7d-4cde-8c7e-7830d6bd5690",
+  "slotIds": {
+    "type_question": "type_question",
+    "municipality": "municipality",
+    "theme": "theme",
+    "question": "question",
+    "any_file": "any_file",
+    "channel_question": "channel_question",
+    "user_id_max": "user_id_max",
+    "attach_links": "attach_links"
+  },
+  "debugMode": false,
+  "debugRequestBody": {
+    "dialog_id": "8f2c1e0a-5b7d-4c1e-9f00-1a2b3c4d5e6f",
+    "client_id": "test-client",
+    "type_question": "Текстовый вопрос",
+    "municipality": "город Уфа",
+    "theme": "Тестовая тема",
+    "question": "Тестовый вопрос",
+    "any_file": "Нет",
+    "date_question": "2026-10-26T09:14:22Z",
+    "channel_question": "Телеграм",
+    "user_id_max": "test-user",
+    "attach_links": "Видео.mp4: https://cloud.craft-talk.ru/file/directline_rb/video.mp4"
+  },
+  "maxRetries": 3,
+  "retryDelayMs": 1000
+}

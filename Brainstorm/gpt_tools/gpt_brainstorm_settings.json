@@ -38,7 +38,7 @@
 		"SHOW_REFERENCES": false,
 		"SHOW_CONTEXT": false,
 		"USE_HISTORY": true,
-		"HISTORY_FROM_BOT_MEDIATOR": true
+		"HISTORY_FROM_BOT_MEDIATOR": false
 	},
 	"standard_messages": {
 		"DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",
