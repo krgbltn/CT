@@ -3,7 +3,6 @@ const {
 	method = "get",
 	headers = {},
 	authorizationToken,
-	serviceNames = {},
 	nextArticle,
 	operatorArticle
 } = agentSettings
@@ -20,7 +19,13 @@ const nextArticleReply = (slots) => {
 const operatorTransferReply = () =>
 	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`)
 
-const normalizeName = (value) => typeof value === 'string' ? value.trim().toLowerCase() : ''
+const normalizeSlotValue = (value) => {
+	if (typeof value === "object") {
+		return JSON.stringify(value)
+	}
+
+	return value.toString()
+}
 
 const sendRequest = async (requestUrl) => {
 	try {
@@ -57,34 +62,33 @@ const main = async () => {
 		return [operatorTransferReply()]
 	}
 
+	const rawBalance = responseData?.account?.balance
+
+	logger.info(`Raw account.balance: ${JSON.stringify(rawBalance)}`)
 	logger.info(`Got response data: ${JSON.stringify(responseData || {})}`)
 
-	const devices = Array.isArray(responseData?.account?.devices)
-		? responseData.account.devices
-		: []
+	if (rawBalance === undefined || rawBalance === null) {
+		logger.warn('account.balance is missing in response')
+		return [nextArticleReply({ final_answer: '3' })]
+	}
 
-	const matchesAliases = (device, aliases) =>
-		Array.isArray(aliases) && aliases.some(name => normalizeName(device?.service_name).includes(normalizeName(name)))
+	const balance = Number(rawBalance)
 
-	const hotDevices = devices.filter(d =>
-		d.is_hot_water === true || matchesAliases(d, serviceNames['ГВС'])
-	)
-	const coldDevices = devices.filter(d => matchesAliases(d, serviceNames['ХВС']))
+	if (Number.isNaN(balance)) {
+		logger.warn(`account.balance is not a number: ${JSON.stringify(rawBalance)}`)
+		return [operatorTransferReply()]
+	}
 
-	const waterDevices = [...new Set([...hotDevices, ...coldDevices])]
+	const amountToPay = balance > 0 ? balance : 0
 
-	const acceptsReadings = (d) =>
-		d.accepts_readings === true || normalizeName(d.readings_accept_type) === 'allowed'
+	const filledSlots = {
+		balance: normalizeSlotValue(balance),
+		amount_to_pay: normalizeSlotValue(amountToPay),
+		final_answer: amountToPay > 0 ? '1' : '2'
+	}
 
-	const hasAcceptingDevice = waterDevices.some(acceptsReadings)
-
-	const finalAnswer = hasAcceptingDevice ? '1' : '2'
-
-	const filledSlots = { final_answer: finalAnswer }
-
-	logger.info(`Hot water devices: ${hotDevices.length}, Cold water devices: ${coldDevices.length}`)
-	logger.info(`Water devices readings_accept_type: ${JSON.stringify(waterDevices.map(d => ({ service_name: d.service_name, accepts_readings: d.accepts_readings, readings_accept_type: d.readings_accept_type })))}`)
-	logger.info(`Final answer: ${finalAnswer}`)
+	logger.info(`Amount to pay: ${amountToPay}`)
+	logger.info(`All slots: ${JSON.stringify(filledSlots)}`)
 
 	return [nextArticleReply(filledSlots)]
 }

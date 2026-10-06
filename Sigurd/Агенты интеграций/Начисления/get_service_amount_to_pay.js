@@ -3,6 +3,7 @@ const {
 	method = "get",
 	headers = {},
 	authorizationToken,
+	serviceNames = {},
 	nextArticle,
 	operatorArticle
 } = agentSettings
@@ -18,6 +19,8 @@ const nextArticleReply = (slots) => {
 
 const operatorTransferReply = () =>
 	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`)
+
+const normalizeName = (value) => typeof value === 'string' ? value.trim().toLowerCase() : ''
 
 const normalizeSlotValue = (value) => {
 	if (typeof value === "object") {
@@ -46,15 +49,16 @@ const sendRequest = async (requestUrl) => {
 
 const main = async () => {
 	const userId = getSlotValueById('uid')
-	const serviceName = getSlotValueById('service_name')
+	const serviceType = getSlotValueById('service_type')
+	const aliases = serviceNames[serviceType]
 
 	if (!userId) {
 		logger.warn('uid slot is empty')
 		return [operatorTransferReply()]
 	}
 
-	if (!serviceName) {
-		logger.warn('service_name slot is empty')
+	if (!serviceType || !Array.isArray(aliases)) {
+		logger.warn(`Missing or unknown service_type slot: ${serviceType}`)
 		return [operatorTransferReply()]
 	}
 
@@ -74,24 +78,25 @@ const main = async () => {
 		? responseData.transactions
 		: []
 
-	const transaction = transactions.find(t =>
-		t.service_name && t.service_name.includes(serviceName)
+	const matched = transactions.filter(t =>
+		t.service_name && aliases.some(name => normalizeName(t.service_name).includes(normalizeName(name)))
 	)
 
-	if (!transaction) {
-		logger.info(`Transaction with service_name '${serviceName}' not found`)
+	if (!matched.length) {
+		logger.info(`Transactions for service_type '${serviceType}' (aliases: ${JSON.stringify(aliases)}) not found`)
 		return [operatorTransferReply()]
 	}
 
-	const debt = Number(transaction.debt) || 0
-	const amountToPay = debt > 0 ? debt : 0
+	const totalDebt = matched.reduce((acc, t) => acc + (Number(t.debt) || 0), 0)
+	const amountToPay = totalDebt > 0 ? totalDebt : 0
 
 	const filledSlots = {
-		service_name: normalizeSlotValue(serviceName),
-		amount_to_pay: normalizeSlotValue(amountToPay)
+		service_name: normalizeSlotValue(serviceType),
+		amount_to_pay: normalizeSlotValue(amountToPay),
+		final_answer: amountToPay > 0 ? '1' : '2'
 	}
 
-	logger.info(`Amount to pay: ${amountToPay}`)
+	logger.info(`Matched transactions: ${matched.length}, total debt: ${totalDebt}`)
 	logger.info(`All slots: ${JSON.stringify(filledSlots)}`)
 
 	return [nextArticleReply(filledSlots)]

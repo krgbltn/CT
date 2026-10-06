@@ -7,9 +7,5 @@
   "headers": {
     "ES-Request-Source": "Website",
     "Accept": "application/json"
-  },
-  "serviceNames": {
-    "ГВС": ["ГВС", "Горячее водоснабжение"],
-    "ХВС": ["ХВС", "Холодное водоснабжение"]
   }
 }
