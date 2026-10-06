@@ -4,6 +4,13 @@
 // Модель показывает reasoning через <think>...</think> в content
 let supportsThinking = true
 
+const _SM_QWEN = typeof agentSettings === 'undefined'
+    ? {}
+    : agentSettings.standard_messages ?? {}
+let {
+    THINKING_INTERRUPTED_ERROR_MSG = "Не удалось подготовить ответ. Пожалуйста, повторите запрос.",
+} = _SM_QWEN
+
 
 class QwenMessageProcessor {
     /**
@@ -21,8 +28,18 @@ class QwenMessageProcessor {
         const startIdx = answer.indexOf(openTag)
         const endIdx = answer.indexOf(closeTag)
 
-        if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
+        if (startIdx === -1) {
             return response
+        }
+
+        // The model was interrupted before closing its reasoning block.
+        // Never expose the raw chain of thought as a user-facing answer.
+        if (endIdx === -1 || endIdx < startIdx) {
+            return {
+                ...response,
+                answer: THINKING_INTERRUPTED_ERROR_MSG,
+                reasoning: undefined,
+            }
         }
 
         const reasoning = answer.substring(startIdx + openTag.length, endIdx).trim()

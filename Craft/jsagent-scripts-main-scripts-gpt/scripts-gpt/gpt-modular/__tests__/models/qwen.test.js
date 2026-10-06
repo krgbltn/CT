@@ -37,6 +37,22 @@ describe('QwenMessageProcessor.fromModelFormat', () => {
     expect(mp.fromModelFormat(input)).toEqual(input)
   })
 
+  it('replaces an unterminated reasoning block with a configured error message', () => {
+    const ctx = loadScript(['modules/models/qwen.js'], {
+      ...GLOBALS,
+      agentSettings: {
+        ...GLOBALS.agentSettings,
+        standard_messages: {
+          THINKING_INTERRUPTED_ERROR_MSG: 'Повторите запрос позже.',
+        },
+      },
+    })
+    const mp = ctx.__getLetVar('messageProcessor')
+    const result = mp.fromModelFormat({ answer: '<think>внутренние рассуждения' })
+    expect(result.answer).toBe('Повторите запрос позже.')
+    expect(result.reasoning).toBeUndefined()
+  })
+
   it('returns response unchanged when reasoning field already present', () => {
     const ctx = loadScript(['modules/models/qwen.js'])
     const mp = ctx.__getLetVar('messageProcessor')
@@ -112,5 +128,4 @@ describe('QwenMessageProcessor.toModelFormat', () => {
     ])
   })
 })
-
 

@@ -24,14 +24,16 @@
 		"MAX_CONTEXTS": 10,
 		"MAX_COMPLEX_SCENARIOS": 5,
 		"MAX_COMPLEX_QUESTION_EXAMPLES_LENGTH": 1000,
-        "CONTEXT_FROM_SCENARIOS": false,
-        "ADD_COMPLEX_SCENARIOS_TO_TOOLS": false,
+		"CONTEXT_FROM_SCENARIOS": false,
+		"ADD_COMPLEX_SCENARIOS_TO_TOOLS": false,
 		"FILTERS": [
-			[{
-				"field": "symbol_code",
-				"condition": "must",
-				"values": []
-			}]
+			[
+				{
+					"field": "symbol_code",
+					"condition": "must",
+					"values": []
+				}
+			]
 		],
 		"RECORD_TYPE": "gpt_evropochta"
 	},
@@ -52,26 +54,27 @@
 		"CATALOG_IDS": null,
 		"TAGS": null
 	},
-    "standard_messages": {
+	"standard_messages": {
 		"DEFAULT_ERROR_MSG": "Что-то пошло не так, попробуйте еще раз.",
 		"TIMEOUT_ERROR_MSG": "Извините за задержку! Похоже, запрос занял больше времени, чем ожидалось. Пожалуйста, попробуйте снова позже.",
+		"THINKING_INTERRUPTED_ERROR_MSG": "Не удалось подготовить ответ. Пожалуйста, повторите запрос.",
 		"MESSAGE_CANCEL_WAITING": "Готов ответить на ваш следующий вопрос! Чем ещё могу помочь?",
 		"NO_CONTEXT_TEXT": "К сожалению я не знаю ответ на ваш вопрос. попробуйте задать вопрос иначе."
 	},
-    "proxy": {
-        "USE_PROXY": false
-    },
-    "slots": {
-        "agent_slots": {
-    		"SCENARIO_RESULT": "scenario_result",
-    		"SCENARIO_SOURCE": "scenario_source",
+	"proxy": {
+		"USE_PROXY": false
+	},
+	"slots": {
+		"agent_slots": {
+			"SCENARIO_RESULT": "scenario_result",
+			"SCENARIO_SOURCE": "scenario_source",
 			"LLM_ANSWER_HISTORY": "llm_history_messages",
 			"INFO_CLIENT": "infoclient_europochta"
-    	},
-        "use_slots": false,
-        "user_slots_placeholder": "## Слоты:",
+		},
+		"use_slots": true,
+		"user_slots_placeholder": "## Слоты:",
 		"user_slots": []
-    },
+	},
 	"articles": {
 		"TRANSFER_FOR_OPERATOR": {
 			"ID": "article-5c27bbc0-79d1-48fc-8c1b-4a3f02aa7549",
