@@ -528,5 +528,5 @@ main()
     .then(res => resolve(res))
     .catch(err => {
         logger.error({ stack: err.stack }, `Some error when main execute ${err}`)
-        resolve([routingToOperatorAnswer])
+        resolve([ agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)])
     })
