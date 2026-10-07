@@ -393,7 +393,10 @@ const getSlots = (mdsInfo, contract) => {
     }
 
     slots[SLOTS.authSuccess] = "true"
-    slots[SLOTS.contract] = contract
+
+    if (contract) {
+        slots[SLOTS.contract] = contract
+    }
 
     if (!mdsInfo) {
         return slots
@@ -456,6 +459,19 @@ const main = async () => {
 
     logger.info(`Start main: storedContracts=${JSON.stringify(storedContracts)}, classifier=${getClassifier()}, nextArticle=${getNextArticle()}`)
 
+    if (storedContracts) {
+        contractsPagination = JSON.parse(await agentStorage.dialogStorage.get(CONTRACTS_PAGINATION_KEY))
+        if (!contractsPagination || contractsPagination.current >= contractsPagination.max) {
+            logger.info(`Contracts pagination finished or missing: ${JSON.stringify(contractsPagination)}. Resetting scenario state`)
+            await agentStorage.dialogStorage.del(CONTRACTS_KEY)
+            await agentStorage.dialogStorage.del(CONTRACTS_PAGINATION_KEY)
+            storedContracts = ""
+        } else {
+            contractsPagination.current++
+            logger.info(`Contracts pagination incremented: ${JSON.stringify(contractsPagination)}`)
+        }
+    }
+
     if (!storedContracts) {
         const phoneNumber = USE_HARDCODED_PHONE
             ? HARDCODED_PHONE
@@ -483,10 +499,6 @@ const main = async () => {
         await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
         logger.info(`Contracts pagination initialized: ${JSON.stringify(contractsPagination)}`)
         storedContracts = contractIdMap
-    } else {
-        contractsPagination = JSON.parse(await agentStorage.dialogStorage.get(CONTRACTS_PAGINATION_KEY))
-        contractsPagination.current++
-        logger.info(`Contracts pagination incremented: ${JSON.stringify(contractsPagination)}`)
     }
 
     if (Object.keys(storedContracts).length === 0) {
@@ -501,9 +513,20 @@ const main = async () => {
     const selectedContractId = Object.values(storedContracts)[contractsPagination.current - 1]
     const selectedContractNo = Object.keys(storedContracts)[contractsPagination.current - 1]
     logger.info(`Selected contract: ${JSON.stringify({ selectedContractNo, selectedContractId, contractsPagination })}`)
+
+    if (!selectedContractId) {
+        logger.error(`Contract at index ${contractsPagination.current} not found in stored contracts. Resetting scenario state`)
+        await agentStorage.dialogStorage.del(CONTRACTS_KEY)
+        await agentStorage.dialogStorage.del(CONTRACTS_PAGINATION_KEY)
+        const slots = getSlots(undefined, undefined)
+        return [
+            agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
+        ]
+    }
+
     const mdsInfo = await getMDSInfo(selectedContractId)
     logger.info(`Got mdsInfo ${JSON.stringify(mdsInfo)}`)
-    const slots = getSlots(mdsInfo, Object.keys(storedContracts)[contractsPagination.current - 1])
+    const slots = getSlots(mdsInfo, selectedContractNo)
     slots[SLOTS.hasNextAccount] = String(contractsPagination.current < contractsPagination.max)
     slots[SLOTS.returnLookupAgent] = RETURN_LOOKUP_AGENT
     logger.info(`Filled slots: ${JSON.stringify(slots)}`)
@@ -528,5 +551,5 @@ main()
     .then(res => resolve(res))
     .catch(err => {
         logger.error({ stack: err.stack }, `Some error when main execute ${err}`)
-        resolve([ agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)])
+        resolve([routingToOperatorAnswer])
     })
