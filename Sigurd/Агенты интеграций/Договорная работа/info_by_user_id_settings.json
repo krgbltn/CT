@@ -1,10 +1,10 @@
 {
-  "infoUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{{slots.uid}}/info",
-  "disconnectionReportUrl": "https://webapisbytfl.dev.enplus.digital/api/service/sigurd/fl/{user_id}/disconnection_report_info",
+  "infoUrl": "https://api.enplus.ru/v2/webapifl/sbyt/api/service/sigurd/fl/{{slots.uid}}/info",
+  "disconnectionReportUrl": "https://api.enplus.ru/v2/webapifl/sbyt/api/service/sigurd/fl/{user_id}/disconnection_report_info",
   "method": "get",
   "nextArticle": "",
   "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
-  "authorizationToken": "Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==",
+  "authorizationToken": "Basic U2lndXJkOk05NTA5MjtkcDpAKTAtMHI5Oy0zbXFrZjs5MDd4ejk4M1J5",
   "headers": {
     "ES-Request-Source": "Website",
     "Accept": "application/json"
