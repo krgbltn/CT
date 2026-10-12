@@ -12,7 +12,8 @@ const {
 	infoUrl,
 	stub,
 	stubResponse,
-	city1Values = []
+	city1Values = [],
+	eddsMapping = []
 } = agentSettings
 
 // --- Утилиты для работы со слотами и message ---
@@ -217,6 +218,22 @@ const getCity1 = (address) => {
 		.find(city => normalizedAddress.includes(city.toLowerCase()))
 }
 
+const normalizeAddress = (address) => (address || '')
+	.toLowerCase()
+	.replace(/ё/g, 'е')
+	.replace(/[.,]/g, ' ')
+	.replace(/\s+/g, ' ')
+	.trim()
+
+const getEdds = (address) => {
+	const normalizedAddress = normalizeAddress(address)
+	const matchedLocation = eddsMapping.find(({ locations = [] }) =>
+		locations.some(location => normalizedAddress.includes(normalizeAddress(location)))
+	)
+
+	return matchedLocation?.phone
+}
+
 // --- Запрос house_type из disconnection_report_info ---
 const fetchHouseType = async (userId) => {
 	if (!disconnectionReportUrl || !userId) return undefined
@@ -347,6 +364,8 @@ const main = async () => {
 				const filledSlots = fillSlotsFromContract(contract)
 				const city1 = getCity1(contract.WebProperties?.Address)
 				if (city1) filledSlots.city_1 = city1
+				const edds = getEdds(contract.WebProperties?.Address)
+				if (edds) filledSlots.edds = edds
 				const status = await fetchStatus(filledSlots.uid)
 				if (status) filledSlots.status_ls = status
 				const houseType = await fetchHouseType(filledSlots.uid)
@@ -373,6 +392,8 @@ const main = async () => {
 				const filledSlots = fillSlotsFromContract(matchedContract)
 				const city1 = getCity1(matchedContract.WebProperties?.Address)
 				if (city1) filledSlots.city_1 = city1
+				const edds = getEdds(matchedContract.WebProperties?.Address)
+				if (edds) filledSlots.edds = edds
 				const status = await fetchStatus(filledSlots.uid)
 				if (status) filledSlots.status_ls = status
 				const houseType = await fetchHouseType(filledSlots.uid)
