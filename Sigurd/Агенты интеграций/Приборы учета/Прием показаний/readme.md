@@ -53,6 +53,7 @@
 | Назначение | Слот |
 |---|---|
 | Идентифицированный ЛС | `account_number` |
+| Адрес выбранного ЛС из `ContractInfo.Adress` | `account_address` |
 | Успех идентификации | `successful_identification` |
 | Номер ПУ электроэнергии | `number_electricity_meter` |
 | Предыдущее / новое показание электроэнергии | `recent_electricity` / `readings_electricity` |
@@ -70,6 +71,8 @@
 | Агент поиска для следующего ЛС | `readings_lookup_agent` |
 
 Слоты `scale_electricity`, `scale_hot_water`, `scale_cold_water`, `scale_heating` используются сценарием как признаки шкалы. Для SOAP-передачи нужны отдельные технические слоты `scale_id_*`.
+
+Оба агента поиска передают адрес выбранного ЛС в слот из настройки `slots.address` (по умолчанию `account_address`). Адреса сохраняются в `dialogStorage` для переходов между найденными ЛС. Если адрес отсутствует или идентификация неуспешна, передается пустая строка. Озвучивание адреса выполняется в сценарии платформы.
 
 ## Настройки submit-readings
 

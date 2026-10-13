@@ -312,26 +312,110 @@ const fetchStatus = async (userId) => {
 	}
 }
 
-// --- Слова для исключения при сравнении адресов ---
-const ADDRESS_STOPWORDS = [
-	'дом', 'ул', 'улица', 'кв', 'квартира',
-	'г', 'город', 'обл', 'область', 'р-н', 'район',
-	'д', '№', 'по', 'на', 'в', 'с', 'и', 'не'
+// --- Сопоставление адресов с учётом ошибок распознавания речи ---
+const ADDRESS_MARKERS = [
+	{ type: 'city', pattern: 'рабочий\\s+пос[её]лок|населенный\\s+пункт|город|поселок|деревня|село|рп|пгт|г|п|с' },
+	{ type: 'street', pattern: 'улица|проспект|пр-кт|бульвар|б-р|переулок|площадь|шоссе|проезд|пр-д|микрорайон|мкр|ул|пер|пл' },
+	{ type: 'house', pattern: 'дом|д' },
+	{ type: 'apartment', pattern: 'квартира|кв' },
+	{ type: 'building', pattern: 'корпус|корп|строение|стр' },
+	{ type: 'region', pattern: 'область|обл|район|р-н|р-он' }
 ]
+
+const addressWords = (value) => value.match(/[а-яa-z]+|\d+/g) || []
+
+const parseAddress = (value) => {
+	const text = normalizeAddress(value).replace(/[;:]/g, ' ')
+	const markers = []
+	for (const { type, pattern } of ADDRESS_MARKERS) {
+		const regex = new RegExp(`(^|[\\s])(${pattern})(?=\\s|$)`, 'g')
+		let match
+		while ((match = regex.exec(text))) {
+			markers.push({ type, start: match.index + match[1].length, end: regex.lastIndex })
+		}
+	}
+	markers.sort((first, second) => first.start - second.start || second.end - first.end)
+	const uniqueMarkers = markers.filter((marker, index) =>
+		!markers.slice(0, index).some(previous => previous.end > marker.start)
+	)
+	const parts = {}
+	uniqueMarkers.forEach((marker, index) => {
+		const end = uniqueMarkers[index + 1]?.start ?? text.length
+		parts[marker.type] = text.slice(marker.end, end).replace(/№/g, '').trim()
+	})
+
+	const houseMarker = uniqueMarkers.find(marker => marker.type === 'house')
+	const extraMarker = uniqueMarkers.find(marker => ['apartment', 'building'].includes(marker.type))
+	const addressEnd = houseMarker?.start ?? extraMarker?.start ?? text.length
+	const prefix = text.slice(0, addressEnd)
+	const numbers = [...prefix.matchAll(/\d+[а-яa-z]?(?:\/\d+)?/g)]
+	const lastNumber = numbers[numbers.length - 1]
+	// Без слова «дом» основным номером считаем последнее число перед квартирой/корпусом.
+	const house = houseMarker
+		? parts.house.match(/^\d+/)?.[0]
+		: lastNumber?.[0].match(/^\d+/)?.[0]
+	const nameText = !houseMarker && lastNumber ? prefix.slice(0, lastNumber.index) : prefix
+	return { parts, house, words: addressWords(nameText) }
+}
+
+const addressWordMatches = (first, second) => {
+	if (first === second) return true
+	if (/\d/.test(first) || /\d/.test(second)) return false
+	const length = Math.min(first.length, second.length)
+	const limit = length >= 7 ? 2 : length >= 5 ? 1 : 0
+	if (!limit || Math.abs(first.length - second.length) > limit) return false
+	let previous = Array.from({ length: second.length + 1 }, (_, index) => index)
+	for (let row = 1; row <= first.length; row++) {
+		const current = [row]
+		for (let column = 1; column <= second.length; column++) {
+			current[column] = Math.min(
+				current[column - 1] + 1,
+				previous[column] + 1,
+				previous[column - 1] + (first[row - 1] === second[column - 1] ? 0 : 1)
+			)
+		}
+		previous = current
+	}
+	return previous[second.length] <= limit
+}
+
+const matchAddressName = (expected, words, used) => {
+	if (!expected.length) return false
+	// Название должно совпасть целиком, в том числе если оно состоит из нескольких слов.
+	for (let start = 0; start <= words.length - expected.length; start++) {
+		if (expected.every((word, index) =>
+			!used.has(start + index) && addressWordMatches(word, words[start + index])
+		)) {
+			expected.forEach((_, index) => used.add(start + index))
+			return true
+		}
+	}
+	return false
+}
 
 // --- Поиск контракта по тексту пользователя (сопоставление адреса) ---
 const findContractByText = (contracts, text) => {
 	if (!text) return null
-
-	const words = text.toLowerCase().split(/\s+/)
-		.filter(w => (w.length > 2 || /\d/.test(w)) && !ADDRESS_STOPWORDS.includes(w))
-
-	if (words.length === 0) return null
+	const userAddress = parseAddress(text)
+	if (!userAddress.house) return null
 
 	for (const contract of contracts) {
-		const address = contract.WebProperties?.Address?.toLowerCase() || ''
-
-		if (words.every(word => address.includes(word))) {
+		const address = parseAddress(contract.WebProperties?.Address)
+		if (!address.house || address.house !== userAddress.house) continue
+		const used = new Set()
+		const matches = ['city', 'street'].every(type => {
+			const expected = addressWords(address.parts[type] || '')
+			const explicitName = userAddress.parts[type]
+			if (explicitName) {
+				// При кратком ответе «улица Медовая, 5» номер дома не является частью названия.
+				const name = userAddress.parts.house ? explicitName
+					: explicitName.replace(/\s+\d+[а-яa-z]?(?:\/\d+)?\s*$/, '')
+				const words = addressWords(name)
+				if (!matchAddressName(expected, words, new Set())) return false
+			}
+			return matchAddressName(expected, userAddress.words, used)
+		})
+		if (matches) {
 			return contract
 		}
 	}

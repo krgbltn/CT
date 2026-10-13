@@ -1,5 +1,5 @@
 {
-  "numberSlotId": "account_number",
+  "numberSlotId": "account_number_client",
   "returnLookupAgent": "identification_account_number",
   "aiAgent": "ai_pribor",
   "routingAgent": "routingagent",
@@ -7,6 +7,7 @@
   "slots": {
     "authSuccess": "successful_identification",
     "contract": "account_number",
+    "address": "account_address",
     "electro": "number_electricity_meter",
     "electroLast": "recent_electricity",
     "electroScale": "scale_electricity",

@@ -91,6 +91,7 @@ const parseJsonToXml = (tag, data) => js2xmlparser.parse(tag, data)
 const exctractBody = (parsedData) => parsedData["soap:Envelope"]?.["soap:Body"]
 
 const CONTRACTS_KEY = "contracts"
+const CONTRACTS_ADDRESSES_KEY = "contracts_addresses"
 const CONTRACTS_PAGINATION_KEY = "contracts_pagination"
 
 const extractInfoFromResponse = async (parsedData) => {
@@ -163,6 +164,11 @@ const extractInfoFromResponse = async (parsedData) => {
         CONTRACTS_KEY,
         JSON.stringify(contractIdMap)
     )
+    const contractAddressMap = contractsInfoArr.reduce((acc, cur) => {
+        acc[cur.No] = typeof cur.Adress === "string" ? cur.Adress.trim() : ""
+        return acc
+    }, {})
+    await agentStorage.dialogStorage.set(CONTRACTS_ADDRESSES_KEY, JSON.stringify(contractAddressMap))
     return { contracts: contractsInfoArr.map(info => info.No), contractIdMap } //
 }
 
@@ -364,7 +370,7 @@ const getMDSInfo = async (contractId) => {
     }
 }
 
-const getSlots = (mdsInfo, contract) => {
+const getSlots = (mdsInfo, contract, address = "") => {
     /**
      * {
             "MDSerialNumber": "981",
@@ -386,6 +392,9 @@ const getSlots = (mdsInfo, contract) => {
 
     const slots = {
         [SLOTS.authSuccess]: "false"
+    }
+    if (SLOTS.address) {
+        slots[SLOTS.address] = address
     }
 
     if (!mdsInfo && !contract) {
@@ -464,6 +473,7 @@ const main = async () => {
         if (!contractsPagination || contractsPagination.current >= contractsPagination.max) {
             logger.info(`Contracts pagination finished or missing: ${JSON.stringify(contractsPagination)}. Resetting scenario state`)
             await agentStorage.dialogStorage.del(CONTRACTS_KEY)
+            await agentStorage.dialogStorage.del(CONTRACTS_ADDRESSES_KEY)
             await agentStorage.dialogStorage.del(CONTRACTS_PAGINATION_KEY)
             storedContracts = ""
         } else {
@@ -473,6 +483,7 @@ const main = async () => {
     }
 
     if (!storedContracts) {
+        await agentStorage.dialogStorage.del(CONTRACTS_ADDRESSES_KEY)
         const phoneNumber = USE_HARDCODED_PHONE
             ? HARDCODED_PHONE
             : getSlotValueById(PHONE_SLOT_ID)
@@ -517,6 +528,7 @@ const main = async () => {
     if (!selectedContractId) {
         logger.error(`Contract at index ${contractsPagination.current} not found in stored contracts. Resetting scenario state`)
         await agentStorage.dialogStorage.del(CONTRACTS_KEY)
+        await agentStorage.dialogStorage.del(CONTRACTS_ADDRESSES_KEY)
         await agentStorage.dialogStorage.del(CONTRACTS_PAGINATION_KEY)
         const slots = getSlots(undefined, undefined)
         return [
@@ -526,7 +538,9 @@ const main = async () => {
 
     const mdsInfo = await getMDSInfo(selectedContractId)
     logger.info(`Got mdsInfo ${JSON.stringify(mdsInfo)}`)
-    const slots = getSlots(mdsInfo, selectedContractNo)
+    const storedAddresses = await agentStorage.dialogStorage.get(CONTRACTS_ADDRESSES_KEY)
+    const contractAddressMap = storedAddresses ? JSON.parse(storedAddresses) : {}
+    const slots = getSlots(mdsInfo, selectedContractNo, contractAddressMap[selectedContractNo] || "")
     slots[SLOTS.hasNextAccount] = String(contractsPagination.current < contractsPagination.max)
     slots[SLOTS.returnLookupAgent] = RETURN_LOOKUP_AGENT
     logger.info(`Filled slots: ${JSON.stringify(slots)}`)

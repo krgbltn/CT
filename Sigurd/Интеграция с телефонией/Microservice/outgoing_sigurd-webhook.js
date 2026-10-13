@@ -17,6 +17,7 @@ const getSlotValue = (slots, slotId) => slots?.find(slot => slot.id === slotId)?
 
 const sendWebhook = async (payload) => {
 	try {
+		logger.info(`Webhook outgoing: url=${WEBHOOK_URL} payload=${JSON.stringify(payload)}`)
 		const response = await axios.post(WEBHOOK_URL, payload, { timeout: 25000 })
 		logger.debug(`Webhook sent: status=${response.status} event=${payload.event}`)
 	} catch (error) {
