@@ -10,7 +10,7 @@
     "deep_linking_token": "deep_linking_token",
     "skipScore": "skip_score"
   },
-  "host": "https://cloud.craft-talk.ru/",
+  "host": "https://cloud.craft-talk.ru",
   "customerId": "<CUSTOMER_ID>",
   "incomingAgent": "<INCOMING_JSAGENT>",
   "webhook_events": ["message_created", "message_callback", "bot_started", "bot_stopped", "bot_removed"],
