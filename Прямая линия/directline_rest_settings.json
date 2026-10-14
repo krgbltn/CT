@@ -30,7 +30,7 @@
       "id": "slotIds",
       "type": "object",
       "name": "Идентификаторы слотов",
-      "description": "Сопоставление полей API с идентификаторами слотов CraftTalk."
+      "description": "Сопоставление полей API с идентификаторами слотов CraftTalk. number_question — слот для сохранения сгенерированного номера обращения."
     },
     {
       "id": "debugMode",
@@ -60,6 +60,7 @@
   "articleId": "article-14185e06-7d7d-4cde-8c7e-7830d6bd5690",
   "errorArticleId": "article-14185e06-7d7d-4cde-8c7e-7830d6bd5690",
   "slotIds": {
+    "number_question": "number_question",
     "type_question": "type_question",
     "municipality": "municipality",
     "theme": "theme",

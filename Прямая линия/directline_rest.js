@@ -11,6 +11,24 @@ const {
 	retryDelayMs = 1000
 } = agentSettings
 
+let appealNumber = ""
+
+const generateAppealNumber = () =>
+	`ПЛ-2026-${String(Math.floor(Math.random() * 999999) + 1).padStart(6, "0")}`
+
+const makeAppealReply = (targetArticleId) => {
+	const filledSlots = appealNumber
+		? { [slotIds.number_question || "number_question"]: appealNumber }
+		: undefined
+
+	return agentApi.makeTextReply(
+		`/switchredirect ${aiAssistAgentId} intent_id="${targetArticleId}"`,
+		undefined,
+		undefined,
+		filledSlots
+	)
+}
+
 const getSlotValue = (slotId) =>
 	message.slot_context?.filled_slots?.find(slot => slot.slot_id === slotId)?.value
 
@@ -105,15 +123,17 @@ const sendAppeal = async (requestBody) => {
 
 const main = async () => {
 	const requestBody = await buildRequestBody()
+	appealNumber = generateAppealNumber()
+	requestBody.number_question = appealNumber
 	logger.info({ requestBody, debugMode }, "Direct Line appeal request")
 
 	await sendAppeal(requestBody)
-	return [agentApi.makeSwitchRedirectReply(aiAssistAgentId, `intent_id="${articleId}"`)]
+	return [makeAppealReply(articleId)]
 }
 
 main()
 	.then(result => resolve(result))
 	.catch(error => {
 		logger.error({ stack: error.stack }, "Direct Line appeal agent execution failed")
-		resolve([agentApi.makeSwitchRedirectReply(aiAssistAgentId, `intent_id="${errorArticleId}"`)])
+		resolve([makeAppealReply(errorArticleId)])
 	})

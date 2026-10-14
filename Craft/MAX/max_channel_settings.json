@@ -5,12 +5,12 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "education"
+      "value": "white_rainbow"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "outgoing_jsagent_max_education_mds"
+      "value": "outgoing_jsagent_max_white_rainbow"
     },
     {
       "name": "file_storage_webhook",
@@ -22,12 +22,12 @@
     {
       "name": "customer_id",
       "type": "string",
-      "value": "education"
+      "value": "white_rainbow"
     },
     {
       "name": "outgoing_agent_id",
       "type": "string",
-      "value": "outgoing_jsagent_max_education_mds"
+      "value": "outgoing_jsagent_max_white_rainbow"
     }
   ]
 }
