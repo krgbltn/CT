@@ -22,8 +22,9 @@ const getDebug = () => {
         heating: DEBUG.heating
     } : undefined
 }
+const getClassifier = () => getSlotValueById("classifier") || AI_AGENT
 
-const routingToOperatorAnswer = agentApi.makeTextReply(`/switchredirect ${ROUTING_AGENT}`)
+const routingToOperatorAnswer =    agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="article-99e4a71c-4d44-4a7b-9d0c-241961c1aaf0"`, undefined, undefined, slots)
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
     slot => slot.slot_id === slotId
@@ -31,7 +32,7 @@ const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
 
 const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
 
-const getClassifier = () => getSlotValueById("classifier") || AI_AGENT
+
 
 
 function createConfig(method, url, headers, data) {
