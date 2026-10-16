@@ -4,7 +4,8 @@ const {
 	customerId: CUSTOMER_ID,
 	slots: SLOTS,
 	routingText: ROUTING_TEXT,
-	routingTopics: ROUTING_TOPICS
+	routingTopics: ROUTING_TOPICS,
+	finishText: FINISH_TEXT
 } = agentSettings
 
 const CALL_ID_SLOT_ID = "call_id_sigurd"
@@ -76,7 +77,7 @@ const handleMessage = async () => {
 				finReason === "finishdialog"
 			if (isFinish) {
 				logger.debug(`[outgoing] callId=${callId} end`)
-				await sendWebhook({ callId, sessionId, event: "end", messageType })
+				await sendWebhook({ callId, sessionId, event: "end", messageType, text: FINISH_TEXT })
 				break
 			}
 			logger.debug(`[outgoing] callId=${callId} reply`)
@@ -85,7 +86,7 @@ const handleMessage = async () => {
 		}
 		case 16: {
 			logger.debug(`[outgoing] callId=${callId} end`)
-			await sendWebhook({ callId, sessionId, event: "end", messageType })
+			await sendWebhook({ callId, sessionId, event: "end", messageType, text: FINISH_TEXT })
 			break
 		}
 		case 18: {

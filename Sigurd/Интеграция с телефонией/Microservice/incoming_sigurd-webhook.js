@@ -22,6 +22,7 @@ const sendMessage = async (body) => {
 const main = async () => {
     logger.info({"Incoming message": message})
     await sendMessage(message)
+    return {}
 }
 
 main()

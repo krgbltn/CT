@@ -2,7 +2,7 @@
   "url": "https://api.enplus.ru/v2/webapifl/sbyt/api/service/sigurd/fl/contracts_by_phone?phone={{slots.phone}}",
   "method": "get",
   "nextArticle": "article-aba26765-2c58-47c8-b5c3-7aca6143c44f",
-  "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
+  "operatorArticle": "article-cd7b7f00-c5a3-47e6-b33c-dfb8930d0c84",
   "city1Values": [
     "Аларский",
     "Ангарск",

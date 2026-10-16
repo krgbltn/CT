@@ -1,6 +1,6 @@
 {
   "microserviceUrl": "http://telephony-bridge:8090",
-  "channelId": "channel_35328b3",
+  "channelId": "channel_358fc91",
   "channelAuthToken": "",
   "customerId": "energo",
   "slots": {
@@ -9,6 +9,7 @@
   "callIdSlotId": "call_id_sigurd",
   "sessionIdSlotId": "session_id_sigurd",
   "routingText": "Перевожу Ваш звонок на специалиста информационно-справочного центра.",
+  "finishText": "Спасибо за обращение!",
   "routingTopics": {
     "Отключение ТСН":       { "topic": "Отключение ТСН",       "groups": [{ "id": 321, "name": "Теплоэнергия" }] },
     "Договорная работа":    { "topic": "Договорная работа",    "groups": [{ "id": 381, "name": "Долг" }] },
@@ -25,6 +26,7 @@
     "Поверка ПУ":           { "topic": "Поверка ПУ",           "groups": [{ "id": 361, "name": "Поверка ПУ" }] },
     "Замена":               { "topic": "Замена",               "groups": [{ "id": 341, "name": "Замена" }] },
     "Качество ЭЭ":          { "topic": "Качество ЭЭ",          "groups": [{ "id": 311, "name": "Качество ЭЭ" }] },
-    "Магелан":          { "topic": "Магелан",          "groups": [] }
+    "Магелан":          { "topic": "Магелан",          "groups": [] },
+    "Меню": { "topic": "Меню",          "groups": [] }
   }
 }
