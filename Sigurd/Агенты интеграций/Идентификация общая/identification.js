@@ -162,7 +162,13 @@ const sendRequest = async (requestUrl, body) => {
 		})
 		return res?.data
 	} catch (error) {
-		logger.error({ stack: error.stack }, `Error when sending request to ${url}. ${error}`)
+		const status = error.response?.status
+		const responseData = error.response?.data
+		logger.error(
+			{ stack: error.stack, status, responseData: JSON.stringify(responseData) },
+			`Error when sending request to ${requestUrl}. Status: ${status}. Response: ${JSON.stringify(responseData)}. ${error}`
+		)
+		return null
 	}
 }
 
@@ -503,7 +509,12 @@ const main = async () => {
 	const responseData = await sendRequest(requestUrl, body)
 	logger.info(`Got response data: ${JSON.stringify(responseData || {})}`)
 
-	if (!responseData || !Array.isArray(responseData) || responseData.length === 0) {
+	if (responseData === null) {
+		logger.error('Request to contracts_by_phone failed, transferring to operator')
+		return [operatorTransferReply()]
+	}
+
+	if (!Array.isArray(responseData) || responseData.length === 0) {
 		logger.warn('No contracts found or invalid response')
 		return [nextArticleReply({ final_answer: 'error' })]
 	}
