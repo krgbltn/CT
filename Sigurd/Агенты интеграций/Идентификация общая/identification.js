@@ -162,13 +162,8 @@ const sendRequest = async (requestUrl, body) => {
 		})
 		return res?.data
 	} catch (error) {
-		const status = error.response?.status
-		const responseData = error.response?.data
-		logger.error(
-			{ stack: error.stack, status, responseData: JSON.stringify(responseData) },
-			`Error when sending request to ${requestUrl}. Status: ${status}. Response: ${JSON.stringify(responseData)}. ${error}`
-		)
-		return null
+		logger.error({ stack: error.stack }, `Error when sending request to ${url}. ${error}`)
+		throw error
 	}
 }
 
@@ -506,15 +501,17 @@ const main = async () => {
 	const body = createRequestBody()
 	logger.info(`Created request body: ${JSON.stringify(body)}`)
 
-	const responseData = await sendRequest(requestUrl, body)
-	logger.info(`Got response data: ${JSON.stringify(responseData || {})}`)
-
-	if (responseData === null) {
-		logger.error('Request to contracts_by_phone failed, transferring to operator')
+	let responseData
+	try {
+		responseData = await sendRequest(requestUrl, body)
+	} catch (error) {
+		logger.error({ stack: error.stack }, `Request failed, transferring to operator: ${error}`)
 		return [operatorTransferReply()]
 	}
 
-	if (!Array.isArray(responseData) || responseData.length === 0) {
+	logger.info(`Got response data: ${JSON.stringify(responseData || {})}`)
+
+	if (!responseData || !Array.isArray(responseData) || responseData.length === 0) {
 		logger.warn('No contracts found or invalid response')
 		return [nextArticleReply({ final_answer: 'error' })]
 	}
