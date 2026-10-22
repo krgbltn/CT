@@ -6,16 +6,15 @@ const {
     slots: SLOTS,
     aiAgent: AI_AGENT,
     routingAgent: ROUTING_AGENT,
+    operatorArticle: OPERATOR_ARTICLE,
     nextArticle: NEXT_ARTICLE,
     debug: DEBUG,
     useHardcodedPhone: USE_HARDCODED_PHONE,
-    hardcodedPhone: HARDCODED_PHONE,
-    returnLookupAgent: RETURN_LOOKUP_AGENT
+    hardcodedPhone: HARDCODED_PHONE
 } = agentSettings
 
 const getDebug = () => {
     return (DEBUG && Object.keys(DEBUG).length > 0) ? {
-        contractsCount: DEBUG.contractsCount,
         electricity: DEBUG.electricity,
         hotWater: DEBUG.hotWater,
         coldWater: DEBUG.coldWater,
@@ -24,7 +23,6 @@ const getDebug = () => {
 }
 const getClassifier = () => getSlotValueById("classifier") || AI_AGENT
 
-const routingToOperatorAnswer =    agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="article-99e4a71c-4d44-4a7b-9d0c-241961c1aaf0"`, undefined, undefined, slots)
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
     slot => slot.slot_id === slotId
@@ -60,8 +58,9 @@ async function sendRequest(data, soapAction) {
     try {
         const response = await axios(config)
         if (response.status !== 200) {
-            logger.error(`Bad request : status - ${response.status} - ${response.syscall} ${response.code} ${response.hostname}`)
+            throw new Error(`SOAP request failed: status=${response.status}`)
         } else {
+            if (!response.data) throw new Error('Empty SOAP response')
             logger.info(`Send status : ${response.status}`)
             logger.info(`SOAP raw response: ${response.data}`)
             return response.data
@@ -69,6 +68,7 @@ async function sendRequest(data, soapAction) {
     } catch (error) {
         logger.error(`Send error : ${error}`)
         logger.error(`Response data: ${JSON.stringify(error.response?.data)}`)
+        throw error
     }
 }
 
@@ -91,86 +91,17 @@ const parseJsonToXml = (tag, data) => js2xmlparser.parse(tag, data)
 
 const exctractBody = (parsedData) => parsedData["soap:Envelope"]?.["soap:Body"]
 
-const CONTRACTS_KEY = "contracts"
-const CONTRACTS_ADDRESSES_KEY = "contracts_addresses"
-const CONTRACTS_PAGINATION_KEY = "contracts_pagination"
+const IDENTIFICATION_KEY = "readings_identification"
 
 const extractInfoFromResponse = async (parsedData) => {
-    /**
-        {
-            "soap:Envelope": {
-                "xmlns:soap": "http://www.w3.org/2003/05/soap-envelope",
-                "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-                "xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
-                "soap:Body": {
-                    "GetContractsInfo_By_PhoneResponse": {
-                        "xmlns": "http://tempuri.org/",
-                        "GetContractsInfo_By_PhoneResult": {
-                            "ContractInfo": [
-                                {
-                                    "ID": "0e114d18-62b6-11e7-80de-00237d360000",
-                                    "No": "103800120",
-                                    "Adress": "               ,   .           ,  .107,   .917",
-                                    "Residents": "5",
-                                    "FullArea": "19.17",
-                                    "DateUpdate": "2022-11-03T15:36:43.76",
-                                    "Stove": "                   ",
-                                    "Status": "         ",
-                                    "AbonentName": "      ",
-                                    "FirstName": "        ",
-                                    "Patronimic": "         ",
-                                    "DivisionID": "9bad477b-26ee-11dc-8782-000423d10000"
-                                },
-                                {
-                                    "ID": "4d21e098-fe41-11e6-80ce-002481f90000",
-                                    "No": "     200763",
-                                    "Adress": "       ,   .        ,  .79 ,   .17 ",
-                                    "Residents": "1",
-                                    "FullArea": "19.60",
-                                    "DateUpdate": "2022-07-08T11:50:24.923",
-                                    "Stove": "                   ",
-                                    "Status": "         ",
-                                    "AbonentName": "    ",
-                                    "FirstName": "        ",
-                                    "Patronimic": "          ",
-                                    "DivisionID": "f59a8382-235d-11e9-80c2-9457a550000"
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "otherParameters": ""
-        }
-     */
-
     const body = exctractBody(parsedData)
-
-    if (!body) {
-        logger.info(`No body founded in response`)
-        return []
-    }
-
-    const contractsInfo = body["GetContractsInfo_By_PhoneResponse"]?.["GetContractsInfo_By_PhoneResult"]?.["ContractInfo"]
+    const result = body?.["GetContractsInfo_By_PhoneResponse"]?.["GetContractsInfo_By_PhoneResult"]
+    if (result === undefined || result === null) throw new Error('Invalid contracts SOAP response')
+    const contractsInfo = result.ContractInfo
     const contractsInfoArr = Array.isArray(contractsInfo)
         ? contractsInfo
         : (contractsInfo ? [contractsInfo] : [])
-    //                       -                ,      -
-    const contractIdMap = contractsInfoArr.reduce((acc, cur) => {
-        acc[cur.No] = cur.ID
-        return acc
-    }, {})
-
-    await agentStorage.dialogStorage.set(
-        CONTRACTS_KEY,
-        JSON.stringify(contractIdMap)
-    )
-    const contractAddressMap = contractsInfoArr.reduce((acc, cur) => {
-        acc[cur.No] = typeof cur.Adress === "string" ? cur.Adress.trim() : ""
-        return acc
-    }, {})
-    await agentStorage.dialogStorage.set(CONTRACTS_ADDRESSES_KEY, JSON.stringify(contractAddressMap))
-    return { contracts: contractsInfoArr.map(info => info.No), contractIdMap } //
+    return contractsInfoArr.map(({ ID, No, Adress }) => ({ ID, No, Adress: typeof Adress === 'string' ? Adress.trim() : '' }))
 }
 
 const getContractsInfoByPhone = async (phoneNumber) => {
@@ -193,7 +124,7 @@ const getContractsInfoByPhone = async (phoneNumber) => {
     logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
     if (!xmlResponse) {
-        return { contracts: [], contractIdMap: {} }
+        throw new Error('Empty contracts SOAP response')
     }
 
     const parsedResponse = await parseXmlToJson(xmlResponse)
@@ -221,66 +152,15 @@ const getScaleInfo = (mdInfo, nomenclatureCode) => {
 }
 
 const extractMdInfoFromResponse = async (parsedData) => {
-    /*
-    {
-        "soap:Envelope": {
-            "xmlns:soap": "http://www.w3.org/2003/05/soap-envelope",
-            "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
-            "soap:Body": {
-                "GetMDInfo_By_ContractIDAndNomenclatureCodeResponse": {
-                    "xmlns": "http://tempuri.org/",
-                    "GetMDInfo_By_ContractIDAndNomenclatureCodeResult": {
-                        "MDInfo": [
-                            {
-                                "MDSerialNumber": "981",
-                                "MDInstallationLocation": "     ",
-                                "MDNextVerificationDeadline": "2031-11-24T00:00:00",
-                                "MDScales": {
-                                    "MDScaleInfo": {
-                                        "MDScaleID": "7C46D77E-D2DE-11E9-80C2-9457A553D5EB",
-                                        "MDScaleName": " 3",
-                                        "MDSDigitsAfterDot": "3",
-                                        "LastReadings": "2",
-                                        "LastReadingsDate": "2025-12-20T14:20:35.973",
-                                        "ReadingsExist": "true",
-                                        "MaxAcceptableNewMDReadingValue": "102"
-                                    }
-                                }
-                            },
-                            {
-                                "MDSerialNumber": "007",
-                                "MDInstallationLocation": "       ",
-                                "MDNextVerificationDeadline": "2031-11-24T00:00:00",
-                                "MDScales": {
-                                    "MDScaleInfo": {
-                                        "MDScaleID": "A1E01E62-D2DE-11E9-80C2-9457A553D5EB",
-                                        "MDScaleName": " 3",
-                                        "MDSDigitsAfterDot": "3",
-                                        "LastReadings": "40",
-                                        "LastReadingsDate": "2025-12-20T14:21:06.77",
-                                        "ReadingsExist": "true",
-                                        "MaxAcceptableNewMDReadingValue": "140"
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "otherParameters": ""
-    }
-
-    */
     const body = exctractBody(parsedData)
 
     if (!body) {
-        logger.info(`No body founded in response`)
-        return []
+        throw new Error('Missing meters SOAP body')
     }
 
-    const mdInfo = body?.["GetMDInfo_By_ContractIDAndNomenclatureCodeResponse"]?.["GetMDInfo_By_ContractIDAndNomenclatureCodeResult"]?.["MDInfo"]
+    const result = body.GetMDInfo_By_ContractIDAndNomenclatureCodeResponse?.GetMDInfo_By_ContractIDAndNomenclatureCodeResult
+    if (body['soap:Fault'] || body.Fault || result === undefined || result === null) throw new Error('Invalid meters SOAP response')
+    const mdInfo = result.MDInfo
     const mdInfoArr = Array.isArray(mdInfo) ? mdInfo : (mdInfo ? [mdInfo] : [])
     return mdInfoArr[0]
 }
@@ -332,7 +212,7 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
     }
 
     if (!xmlResponse) {
-        return []
+        throw new Error('Empty meters SOAP response')
     }
 
     const parsedResponse = await parseXmlToJson(xmlResponse)
@@ -343,57 +223,17 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
 }
 
 const getMDSInfo = async (contractId) => {
-    try {
-        const mdsResultPromises = await Promise.allSettled(
-            [
-                getMDInfo(contractId, NOMENCLATURES[0]),
-                getMDInfo(contractId, NOMENCLATURES[1]),
-                getMDInfo(contractId, NOMENCLATURES[2]),
-                getMDInfo(contractId, NOMENCLATURES[3])
-            ]
-        )
-
-        logger.info(`PROMISES: ${JSON.stringify(mdsResultPromises)}`)
-
-        return mdsResultPromises.reduce(
-            (acc, cur, indx) => {
-                if (cur.status === "fulfilled" && cur.value !== undefined) {
-                    acc[NOMENCLATURES[indx]] = cur.value
-                }
-
-                return acc
-            },
-            {}
-        )
-    } catch (err) {
-        logger.error(`Err when get mds info: ${err}`)
-        return undefined
-    }
+    const meters = await Promise.all(NOMENCLATURES.map(code => getMDInfo(contractId, code)))
+    return meters.reduce((result, meter, index) => {
+        if (meter) result[NOMENCLATURES[index]] = meter
+        return result
+    }, {})
 }
 
 const getSlots = (mdsInfo, contract, address = "") => {
-    /**
-     * {
-            "MDSerialNumber": "981",
-            "MDInstallationLocation": "     ",
-            "MDNextVerificationDeadline": "2031-11-24T00:00:00",
-            "MDScales": {
-                "MDScaleInfo": {
-                    "MDScaleID": "7C46D77E-D2DE-11E9-80C2-9457A553D5EB",
-                    "MDScaleName": " 3",
-                    "MDSDigitsAfterDot": "3",
-                    "LastReadings": "2",
-                    "LastReadingsDate": "2025-12-20T14:20:35.973",
-                    "ReadingsExist": "true",
-                    "MaxAcceptableNewMDReadingValue": "102"
-                }
-            }
-        }
-     */
-
-    const slots = {
-        [SLOTS.authSuccess]: "false"
-    }
+    const slots = Object.fromEntries(Object.values(SLOTS).filter(Boolean).map(id => [id, ""]))
+    slots[SLOTS.authSuccess] = "false"
+    slots[SLOTS.hasNextAccount] = "false"
     if (SLOTS.address) {
         slots[SLOTS.address] = address
     }
@@ -462,109 +302,311 @@ const getSlots = (mdsInfo, contract, address = "") => {
     return slots
 }
 
-const main = async () => {
-    let storedContracts = await agentStorage.dialogStorage.get(CONTRACTS_KEY)
-    storedContracts = storedContracts ? JSON.parse(storedContracts) : ""
-    let contractsPagination
-
-    logger.info(`Start main: storedContracts=${JSON.stringify(storedContracts)}, classifier=${getClassifier()}, nextArticle=${getNextArticle()}`)
-
-    if (storedContracts) {
-        contractsPagination = JSON.parse(await agentStorage.dialogStorage.get(CONTRACTS_PAGINATION_KEY))
-        if (!contractsPagination || contractsPagination.current >= contractsPagination.max) {
-            logger.info(`Contracts pagination finished or missing: ${JSON.stringify(contractsPagination)}. Resetting scenario state`)
-            await agentStorage.dialogStorage.del(CONTRACTS_KEY)
-            await agentStorage.dialogStorage.del(CONTRACTS_ADDRESSES_KEY)
-            await agentStorage.dialogStorage.del(CONTRACTS_PAGINATION_KEY)
-            storedContracts = ""
-        } else {
-            contractsPagination.current++
-            logger.info(`Contracts pagination incremented: ${JSON.stringify(contractsPagination)}`)
-        }
+// Сопоставление и озвучивание адресов — по шаблону общей идентификации.
+const normalizeAddress = (value) => (value || '').toLowerCase().replace(/ё/g, 'е').replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim()
+const ADDRESS_MARKERS = [
+    { type: 'city', pattern: 'дачный\\s+поселок|рабочий\\s+поселок|населенный\\s+пункт|город|поселок|деревня|село|дп|рп|пгт|пос|г|п|с' },
+    { type: 'street', pattern: 'улица|проспект|пр-кт|бульвар|б-р|переулок|площадь|шоссе|проезд|пр-д|микрорайон|мкр|квартал|кв-л|квл|ул|пер|пл' },
+    { type: 'house', pattern: 'дом|д' },
+    { type: 'apartment', pattern: 'квартира|кв' },
+    { type: 'building', pattern: 'корпус|корп|к' },
+    { type: 'structure', pattern: 'строение|стр' },
+    { type: 'region', pattern: 'область|обл|район|р-н|р-он' }
+]
+const SMALL_NUMBERS = 'ноль один два три четыре пять шесть семь восемь девять десять одиннадцать двенадцать тринадцать четырнадцать пятнадцать шестнадцать семнадцать восемнадцать девятнадцать'.split(' ')
+const TENS = 'двадцать тридцать сорок пятьдесят шестьдесят семьдесят восемьдесят девяносто'.split(' ')
+const HUNDREDS = 'сто двести триста четыреста пятьсот шестьсот семьсот восемьсот девятьсот'.split(' ')
+const ORDINALS = 'нулевой первый второй третий четвертый пятый шестой седьмой восьмой девятый десятый одиннадцатый двенадцатый тринадцатый четырнадцатый пятнадцатый шестнадцатый семнадцатый восемнадцатый девятнадцатый'.split(' ')
+const ORDINAL_TENS = 'двадцатый тридцатый сороковой пятидесятый шестидесятый семидесятый восьмидесятый девяностый'.split(' ')
+const ORDINAL_HUNDREDS = 'сотый двухсотый трехсотый четырехсотый пятисотый шестисотый семисотый восьмисотый девятисотый'.split(' ')
+const cardinalValues = { одна: 1, одно: 1, две: 2, нуль: 0 }
+const ordinalValues = {}
+for (const [words, step, offset] of [[SMALL_NUMBERS, 1, 0], [TENS, 10, 2], [HUNDREDS, 100, 1]]) {
+    words.forEach((word, index) => cardinalValues[word] = (index + offset) * step)
+}
+for (const [words, step, offset] of [[ORDINALS, 1, 0], [ORDINAL_TENS, 10, 2], [ORDINAL_HUNDREDS, 100, 1]]) {
+    words.forEach((word, index) => ordinalValues[word.slice(0, -2)] = (index + offset) * step)
+}
+const ordinalValue = (word) => {
+    const match = word.match(/^(.*?)(?:ый|ой|ий|ая|яя|ья|ое|ее|ье|ую|юю|ью|ого|его|ьего|ому|ему|ьему|ым|им|ьим|ом|ем|ьем|ей|ьей)$/)
+    return match ? ordinalValues[match[1]] : undefined
+}
+const parseNumber = (words, allowOrdinals = true) => {
+    if (!words.length) return null
+    if (words.length === 1 && /^\d+$/.test(words[0])) return Number(words[0])
+    let result = 0
+    let previousRank = 4
+    for (let index = 0; index < words.length; index++) {
+        const ordinal = allowOrdinals ? ordinalValue(words[index]) : undefined
+        const value = cardinalValues[words[index]] ?? ordinal
+        if (value === undefined || (ordinal !== undefined && index !== words.length - 1)) return null
+        const rank = value >= 100 ? 3 : value >= 20 ? 2 : 1
+        if (rank >= previousRank || (value === 0 && words.length !== 1)) return null
+        previousRank = rank
+        result += value
     }
-
-    if (!storedContracts) {
-        await agentStorage.dialogStorage.del(CONTRACTS_ADDRESSES_KEY)
-        const phoneNumber = USE_HARDCODED_PHONE
-            ? HARDCODED_PHONE
-            : getSlotValueById(PHONE_SLOT_ID)
-        logger.info(`Got phone number ${phoneNumber}, source=${USE_HARDCODED_PHONE ? "hardcoded" : `slot:${PHONE_SLOT_ID}`}`)
-
-        if (!phoneNumber) {
-            logger.info(`Phone not found`)
-            return [routingToOperatorAnswer]
+    return result
+}
+const normalizeNumbers = (value, allowOrdinals = true) => {
+    const text = allowOrdinals ? value.replace(/(\d+)\s*-?\s*(?:ая|яя|ый|ий|ой|я|й|е)(?=\s|$)/g, '$1') : value
+    const tokens = [...text.matchAll(/[а-яa-z]+|\d+/g)]
+    let result = ''
+    let position = 0
+    for (let index = 0; index < tokens.length; index++) {
+        let last = index
+        let number = parseNumber([tokens[index][0]], allowOrdinals)
+        if (number === null) continue
+        for (let end = index + 1; end < tokens.length; end++) {
+            if (!/^\s+$/.test(text.slice(tokens[end - 1].index + tokens[end - 1][0].length, tokens[end].index))) break
+            const next = parseNumber(tokens.slice(index, end + 1).map(token => token[0]), allowOrdinals)
+            if (next === null) break
+            number = next
+            last = end
         }
-
-        const { contracts, contractIdMap } = await getContractsInfoByPhone(phoneNumber) //
-        logger.info(`Contracts received for phone ${phoneNumber}: ${JSON.stringify({ contracts, contractIdMap })}`)
-
-        if (getDebug()) {
-            for (let i = 0; i < getDebug().contractsCount; i++) {
-                const contractNo = `NO_${uuid.v4()}`
-                const contractId = `ID_${uuid.v4()}`
-                contracts.push(contractNo)
-                contractIdMap[contractNo] = contractId
+        result += text.slice(position, tokens[index].index) + number
+        position = tokens[last].index + tokens[last][0].length
+        index = last
+    }
+    return result + text.slice(position)
+}
+const addressWords = (value) => normalizeNumbers(value).match(/[а-яa-z]+|\d+/g) || []
+const addressNumber = (value) => {
+    const match = normalizeNumbers(value || '').replace(/№/g, '').trim().match(/^(\d+)(?:\s*([а-яa-z])(?=\s|\/|$))?(?:\s*\/\s*(\d+))?/)
+    return match ? match[1] + (match[2] || '') + (match[3] ? '/' + match[3] : '') : ''
+}
+const parseAddress = (value) => {
+    const text = normalizeAddress(value).replace(/[;:]/g, ' ')
+    const markers = []
+    for (const { type, pattern } of ADDRESS_MARKERS) {
+        const regex = new RegExp(`(^|[\\s])(${pattern})(?=\\s|\\d|$)`, 'g')
+        let match
+        while ((match = regex.exec(text))) {
+            let markerType = type
+            if (type === 'house' && match[2] === 'д') {
+                const following = text.slice(regex.lastIndex).trim().split(/\s+/)[0]
+                if (/^[а-я]/.test(following) && parseNumber([following]) === null) markerType = 'city'
             }
+            markers.push({ type: markerType, label: match[2], start: match.index + match[1].length, end: regex.lastIndex })
         }
-
-        contractsPagination = { max: contracts.length, current: 1 }
-        await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
-        logger.info(`Contracts pagination initialized: ${JSON.stringify(contractsPagination)}`)
-        storedContracts = contractIdMap
     }
-
-    if (Object.keys(storedContracts).length === 0) {
-        logger.info(`Empty contracts stored or got`)
-        const slots = getSlots(undefined, undefined)
-        logger.info(`Redirect payload for empty contracts: ${JSON.stringify({ classifier: getClassifier(), nextArticle: getNextArticle(), slots })}`)
-        return [
-            agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
-        ]
+    markers.sort((first, second) => first.start - second.start || second.end - first.end)
+    const unique = markers.filter((marker, index) => !markers.slice(0, index).some(previous => previous.end > marker.start))
+    const parts = {}
+    unique.forEach((marker, index) => {
+        const part = text.slice(marker.end, unique[index + 1]?.start ?? text.length).replace(/№/g, '').trim()
+        parts[marker.type] = marker.type === 'region' && parts.region ? parts.region + ' ' + part : part
+    })
+    // SOAP может возвращать населённый пункт первым сегментом без «г.».
+    if (!parts.city && (value || '').includes(',')) {
+        const first = normalizeAddress(value.split(',').find(part => !/^\s*\d{6}\s*$/.test(part)) || '')
+        const hasMarker = ADDRESS_MARKERS.some(({ pattern }) => new RegExp(`(^|\\s)(${pattern})(?=\\s|\\d|$)`).test(first))
+        if (first && !hasMarker && !/\d/.test(first)) parts.city = first
     }
-
-    const selectedContractId = Object.values(storedContracts)[contractsPagination.current - 1]
-    const selectedContractNo = Object.keys(storedContracts)[contractsPagination.current - 1]
-    logger.info(`Selected contract: ${JSON.stringify({ selectedContractNo, selectedContractId, contractsPagination })}`)
-
-    if (!selectedContractId) {
-        logger.error(`Contract at index ${contractsPagination.current} not found in stored contracts. Resetting scenario state`)
-        await agentStorage.dialogStorage.del(CONTRACTS_KEY)
-        await agentStorage.dialogStorage.del(CONTRACTS_ADDRESSES_KEY)
-        await agentStorage.dialogStorage.del(CONTRACTS_PAGINATION_KEY)
-        const slots = getSlots(undefined, undefined)
-        return [
-            agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
-        ]
+    const houseMarker = unique.find(marker => marker.type === 'house')
+    const extraMarker = unique.find(marker => ['apartment', 'building', 'structure'].includes(marker.type))
+    const prefix = normalizeNumbers(text.slice(0, houseMarker?.start ?? extraMarker?.start ?? text.length), false)
+    const tail = prefix.match(/\d+(?:\s*[а-яa-z](?=\s|\/|$))?(?:\s*\/\s*\d+)?\s*$/)
+    const inferred = tail && !/^\d+\s*[яйе]\s*$/.test(tail[0]) && !/^\d{6}\s*$/.test(prefix)
+        && (!parts.street || parts.street !== tail[0].trim()) ? tail : null
+    const houseFull = addressNumber(houseMarker ? parts.house : inferred?.[0])
+    const nameText = !houseMarker && inferred ? prefix.slice(0, inferred.index) : prefix
+    if (!houseMarker && inferred && parts.street) {
+        parts.street = normalizeNumbers(parts.street, false).replace(/\d+(?:\s*[а-яa-z](?=\s|\/|$))?(?:\s*\/\s*\d+)?\s*$/, '').trim()
     }
+    return { parts, house: houseFull.match(/^\d+/)?.[0], houseFull, words: addressWords(nameText), streetLabel: unique.find(marker => marker.type === 'street')?.label }
+}
+const addressWordMatches = (first, second) => {
+    if (first === second) return true
+    if (/\d/.test(first) || /\d/.test(second)) return false
+    const length = Math.min(first.length, second.length)
+    const limit = length >= 7 ? 2 : length >= 5 ? 1 : 0
+    if (!limit || Math.abs(first.length - second.length) > limit) return false
+    let previous = Array.from({ length: second.length + 1 }, (_, index) => index)
+    for (let row = 1; row <= first.length; row++) {
+        const current = [row]
+        for (let column = 1; column <= second.length; column++) {
+            current[column] = Math.min(current[column - 1] + 1, previous[column] + 1, previous[column - 1] + (first[row - 1] === second[column - 1] ? 0 : 1))
+        }
+        previous = current
+    }
+    return previous[second.length] <= limit
+}
+const matchAddressName = (expected, words, used) => {
+    if (!expected.length) return false
+    for (let start = 0; start <= words.length - expected.length; start++) {
+        if (expected.every((word, index) => !used.has(start + index) && addressWordMatches(word, words[start + index]))) {
+            expected.forEach((_, index) => used.add(start + index))
+            return true
+        }
+    }
+    return false
+}
+const canonicalPart = (value) => addressWords(value || '').join(' ')
+const streetType = (label) => ({ ул: 'улица', мкр: 'микрорайон', 'кв-л': 'квартал', квл: 'квартал', 'пр-кт': 'проспект', 'б-р': 'бульвар', пер: 'переулок', пл: 'площадь', 'пр-д': 'проезд' }[label] || label || '')
+const getAddressOptions = (contracts) => {
+    const seen = new Set()
+    return contracts.reduce((options, contract, index) => {
+        const raw = contract.Adress
+        const address = parseAddress(raw)
+        const { parts, houseFull } = address
+        const key = parts.city && parts.street && houseFull
+            ? JSON.stringify([canonicalPart(parts.region), canonicalPart(parts.city), streetType(address.streetLabel), canonicalPart(parts.street), houseFull, ...['building', 'structure', 'apartment'].map(type => canonicalPart(parts[type]))])
+            : canonicalPart(raw)
+        if (!seen.has(key)) {
+            seen.add(key)
+            options.push({ index, address, raw })
+        }
+        return options
+    }, [])
+}
+const scoreAddresses = (options, text) => {
+    const userAddress = parseAddress(text)
+    const userWords = addressWords(normalizeAddress(text))
+    return options.map(option => {
+        const { address } = option
+        const used = new Set()
+        let score = address.house && address.house === userAddress.house ? 1 : 0
+        for (const type of ['city', 'street']) {
+            const expected = addressWords(address.parts[type] || '')
+            const explicit = userAddress.parts[type]
+            if ((!explicit || matchAddressName(expected, addressWords(explicit), new Set())) && matchAddressName(expected, userAddress.words, used)) score++
+        }
+        const detailConflict = ['apartment', 'building', 'structure'].some(type => userAddress.parts[type] && canonicalPart(userAddress.parts[type]) !== canonicalPart(address.parts[type]))
+        const words = addressWords(['city', 'street', 'house', 'apartment', 'building', 'structure'].map(type => address.parts[type] || '').join(' '))
+        const partial = [...new Set(userWords)].filter(word => words.some(expected => addressWordMatches(expected, word) || (/^[а-яa-z]{3,}$/.test(word) && expected.includes(word)))).length
+        return { ...option, score, partial, full: score === 3 && !detailConflict && address.houseFull === userAddress.houseFull }
+    })
+}
+const title = (value) => value.replace(/(^|[\s-])([а-яa-z])/g, (_, prefix, letter) => prefix + letter.toUpperCase())
+const spokenOrdinal = (number) => {
+    const n = Number(number)
+    if (n < 1 || n > 99) return number + '-я'
+    const word = n < 20 ? ORDINALS[n] : n % 10 ? ORDINALS[n % 10] : ORDINAL_TENS[n / 10 - 2]
+    const feminine = word === 'третий' ? 'третья' : word.slice(0, -2) + 'ая'
+    return n >= 20 && n % 10 ? TENS[Math.floor(n / 10) - 2] + ' ' + feminine : feminine
+}
+const formatAddress = (option) => {
+    const { parts, houseFull, streetLabel } = option.address
+    const result = []
+    if (parts.city) result.push(title(parts.city))
+    if (parts.street) {
+        const name = parts.street.replace(/(\d+)\s*-?\s*(?:ая|яя|я|й)(?=\s|$)/g, (_, n) => spokenOrdinal(n))
+        const label = streetType(streetLabel)
+        result.push(['ул', 'улица'].includes(label) ? title(name) + (/^\d+$/.test(canonicalPart(name)) ? ' улица' : '') : label + ' ' + title(name))
+    }
+    if (houseFull) result.push('дом ' + houseFull.toUpperCase())
+    for (const [type, label] of [['building', 'корпус'], ['structure', 'строение'], ['apartment', 'квартира']]) {
+        if (parts[type]) result.push(label + ' ' + parts[type])
+    }
+    const raw = option.raw.replace(/^\s*\d{6}(?:\s*,\s*|\s+|$)/, '').trim()
+    return parts.city && parts.street && result.length ? result.join(', ') : raw || 'адрес не указан'
+}
+const normalizeResponse = (text) => normalizeAddress(text).replace(/[^а-яa-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim()
+const confirmationAnswer = (text) => {
+    const response = normalizeResponse(text)
+    if (/^(?:да|yes|ага|конечно|верно|правильно|согласен|подтверждаю|угу|ok|okay)(?: (?:да|верно|правильно|конечно))?$/.test(response)) return 'yes'
+    if (/^(?:нет|no|не|неверно|неправильно|не то|другой|нет не то|нет другой адрес)$/.test(response)) return 'no'
+    return null
+}
+const selectedNumber = (text) => {
+    let response = normalizeResponse(text)
+    if (response === 'нет') return 'no'
+    response = response.replace(/^(?:номер|адрес|вариант)\s+/, '').replace(/\s+(?:адрес|вариант|номер)$/, '')
+    return parseNumber(response.split(/\s+/))
+}
 
-    const mdsInfo = await getMDSInfo(selectedContractId)
-    logger.info(`Got mdsInfo ${JSON.stringify(mdsInfo)}`)
-    const storedAddresses = await agentStorage.dialogStorage.get(CONTRACTS_ADDRESSES_KEY)
-    const contractAddressMap = storedAddresses ? JSON.parse(storedAddresses) : {}
-    const slots = getSlots(mdsInfo, selectedContractNo, contractAddressMap[selectedContractNo] || "")
-    slots[SLOTS.hasNextAccount] = String(contractsPagination.current < contractsPagination.max)
-    slots[SLOTS.returnLookupAgent] = RETURN_LOOKUP_AGENT
-    logger.info(`Filled slots: ${JSON.stringify(slots)}`)
+// Состояние принадлежит этому агенту и хранится только до выбора адреса.
+const clearLookupState = async () => {
+    for (const key of [IDENTIFICATION_KEY, 'contracts', 'contracts_addresses', 'contracts_pagination']) await agentStorage.dialogStorage.del(key)
+}
+const routingToOperator = async () => {
+    try {
+        await clearLookupState()
+    } catch (error) {
+        logger.error({ stack: error.stack }, 'Failed to clear identification state')
+    }
+    const command = OPERATOR_ARTICLE ? `/switchredirect ${getClassifier()} intent_id="${OPERATOR_ARTICLE}"` : `/switchredirect ${ROUTING_AGENT}`
+    return [agentApi.makeTextReply(command, undefined, undefined, getSlots())]
+}
+const validContracts = (contracts) => Array.isArray(contracts) && contracts.length > 0 && contracts.every(contract =>
+    contract && typeof contract.ID === 'string' && contract.ID.trim() && contract.No && typeof contract.Adress === 'string' && contract.Adress.trim())
+const questionReply = async (text, state) => {
+    const saved = await agentStorage.dialogStorage.set(IDENTIFICATION_KEY, JSON.stringify(state))
+    if (saved === false) throw new Error('Failed to save identification state')
+    return [agentApi.makeTextReply(text, undefined, undefined, getSlots())]
+}
+const askAddressReply = (contracts) => questionReply('Назовите адрес, по которому Вы обращаетесь.', { contracts, step: 'ask_multiple' })
+const confirmAddressReply = (state) => {
+    const raw = state.contracts[state.selectedIndex].Adress
+    return questionReply(`Вы обращаетесь по адресу: ${formatAddress({ raw, address: parseAddress(raw) })}? Скажите «да» или «нет».`, state)
+}
+const addressListReply = (contracts, retry = 0) => {
+    const list = getAddressOptions(contracts).map((option, index) => `Номер ${index + 1}: ${formatAddress(option)}.`).join('\n')
+    return questionReply(`Сейчас я перечислю найденные адреса, после этого назовите номер нужного адреса.\n${list}\nЕсли нужного адреса нет в озвученном списке, ответьте словом «нет».`, { contracts, step: 'choose_address', retry })
+}
+const completeIdentification = async (contract) => {
+    // Удаляем все варианты; результат остаётся только в слотах выбранного ЛС.
+    await clearLookupState()
+    const mdsInfo = await getMDSInfo(contract.ID)
+    const slots = getSlots(mdsInfo, String(contract.No), contract.Adress)
+    logger.info(`Contract selected: ${contract.No}, filled slots: ${JSON.stringify(slots)}`)
+    return [agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)]
+}
+const startIdentification = (contracts) => {
+    if (!validContracts(contracts)) return routingToOperator()
+    const unique = getAddressOptions(contracts).map(option => contracts[option.index])
+    return unique.length === 1 ? completeIdentification(unique[0]) : askAddressReply(unique)
+}
+const handleIdentification = async (state) => {
+    if (!state || !validContracts(state.contracts) || !['ask_multiple', 'confirm_partial', 'choose_address'].includes(state.step)) return routingToOperator()
+    const { contracts, step } = state
+    const text = message?.message?.text || message?.text || ''
+    logger.info(`User response (step=${step}): ${JSON.stringify(text)}`)
+    if (step === 'confirm_partial') {
+        if (!Number.isInteger(state.selectedIndex) || !contracts[state.selectedIndex] || ![0, 1].includes(state.retry)) return routingToOperator()
+        if (message.message_type === 0) return confirmAddressReply(state)
+        const answer = confirmationAnswer(text)
+        if (answer === 'yes') return completeIdentification(contracts[state.selectedIndex])
+        if (answer === 'no' || state.retry === 1) return addressListReply(contracts)
+        return confirmAddressReply({ ...state, retry: 1 })
+    }
+    if (step === 'choose_address') {
+        if (![0, 1].includes(state.retry)) return routingToOperator()
+        const options = getAddressOptions(contracts)
+        if (message.message_type === 0) return addressListReply(contracts, state.retry)
+        const number = selectedNumber(text)
+        if (number === 'no') return routingToOperator()
+        if (Number.isSafeInteger(number) && number >= 1 && number <= options.length) return completeIdentification(contracts[options[number - 1].index])
+        if (state.retry === 1) return routingToOperator()
+        return questionReply(`Назовите номер адреса от 1 до ${options.length} или скажите «нет», если нужного адреса нет.`, { ...state, retry: 1 })
+    }
+    if (message.message_type === 0) return askAddressReply(contracts)
+    const scored = scoreAddresses(getAddressOptions(contracts), text)
+    const full = scored.filter(option => option.full)
+    if (full.length === 1) return completeIdentification(contracts[full[0].index])
+    if (full.length > 1) return addressListReply(contracts)
+    scored.sort((first, second) => second.score - first.score || second.partial - first.partial)
+    const best = scored[0]
+    const tied = scored.filter(option => option.score === best.score && option.partial === best.partial)
+    logger.info(`Address candidates: ${tied.length}, score: ${best.score}, partial: ${best.partial}`)
+    return tied.length === 1 && (best.score > 0 || best.partial > 0)
+        ? confirmAddressReply({ contracts, step: 'confirm_partial', selectedIndex: best.index, retry: 0 })
+        : addressListReply(contracts)
+}
 
-    await agentStorage.dialogStorage.set(CONTRACTS_PAGINATION_KEY, JSON.stringify(contractsPagination))
-    logger.info(`Redirect payload: ${JSON.stringify({
-        classifier: getClassifier(),
-        nextArticle: getNextArticle(),
-        selectedContractNo,
-        selectedContractId,
-        contractsPagination,
-        mdsInfo,
-        slots
-    })}`)
-
-    return [
-        agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)
-    ]
+const main = async () => {
+    if (message.message_type !== undefined && ![0, 1].includes(message.message_type)) return [agentApi.makeAckReply()]
+    const storedState = await agentStorage.dialogStorage.get(IDENTIFICATION_KEY)
+    if (storedState) return handleIdentification(JSON.parse(storedState))
+    await clearLookupState()
+    const phoneNumber = USE_HARDCODED_PHONE ? HARDCODED_PHONE : getSlotValueById(PHONE_SLOT_ID)
+    if (!phoneNumber) return routingToOperator()
+    return startIdentification(await getContractsInfoByPhone(phoneNumber))
 }
 
 main()
     .then(res => resolve(res))
-    .catch(err => {
+    .catch(async err => {
         logger.error({ stack: err.stack }, `Some error when main execute ${err}`)
-        resolve([routingToOperatorAnswer])
+        resolve(await routingToOperator())
     })

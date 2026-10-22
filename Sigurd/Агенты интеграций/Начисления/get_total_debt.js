@@ -84,7 +84,7 @@ const main = async () => {
 	const filledSlots = {
 		balance: normalizeSlotValue(balance),
 		amount_to_pay: normalizeSlotValue(amountToPay),
-		final_answer: amountToPay > 0 ? '1' : '2'
+		final_answer: balance === 0 ? '3' : amountToPay > 0 ? '1' : '2'
 	}
 
 	logger.info(`Amount to pay: ${amountToPay}`)

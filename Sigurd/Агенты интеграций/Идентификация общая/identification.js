@@ -301,7 +301,7 @@ const fetchStatus = async (userId) => {
 // --- Сопоставление адресов с учётом ошибок распознавания речи ---
 const ADDRESS_MARKERS = [
 	{ type: 'city', pattern: 'дачный\\s+поселок|рабочий\\s+поселок|населенный\\s+пункт|город|поселок|деревня|село|дп|рп|пгт|пос|г|п|с' },
-	{ type: 'street', pattern: 'улица|проспект|пр-кт|бульвар|б-р|переулок|площадь|шоссе|проезд|пр-д|микрорайон|мкр|ул|пер|пл' },
+	{ type: 'street', pattern: 'улица|проспект|пр-кт|бульвар|б-р|переулок|площадь|шоссе|проезд|пр-д|микрорайон|мкр|квартал|кв-л|квл|ул|пер|пл' },
 	{ type: 'house', pattern: 'дом|д' },
 	{ type: 'apartment', pattern: 'квартира|кв' },
 	{ type: 'building', pattern: 'корпус|корп|к' },
@@ -456,7 +456,7 @@ const matchAddressName = (expected, words, used) => {
 }
 
 const canonicalPart = (value) => addressWords(value || '').join(' ')
-const streetType = (label) => ({ ул: 'улица', мкр: 'микрорайон', 'пр-кт': 'проспект', 'б-р': 'бульвар', пер: 'переулок', пл: 'площадь', 'пр-д': 'проезд' }[label] || label || '')
+const streetType = (label) => ({ ул: 'улица', мкр: 'микрорайон', 'кв-л': 'квартал', квл: 'квартал', 'пр-кт': 'проспект', 'б-р': 'бульвар', пер: 'переулок', пл: 'площадь', 'пр-д': 'проезд' }[label] || label || '')
 const getAddressOptions = (contracts) => {
 	const seen = new Set()
 	return contracts.reduce((options, contract, index) => {
@@ -514,7 +514,8 @@ const formatAddress = (option) => {
 	for (const [type, label] of [['building', 'корпус'], ['structure', 'строение'], ['apartment', 'квартира']]) {
 		if (parts[type]) result.push(label + ' ' + parts[type])
 	}
-	return result.length && parts.city && parts.street ? result.join(', ') : option.raw || 'адрес не указан'
+	const rawWithoutPostalCode = (option.raw || '').replace(/^\s*\d{6}(?:\s*,\s*|\s+|$)/, '').trim()
+	return result.length && parts.city && parts.street ? result.join(', ') : rawWithoutPostalCode || 'адрес не указан'
 }
 
 const normalizeResponse = (text) => normalizeAddress(text).replace(/[^а-яa-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim()

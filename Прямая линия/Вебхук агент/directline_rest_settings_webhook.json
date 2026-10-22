@@ -1,61 +1,13 @@
 {
-  "__declaration__": [
-    {
-      "id": "apiUrl",
-      "type": "string",
-      "name": "URL вебхука принимающего агента",
-      "description": "Адрес для отправки сформированного JSON обращения. Принимающий агент должен подтверждать приём без ожидания дальнейшей обработки."
-    },
-    {
-      "id": "apiToken",
-      "type": "string",
-      "name": "Bearer-токен вебхука",
-      "description": "Необязательный токен. Если значение пустое, заголовок Authorization не отправляется."
-    },
-    {
-      "id": "aiAssistAgentId",
-      "type": "string",
-      "name": "ID агента базы знаний",
-      "description": "Экземпляр aiassist2, на который будет переключён диалог после успешной отправки."
-    },
-    {
-      "id": "articleId",
-      "type": "string",
-      "name": "ID статьи после отправки"
-    },
-    {
-      "id": "errorArticleId",
-      "type": "string",
-      "name": "ID статьи при ошибке отправки"
-    },
-    {
-      "id": "slotIds",
-      "type": "object",
-      "name": "Идентификаторы слотов",
-      "description": "Сопоставление полей API с идентификаторами слотов CraftTalk. number_question — слот для сохранения сгенерированного номера обращения."
-    },
-    {
-      "id": "debugMode",
-      "type": "boolean",
-      "name": "Режим отладки",
-      "description": "Отправляет debugRequestBody вместо значений текущего сообщения и слотов."
-    },
-    {
-      "id": "debugRequestBody",
-      "type": "object",
-      "name": "Тестовое тело запроса"
-    }
-  ],
-  "apiUrl": "",
-  "apiToken": "",
+  "apiUrl": "https://directline.appliedai.tech/v1/appeals",
+  "apiToken": "w5Dgpi0SlamgJl1yRyfBE7bfJi4oXGIfL7X8_m8k4Mg",
   "aiAssistAgentId": "aiassist2",
-  "articleId": "article-14185e06-7d7d-4cde-8c7e-7830d6bd5690",
+  "articleId": "article-80c8587d-393e-4d66-bec3-83716c4f5ee4",
   "errorArticleId": "article-14185e06-7d7d-4cde-8c7e-7830d6bd5690",
   "slotIds": {
     "number_question": "number_question",
     "type_question": "type_question",
     "municipality": "municipality",
-    "theme": "theme",
     "question": "question",
     "summary": "summary",
     "any_file": "any_file",
@@ -69,7 +21,6 @@
     "client_id": "test-client",
     "type_question": "Текстовый вопрос",
     "municipality": "город Уфа",
-    "theme": "Тестовая тема",
     "question": "Тестовый вопрос",
     "summary": "Краткое содержание тестового обращения",
     "any_file": "Нет",
