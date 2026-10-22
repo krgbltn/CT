@@ -1,0 +1,8 @@
+{
+  "incoming_api": "https://cloud.craft-talk.ru/webhooks/integration_channel/channel_209c6a6",
+  "authorization_token_incoming": "",
+  "confirmation_token": "776754b8",
+  "vk_api_token": "vk1.a.wlk17EfijjELjwJTP2Jswp1HYcEVLGdxaIA5vhQ7Btq8QTotH4rLFx2ecYSdr0at4NGozG3R9mYEpSMS9HIaNXs71TwUnDQhxIsyrkBUPLY54oquT_0e31BQpasxvTrGI3QBhJrNyDXzy5ppjwbhZ4yAMvMzsdiAFYIVGbvo9rXuY7RcL1jBKRF2Nw5RlBHXSQtNYvqkQZX6oP9tp3TW3Q",
+  "api_version": "5.199",
+  "vk_api_url": "https://api.vk.ru/method/"
+}
