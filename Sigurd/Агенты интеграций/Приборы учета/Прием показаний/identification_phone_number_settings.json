@@ -5,7 +5,7 @@
   "aiAgent": "ai_pribor",
   "routingAgent": "routingagent",
   "operatorArticle": "article-99e4a71c-4d44-4a7b-9d0c-241961c1aaf0",
-  "url": "https://asuse-test.ie.corp/IVR.asmx",
+  "url": "https://sbyt.service.1c/IVR.asmx",
   "slots": {
     "authSuccess": "successful_identification",
     "contract": "account_number",
