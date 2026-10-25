@@ -101,7 +101,11 @@ const extractInfoFromResponse = async (parsedData) => {
     const contractsInfoArr = Array.isArray(contractsInfo)
         ? contractsInfo
         : (contractsInfo ? [contractsInfo] : [])
-    return contractsInfoArr.map(({ ID, No, Adress }) => ({ ID, No, Adress: typeof Adress === 'string' ? Adress.trim() : '' }))
+    return contractsInfoArr.map(({ ID, No, Adress, City }) => ({
+        ID, No,
+        Adress: typeof Adress === 'string' ? Adress.trim() : '',
+        City: typeof City === 'string' ? City.trim() : ''
+    }))
 }
 
 const getContractsInfoByPhone = async (phoneNumber) => {
@@ -443,11 +447,20 @@ const matchAddressName = (expected, words, used) => {
 }
 const canonicalPart = (value) => addressWords(value || '').join(' ')
 const streetType = (label) => ({ ул: 'улица', мкр: 'микрорайон', 'кв-л': 'квартал', квл: 'квартал', 'пр-кт': 'проспект', 'б-р': 'бульвар', пер: 'переулок', пл: 'площадь', 'пр-д': 'проезд' }[label] || label || '')
+const getContractAddressOption = (contract) => {
+    const rawAddress = contract.Adress.replace(/^\s*\d{6}(?:\s*,\s*|\s+|$)/, '').trim()
+    const address = parseAddress(rawAddress)
+    const cityValue = typeof contract.City === 'string' ? contract.City.trim() : ''
+    const city = cityValue && (parseAddress(cityValue).parts.city || normalizeAddress(cityValue))
+    const raw = city && canonicalPart(city) !== canonicalPart(address.parts.city)
+        ? `${cityValue}, ${rawAddress}` : rawAddress
+    if (city) address.parts.city = city
+    return { address, raw }
+}
 const getAddressOptions = (contracts) => {
     const seen = new Set()
     return contracts.reduce((options, contract, index) => {
-        const raw = contract.Adress
-        const address = parseAddress(raw)
+        const { address, raw } = getContractAddressOption(contract)
         const { parts, houseFull } = address
         const key = parts.city && parts.street && houseFull
             ? JSON.stringify([canonicalPart(parts.region), canonicalPart(parts.city), streetType(address.streetLabel), canonicalPart(parts.street), houseFull, ...['building', 'structure', 'apartment'].map(type => canonicalPart(parts[type]))])
@@ -537,18 +550,19 @@ const questionReply = async (text, state) => {
 }
 const askAddressReply = (contracts) => questionReply('Назовите адрес, по которому Вы обращаетесь.', { contracts, step: 'ask_multiple' })
 const confirmAddressReply = (state) => {
-    const raw = state.contracts[state.selectedIndex].Adress
-    return questionReply(`Вы обращаетесь по адресу: ${formatAddress({ raw, address: parseAddress(raw) })}? Скажите «да» или «нет».`, state)
+    const option = getContractAddressOption(state.contracts[state.selectedIndex])
+    return questionReply(`Вы обращаетесь по адресу: ${formatAddress(option)}? Скажите «да» или «нет».`, state)
 }
 const addressListReply = (contracts, retry = 0) => {
     const list = getAddressOptions(contracts).map((option, index) => `Номер ${index + 1}: ${formatAddress(option)}.`).join('\n')
     return questionReply(`Сейчас я перечислю найденные адреса, после этого назовите номер нужного адреса.\n${list}\nЕсли нужного адреса нет в озвученном списке, ответьте словом «нет».`, { contracts, step: 'choose_address', retry })
 }
-const completeIdentification = async (contract) => {
+const completeIdentification = async (contract, addressConfirmed = false) => {
     // Удаляем все варианты; результат остаётся только в слотах выбранного ЛС.
     await clearLookupState()
     const mdsInfo = await getMDSInfo(contract.ID)
     const slots = getSlots(mdsInfo, String(contract.No), contract.Adress)
+    if (addressConfirmed && SLOTS.addressSuccess) slots[SLOTS.addressSuccess] = "true"
     logger.info(`Contract selected: ${contract.No}, filled slots: ${JSON.stringify(slots)}`)
     return [agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)]
 }
@@ -566,7 +580,7 @@ const handleIdentification = async (state) => {
         if (!Number.isInteger(state.selectedIndex) || !contracts[state.selectedIndex] || ![0, 1].includes(state.retry)) return routingToOperator()
         if (message.message_type === 0) return confirmAddressReply(state)
         const answer = confirmationAnswer(text)
-        if (answer === 'yes') return completeIdentification(contracts[state.selectedIndex])
+        if (answer === 'yes') return completeIdentification(contracts[state.selectedIndex], true)
         if (answer === 'no' || state.retry === 1) return addressListReply(contracts)
         return confirmAddressReply({ ...state, retry: 1 })
     }

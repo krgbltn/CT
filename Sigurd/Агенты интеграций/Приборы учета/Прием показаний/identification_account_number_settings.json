@@ -8,6 +8,7 @@
     "authSuccess": "successful_identification",
     "contract": "account_number",
     "address": "account_address",
+    "addressSuccess": "address_success",
     "electro": "number_electricity_meter",
     "electroLast": "recent_electricity",
     "electroScale": "scale_electricity",
