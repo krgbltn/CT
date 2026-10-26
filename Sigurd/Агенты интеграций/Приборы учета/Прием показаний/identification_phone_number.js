@@ -96,11 +96,12 @@ const IDENTIFICATION_KEY = "readings_identification"
 const extractInfoFromResponse = async (parsedData) => {
     const body = exctractBody(parsedData)
     const result = body?.["GetContractsInfo_By_PhoneResponse"]?.["GetContractsInfo_By_PhoneResult"]
-    if (result === undefined || result === null) throw new Error('Invalid contracts SOAP response')
+    if (body?.['soap:Fault'] || body?.Fault || result === undefined || result === null
+        || (result !== '' && (typeof result !== 'object' || Array.isArray(result)))) throw new Error('Invalid contracts SOAP response')
     const contractsInfo = result.ContractInfo
     const contractsInfoArr = Array.isArray(contractsInfo)
         ? contractsInfo
-        : (contractsInfo ? [contractsInfo] : [])
+        : (contractsInfo === undefined ? [] : [contractsInfo])
     return contractsInfoArr.map(({ ID, No, Adress, City }) => ({
         ID, No,
         Adress: typeof Adress === 'string' ? Adress.trim() : '',
@@ -123,16 +124,13 @@ const getContractsInfoByPhone = async (phoneNumber) => {
     }
 
     const xmlData = parseJsonToXml("soapenv:Envelope", requestBody)
-    logger.info(`Created xml data: ${JSON.stringify(xmlData)}`)
     const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/GetContractsInfo_By_Phone')
-    logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
     if (!xmlResponse) {
         throw new Error('Empty contracts SOAP response')
     }
 
     const parsedResponse = await parseXmlToJson(xmlResponse)
-    logger.info(`GetContractsInfo_By_Phone parsed response: ${JSON.stringify(parsedResponse)}`)
     const result = await extractInfoFromResponse(parsedResponse)
     logger.info(`GetContractsInfo_By_Phone extracted contracts: ${JSON.stringify(result)}`)
     return result
@@ -186,9 +184,7 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
     }
 
     const xmlData = parseJsonToXml("soapenv:Envelope", requestBody)
-    logger.info(`Created xml data: ${JSON.stringify(xmlData)}`)
     const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/GetMDInfo_By_ContractIDAndNomenclatureCode')
-    logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
 
     if (getDebug()) {
         const debugScaleNames = {
@@ -220,7 +216,6 @@ const getMDInfo = async (contractId, nomenclatureCode) => {
     }
 
     const parsedResponse = await parseXmlToJson(xmlResponse)
-    logger.info(`GetMDInfo parsed response for nomenclature ${nomenclatureCode}: ${JSON.stringify(parsedResponse)}`)
     const result = await extractMdInfoFromResponse(parsedResponse)
     logger.info(`GetMDInfo extracted meter for nomenclature ${nomenclatureCode}: ${JSON.stringify(result)}`)
     return result
@@ -566,7 +561,12 @@ const completeIdentification = async (contract, addressConfirmed = false) => {
     logger.info(`Contract selected: ${contract.No}, filled slots: ${JSON.stringify(slots)}`)
     return [agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)]
 }
-const startIdentification = (contracts) => {
+const startIdentification = async (contracts) => {
+    if (Array.isArray(contracts) && contracts.length === 0) {
+        await clearLookupState()
+        logger.info('No contracts found; returning to next article')
+        return [agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, getSlots())]
+    }
     if (!validContracts(contracts)) return routingToOperator()
     const unique = getAddressOptions(contracts).map(option => contracts[option.index])
     return unique.length === 1 ? completeIdentification(unique[0]) : askAddressReply(unique)
