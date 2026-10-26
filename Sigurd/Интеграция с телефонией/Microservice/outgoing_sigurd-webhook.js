@@ -54,6 +54,8 @@ const handleMessage = async () => {
 	const msg = message.data
 
 	const slots = msg?.slots || []
+	const finishText = getSlotValue(slots, "finish_text").trim() || FINISH_TEXT
+	const routingText = getSlotValue(slots, "routing_text").trim() || ROUTING_TEXT
 	const callId = getSlotValue(slots, CALL_ID_SLOT_ID)
 	const sessionId = getSlotValue(slots, SESSION_ID_SLOT_ID)
 	const omniUserId = getSlotValue(slots, OMNI_USER_ID_SLOT_ID)
@@ -77,7 +79,7 @@ const handleMessage = async () => {
 				finReason === "finishdialog"
 			if (isFinish) {
 				logger.debug(`[outgoing] callId=${callId} end`)
-				await sendWebhook({ callId, sessionId, event: "end", messageType, text: FINISH_TEXT })
+				await sendWebhook({ callId, sessionId, event: "end", messageType, text: finishText })
 				break
 			}
 			logger.debug(`[outgoing] callId=${callId} reply`)
@@ -86,7 +88,7 @@ const handleMessage = async () => {
 		}
 		case 16: {
 			logger.debug(`[outgoing] callId=${callId} end`)
-			await sendWebhook({ callId, sessionId, event: "end", messageType, text: FINISH_TEXT })
+			await sendWebhook({ callId, sessionId, event: "end", messageType, text: finishText })
 			break
 		}
 		case 18: {
@@ -99,7 +101,7 @@ const handleMessage = async () => {
 			const topicInfo = (ROUTING_TOPICS || {})[topic] || (ROUTING_TOPICS || {})["Не определена"]
 			const groups = topicInfo?.groups || []
 			logger.info(`[outgoing] callId=${callId} operator_connected operator=${operatorName} topic=${topic}`)
-			await sendWebhook({ callId, sessionId, event: "operator_connected", operator: operatorName, target: { topic, groups }, text: ROUTING_TEXT, messageType })
+			await sendWebhook({ callId, sessionId, event: "operator_connected", operator: operatorName, target: { topic, groups }, text: routingText, messageType })
 			await finishDialog(omniUserId)
 			break
 		}
