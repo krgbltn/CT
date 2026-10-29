@@ -1,5 +1,6 @@
 ﻿// prod
 
+// Настройки поиска ЛС и выходных полей; все адреса API и маршруты берутся из agentSettings.
 const {
     numberSlotId: NUMBER_SLOT_ID,
     url: INCOMING_API,
@@ -7,18 +8,10 @@ const {
     aiAgent: AI_AGENT,
     routingAgent: ROUTING_AGENT,
     operatorArticle: OPERATOR_ARTICLE,
-    nextArticle: NEXT_ARTICLE,
-    debug: DEBUG
+    nextArticle: NEXT_ARTICLE
 } = agentSettings
 
-const getDebug = () => {
-    return (DEBUG && Object.keys(DEBUG).length > 0) ? {
-        electricity: DEBUG.electricity,
-        hotWater: DEBUG.hotWater,
-        coldWater: DEBUG.coldWater,
-        heating: DEBUG.heating
-    } : undefined
-}
+// Входные слоты маршрутизации имеют приоритет над настройками агента.
 const getClassifier = () => getSlotValueById("classifier") || AI_AGENT
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
@@ -30,6 +23,7 @@ const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
 
 
 
+// Собираем параметры HTTP-запроса для существующего SOAP endpoint.
 function createConfig(method, url, headers, data) {
     return {
         method,
@@ -40,6 +34,7 @@ function createConfig(method, url, headers, data) {
     }
 }
 
+// Отправляем SOAP; пустой ответ или ошибка HTTP прекращают идентификацию.
 async function sendRequest(data, soapAction) {
     logger.info('Start sending request')
 
@@ -67,6 +62,7 @@ async function sendRequest(data, soapAction) {
     }
 }
 
+// Разбираем XML в объект; ошибка парсинга обрабатывается общим маршрутом ошибок.
 function parseXmlToJson(xml) {
     const parser = new xml2js.Parser({
         explicitArray: false,
@@ -88,6 +84,7 @@ const exctractBody = (parsedData) => parsedData["soap:Envelope"]?.["soap:Body"]
 
 const IDENTIFICATION_KEY = "readings_identification"
 
+// Проверяем результат поиска и оставляем только поля, нужные для выбора ЛС.
 const extractInfoFromResponse = async (parsedData) => {
     const body = exctractBody(parsedData)
     const result = body?.["FindAllByContractNumberResponse"]?.["FindAllByContractNumberResult"]
@@ -104,6 +101,7 @@ const extractInfoFromResponse = async (parsedData) => {
     }))
 }
 
+// Запрашиваем ЛС по цифровой части номера, без запроса приборов.
 const getContractsInfoByContract = async (contractNumber) => {
     const requestBody = {
         "@": {
@@ -131,168 +129,17 @@ const getContractsInfoByContract = async (contractNumber) => {
     return await extractInfoFromResponse(parsedResponse)
 }
 
-const NOMENCLATURES = [1, 2, 21, 24]
-
-const getScaleInfo = (mdInfo, nomenclatureCode) => {
-    const scales = mdInfo?.MDScales?.MDScaleInfo
-    const scalesArr = Array.isArray(scales) ? scales : (scales ? [scales] : [])
-
-    if (nomenclatureCode === 1) {
-        return scalesArr.find(scale => String(scale.MDScaleName).toLowerCase().includes("гкал"))
-    }
-
-    if (nomenclatureCode === 2) {
-        return scalesArr.find(scale => String(scale.MDScaleName).toLowerCase().includes("м3"))
-    }
-
-    return scalesArr[0]
-}
-
-const extractMdInfoFromResponse = async (parsedData) => {
-    const body = exctractBody(parsedData)
-
-    if (!body) {
-        throw new Error('Missing meters SOAP body')
-    }
-
-    const result = body.GetMDInfo_By_ContractIDAndNomenclatureCodeResponse?.GetMDInfo_By_ContractIDAndNomenclatureCodeResult
-    if (body['soap:Fault'] || body.Fault || result === undefined || result === null) throw new Error('Invalid meters SOAP response')
-    const mdInfo = result.MDInfo
-    const mdInfoArr = Array.isArray(mdInfo) ? mdInfo : (mdInfo ? [mdInfo] : [])
-    return mdInfoArr[0]
-}
-
-// получаем данные счетчиков по лицевому счету
-const getMDInfo = async (contractId, nomenclatureCode) => {
-    const requestBody = {
-        "@": {
-            "xmlns:soapenv": "http://schemas.xmlsoap.org/soap/envelope/",
-            "xmlns:tem": "http://tempuri.org/",
-        },
-        "soapenv:Header": "",
-        "soapenv:Body": {
-            "tem:GetMDInfo_By_ContractIDAndNomenclatureCode": {
-                "tem:ContractStrGUID": contractId,
-                "tem:NomenclatureCode": nomenclatureCode
-            }
-        }
-    }
-
-    const xmlData = parseJsonToXml("soapenv:Envelope", requestBody)
-    logger.info(`Created xml data: ${JSON.stringify(xmlData)}`)
-    const xmlResponse = await sendRequest(xmlData, 'http://tempuri.org/GetMDInfo_By_ContractIDAndNomenclatureCode')
-    logger.info(`Got xml response: ${JSON.stringify(xmlResponse ?? {})}`)
-
-    if (getDebug()) {
-        const debugScaleNames = {
-            1: "Гкал",
-            2: "м3",
-            21: "м3 ХВС",
-            24: "кВт.ч"
-        }
-        return {
-            "MDSerialNumber": "007",
-            "MDInstallationLocation": "Санузел",
-            "MDNextVerificationDeadline": "2031-11-24T00:00:00",
-            "MDScales": {
-                "MDScaleInfo": {
-                    "MDScaleID": "A1E01E62-D2DE-11E9-80C2-9457A553D5EB",
-                    "MDScaleName": debugScaleNames[nomenclatureCode],
-                    "MDSDigitsAfterDot": "3",
-                    "LastReadings": "40",
-                    "LastReadingsDate": "2025-12-20T14:21:06.77",
-                    "ReadingsExist": "true",
-                    "MaxAcceptableNewMDReadingValue": "140"
-                }
-            }
-        }
-    }
-
-    if (!xmlResponse) {
-        throw new Error('Empty meters SOAP response')
-    }
-
-    const parsedResponse = await parseXmlToJson(xmlResponse)
-    return await extractMdInfoFromResponse(parsedResponse)
-}
-
-const getMDSInfo = async (contractId) => {
-    const meters = await Promise.all(NOMENCLATURES.map(code => getMDInfo(contractId, code)))
-    return meters.reduce((result, meter, index) => {
-        if (meter) result[NOMENCLATURES[index]] = meter
-        return result
-    }, {})
-}
-
-const getSlots = (mdsInfo, contract, address = "") => {
-    const slots = Object.fromEntries(Object.values(SLOTS).filter(Boolean).map(id => [id, ""]))
-    slots[SLOTS.authSuccess] = "false"
-    slots[SLOTS.hasNextAccount] = "false"
-    if (SLOTS.address) {
-        slots[SLOTS.address] = address
-    }
-
-    if (!mdsInfo && !contract) {
-        return slots
-    }
-
-    slots[SLOTS.authSuccess] = "true"
-
+// Возвращаем результат выбранного ЛС либо очищенный набор при уточнении и ошибке.
+const getSlots = (contract) => {
+    // resetSlots очищает прежний цикл; slots содержит только пять полей идентификации.
+    const slots = { ...agentSettings.resetSlots,
+        ...Object.fromEntries(Object.values(SLOTS).filter(Boolean).map(id => [id, ""])) }
+    slots[SLOTS.authSuccess] = contract ? "true" : "false"
     if (contract) {
-        slots[SLOTS.contract] = contract
+        slots[SLOTS.accountId] = String(contract.ID).trim()
+        slots[SLOTS.contract] = String(contract.No)
+        if (SLOTS.address) slots[SLOTS.address] = contract.Adress
     }
-
-    if (!mdsInfo) {
-        return slots
-    }
-
-    for (const nom of Object.keys(mdsInfo)) {
-        const scaleInfo = getScaleInfo(mdsInfo[nom], Number(nom))
-        logger.info(`Selected scale for nomenclature ${nom}: ${JSON.stringify(scaleInfo)}`)
-
-        if (!scaleInfo) {
-            continue
-        }
-
-        switch (Number(nom)) {
-            case 1:
-                if (!getDebug() || getDebug().heating) {
-                    slots[SLOTS.heating] = mdsInfo[nom].MDSerialNumber
-                    slots[SLOTS.heatingLast] = scaleInfo.LastReadings
-                    slots[SLOTS.heatingScale] = "true"
-                    slots[SLOTS.heatingScaleId] = scaleInfo.MDScaleID
-                }
-                break
-
-            case 2:
-                if (!getDebug() || getDebug().hotWater) {
-                    slots[SLOTS.hw] = mdsInfo[nom].MDSerialNumber
-                    slots[SLOTS.hwLast] = scaleInfo.LastReadings
-                    slots[SLOTS.hwScale] = "true"
-                    slots[SLOTS.hwScaleId] = scaleInfo.MDScaleID
-                }
-                break
-
-            case 21:
-                if (!getDebug() || getDebug().coldWater) {
-                    slots[SLOTS.cw] = mdsInfo[nom].MDSerialNumber
-                    slots[SLOTS.cwLast] = scaleInfo.LastReadings
-                    slots[SLOTS.cwScale] = "true"
-                    slots[SLOTS.cwScaleId] = scaleInfo.MDScaleID
-                }
-                break
-
-            case 24:
-                if (!getDebug() || getDebug().electricity) {
-                    slots[SLOTS.electro] = mdsInfo[nom].MDSerialNumber
-                    slots[SLOTS.electroLast] = scaleInfo.LastReadings
-                    slots[SLOTS.electroScale] = "true"
-                    slots[SLOTS.electroScaleId] = scaleInfo.MDScaleID
-                }
-                break
-        }
-    }
-
     return slots
 }
 
@@ -307,6 +154,7 @@ const ADDRESS_MARKERS = [
     { type: 'structure', pattern: 'строение|стр' },
     { type: 'region', pattern: 'область|обл|район|р-н|р-он' }
 ]
+// Словари числительных позволяют распознавать названия улиц, дома и номера вариантов.
 const SMALL_NUMBERS = 'ноль один два три четыре пять шесть семь восемь девять десять одиннадцать двенадцать тринадцать четырнадцать пятнадцать шестнадцать семнадцать восемнадцать девятнадцать'.split(' ')
 const TENS = 'двадцать тридцать сорок пятьдесят шестьдесят семьдесят восемьдесят девяносто'.split(' ')
 const HUNDREDS = 'сто двести триста четыреста пятьсот шестьсот семьсот восемьсот девятьсот'.split(' ')
@@ -325,6 +173,7 @@ const ordinalValue = (word) => {
     const match = word.match(/^(.*?)(?:ый|ой|ий|ая|яя|ья|ое|ее|ье|ую|юю|ью|ого|его|ьего|ому|ему|ьему|ым|им|ьим|ом|ем|ьем|ей|ьей)$/)
     return match ? ordinalValues[match[1]] : undefined
 }
+// Преобразуем произнесенные числительные в число для сопоставления адреса.
 const parseNumber = (words, allowOrdinals = true) => {
     if (!words.length) return null
     if (words.length === 1 && /^\d+$/.test(words[0])) return Number(words[0])
@@ -341,6 +190,7 @@ const parseNumber = (words, allowOrdinals = true) => {
     }
     return result
 }
+// Приводим словесную и цифровую запись адресных чисел к общей форме.
 const normalizeNumbers = (value, allowOrdinals = true) => {
     const text = allowOrdinals ? value.replace(/(\d+)\s*-?\s*(?:ая|яя|ый|ий|ой|я|й|е)(?=\s|$)/g, '$1') : value
     const tokens = [...text.matchAll(/[а-яa-z]+|\d+/g)]
@@ -368,6 +218,7 @@ const addressNumber = (value) => {
     const match = normalizeNumbers(value || '').replace(/№/g, '').trim().match(/^(\d+)(?:\s*([а-яa-z])(?=\s|\/|$))?(?:\s*\/\s*(\d+))?/)
     return match ? match[1] + (match[2] || '') + (match[3] ? '/' + match[3] : '') : ''
 }
+// Разделяем адрес на населенный пункт, улицу, дом и уточняющие части.
 const parseAddress = (value) => {
     const text = normalizeAddress(value).replace(/[;:]/g, ' ')
     const markers = []
@@ -409,6 +260,7 @@ const parseAddress = (value) => {
     }
     return { parts, house: houseFull.match(/^\d+/)?.[0], houseFull, words: addressWords(nameText), streetLabel: unique.find(marker => marker.type === 'street')?.label }
 }
+// Допускаем небольшие различия слов при сопоставлении произнесенного адреса.
 const addressWordMatches = (first, second) => {
     if (first === second) return true
     if (/\d/.test(first) || /\d/.test(second)) return false
@@ -437,6 +289,7 @@ const matchAddressName = (expected, words, used) => {
 }
 const canonicalPart = (value) => addressWords(value || '').join(' ')
 const streetType = (label) => ({ ул: 'улица', мкр: 'микрорайон', 'кв-л': 'квартал', квл: 'квартал', 'пр-кт': 'проспект', 'б-р': 'бульвар', пер: 'переулок', пл: 'площадь', 'пр-д': 'проезд' }[label] || label || '')
+// Строим единое представление адреса с учетом отдельного поля City.
 const getContractAddressOption = (contract) => {
     const rawAddress = contract.Adress.replace(/^\s*\d{6}(?:\s*,\s*|\s+|$)/, '').trim()
     const address = parseAddress(rawAddress)
@@ -447,6 +300,7 @@ const getContractAddressOption = (contract) => {
     if (city) address.parts.city = city
     return { address, raw }
 }
+// Объединяем одинаковые адреса; сохраняем связь с первым соответствующим ЛС.
 const getAddressOptions = (contracts) => {
     const seen = new Set()
     return contracts.reduce((options, contract, index) => {
@@ -462,6 +316,7 @@ const getAddressOptions = (contracts) => {
         return options
     }, [])
 }
+// Оцениваем полное и частичное совпадение слов клиента с найденными адресами.
 const scoreAddresses = (options, text) => {
     const userAddress = parseAddress(text)
     const userWords = addressWords(normalizeAddress(text))
@@ -488,6 +343,7 @@ const spokenOrdinal = (number) => {
     const feminine = word === 'третий' ? 'третья' : word.slice(0, -2) + 'ая'
     return n >= 20 && n % 10 ? TENS[Math.floor(n / 10) - 2] + ' ' + feminine : feminine
 }
+// Готовим адрес для озвучивания без индекса и дублирующего названия города.
 const formatAddress = (option) => {
     const { parts, houseFull, streetLabel } = option.address
     const result = []
@@ -505,12 +361,14 @@ const formatAddress = (option) => {
     return parts.city && parts.street && result.length ? result.join(', ') : raw || 'адрес не указан'
 }
 const normalizeResponse = (text) => normalizeAddress(text).replace(/[^а-яa-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim()
+// Распознаем подтверждение адреса; непонятный ответ остается отдельным исходом.
 const confirmationAnswer = (text) => {
     const response = normalizeResponse(text)
     if (/^(?:да|yes|ага|конечно|верно|правильно|согласен|подтверждаю|угу|ok|okay)(?: (?:да|верно|правильно|конечно))?$/.test(response)) return 'yes'
     if (/^(?:нет|no|не|неверно|неправильно|не то|другой|нет не то|нет другой адрес)$/.test(response)) return 'no'
     return null
 }
+// Получаем номер адреса из списка либо явный отказ от предложенных вариантов.
 const selectedNumber = (text) => {
     let response = normalizeResponse(text)
     if (response === 'нет') return 'no'
@@ -522,6 +380,7 @@ const selectedNumber = (text) => {
 const clearLookupState = async () => {
     for (const key of [IDENTIFICATION_KEY, 'contracts', 'contracts_addresses', 'contracts_pagination']) await agentStorage.dialogStorage.del(key)
 }
+// Перед переводом очищаем кандидатов и выходные данные прошлого поиска.
 const routingToOperator = async () => {
     try {
         await clearLookupState()
@@ -531,8 +390,10 @@ const routingToOperator = async () => {
     const command = OPERATOR_ARTICLE ? `/switchredirect ${getClassifier()} intent_id="${OPERATOR_ARTICLE}"` : `/switchredirect ${ROUTING_AGENT}`
     return [agentApi.makeTextReply(command, undefined, undefined, getSlots())]
 }
+// Не продолжаем выбор, если в ответе отсутствуют обязательные поля ЛС.
 const validContracts = (contracts) => Array.isArray(contracts) && contracts.length > 0 && contracts.every(contract =>
     contract && typeof contract.ID === 'string' && contract.ID.trim() && contract.No && typeof contract.Adress === 'string' && contract.Adress.trim())
+// Сохраняем шаг идентификации до вопроса, чтобы следующий вызов продолжил тот же выбор.
 const questionReply = async (text, state) => {
     const saved = await agentStorage.dialogStorage.set(IDENTIFICATION_KEY, JSON.stringify(state))
     if (saved === false) throw new Error('Failed to save identification state')
@@ -547,15 +408,16 @@ const addressListReply = (contracts, retry = 0) => {
     const list = getAddressOptions(contracts).map((option, index) => `Номер ${index + 1}: ${formatAddress(option)}.`).join('\n')
     return questionReply(`Сейчас я перечислю найденные адреса, после этого назовите номер нужного адреса.\n${list}\nЕсли нужного адреса нет в озвученном списке, ответьте словом «нет».`, { contracts, step: 'choose_address', retry })
 }
+// Фиксируем выбранный ЛС в пяти слотах; приборы получит отдельный контроллер.
 const completeIdentification = async (contract, addressConfirmed = false) => {
     // Удаляем все варианты; результат остаётся только в слотах выбранного ЛС.
     await clearLookupState()
-    const mdsInfo = await getMDSInfo(contract.ID)
-    const slots = getSlots(mdsInfo, String(contract.No), contract.Adress)
+    const slots = getSlots(contract)
     if (addressConfirmed && SLOTS.addressSuccess) slots[SLOTS.addressSuccess] = "true"
     logger.info(`Contract selected: ${contract.No}, filled slots: ${JSON.stringify(slots)}`)
     return [agentApi.makeTextReply(`/switchredirect ${getClassifier()} intent_id="${getNextArticle()}"`, undefined, undefined, slots)]
 }
+// Разделяем пустой результат, единственный адрес и необходимость уточнения.
 const startIdentification = async (contracts) => {
     if (Array.isArray(contracts) && contracts.length === 0) {
         await clearLookupState()
@@ -566,6 +428,7 @@ const startIdentification = async (contracts) => {
     const unique = getAddressOptions(contracts).map(option => contracts[option.index])
     return unique.length === 1 ? completeIdentification(unique[0]) : askAddressReply(unique)
 }
+// Продолжаем сохраненный этап: адрес, подтверждение совпадения или номер из списка.
 const handleIdentification = async (state) => {
     if (!state || !validContracts(state.contracts) || !['ask_multiple', 'confirm_partial', 'choose_address'].includes(state.step)) return routingToOperator()
     const { contracts, step } = state
@@ -603,16 +466,18 @@ const handleIdentification = async (state) => {
         : addressListReply(contracts)
 }
 
+// Системные события подтверждаем; обычный вызов продолжает выбор или начинает новый поиск.
 const main = async () => {
     if (message.message_type !== undefined && ![0, 1].includes(message.message_type)) return [agentApi.makeAckReply()]
     const storedState = await agentStorage.dialogStorage.get(IDENTIFICATION_KEY)
     if (storedState) return handleIdentification(JSON.parse(storedState))
     await clearLookupState()
-    const contractNumber = getDebug() ? "11189" : getSlotValueById(NUMBER_SLOT_ID)
+    const contractNumber = getSlotValueById(NUMBER_SLOT_ID)
     if (!contractNumber || !/^\d+$/.test(String(contractNumber))) return routingToOperator()
     return startIdentification(await getContractsInfoByContract(contractNumber))
 }
 
+// Завершаем запрос через resolve, в том числе при ошибке поиска или обработки ответа.
 main()
     .then(res => resolve(res))
     .catch(async err => {
