@@ -12,6 +12,10 @@
 
 `submit-readings.js` сохранен для прежней цепочки. В новом сценарии его не вызывать. Отдельная инструкция статей и реплик: [scenario-plan.md](scenario-plan.md).
 
+Актуальное описание реализации: [для техподдержки](implementation-support.md) и [для заказчика](implementation-customer.md). Оба документа обновляются при поступлении новых скриншотов сценариев; показанная конфигурация отделяется от согласованных, но еще не подтвержденных этапов.
+
+[Общая блок-схема на одном листе](scenario-overview.md): draw.io, SVG и PDF полного пути клиента.
+
 ## Идентификация
 
 По телефону вызывается `GetContractsInfo_By_Phone`, по цифровой части номера ЛС - `FindAllByContractNumber`. Получение приборов из этих копий удалено. После выбора передаются `account_id` из `ContractInfo.ID`, `account_number`, `account_address`, `successful_identification`, `address_success`.
@@ -81,7 +85,7 @@
 | `addressSuccess` | `address_success` | Подтвержденное частичное совпадение адреса |
 | `service` | `current_service` | Услуга для реплики |
 | `meterNumber` | `current_meter_number` | Полный номер ПУ |
-| `meterNumberShort` | `current_meter_number_short` | Последние три символа номера |
+| `meterNumberShort` | `current_meter_number_short` | Последние три символа номера для озвучивания |
 | `meterLocation` | `current_meter_location` | Место установки, может быть пустым |
 | `scaleName` | `current_scale_name` | Название шкалы |
 | `previousReading` | `current_previous_reading` | Предыдущее показание |
@@ -95,6 +99,8 @@
 | `stepId` | `readings_step_id` | Непрозрачный ID шага, вернуть агенту без изменений |
 | `sentCount` | `readings_sent_count` | Число переданных шкал |
 | `skippedCount` | `readings_skipped_count` | Число пропущенных шкал |
+
+Сценарий озвучивает **последние три цифры номера** из `current_meter_number_short`. Этот слот нужно зарегистрировать для использования в репликах и хранить текстом, сохраняя начальные нули. `current_meter_number` содержит полный номер для технического контекста; регистрировать его для текущего сценария не требуется.
 
 `reading_retry` отсутствует. Попытки исправления и сохранение их состояния реализуются в сценарии.
 

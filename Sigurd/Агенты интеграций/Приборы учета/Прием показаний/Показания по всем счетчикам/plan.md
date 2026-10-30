@@ -149,7 +149,7 @@
 | `account_number`, `account_address` | Номер ЛС и адрес |
 | `current_service` | Услуга в форме для подстановки в реплику |
 | `current_meter_number` | Полный номер прибора |
-| `current_meter_number_short` | Последние три символа номера |
+| `current_meter_number_short` | Последние три символа номера для озвучивания |
 | `current_meter_location` | Место установки |
 | `current_scale_name` | Название шкалы |
 | `current_previous_reading` | Предыдущее показание |
