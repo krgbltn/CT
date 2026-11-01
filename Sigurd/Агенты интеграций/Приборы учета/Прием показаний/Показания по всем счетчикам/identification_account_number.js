@@ -15,8 +15,8 @@ const {
 const getClassifier = () => getSlotValueById("classifier") || AI_AGENT
 
 const getSlotValueById = (slotId) => message.slot_context?.filled_slots?.find(
-        slot => slot.slot_id === slotId
-    )?.value
+    slot => slot.slot_id === slotId
+)?.value
 
 const getNextArticle = () => getSlotValueById("next_article") || NEXT_ARTICLE
 
@@ -252,7 +252,7 @@ const parseAddress = (value) => {
     const prefix = normalizeNumbers(text.slice(0, houseMarker?.start ?? extraMarker?.start ?? text.length), false)
     const tail = prefix.match(/\d+(?:\s*[а-яa-z](?=\s|\/|$))?(?:\s*\/\s*\d+)?\s*$/)
     const inferred = tail && !/^\d+\s*[яйе]\s*$/.test(tail[0]) && !/^\d{6}\s*$/.test(prefix)
-        && (!parts.street || parts.street !== tail[0].trim()) ? tail : null
+    && (!parts.street || parts.street !== tail[0].trim()) ? tail : null
     const houseFull = addressNumber(houseMarker ? parts.house : inferred?.[0])
     const nameText = !houseMarker && inferred ? prefix.slice(0, inferred.index) : prefix
     if (!houseMarker && inferred && parts.street) {

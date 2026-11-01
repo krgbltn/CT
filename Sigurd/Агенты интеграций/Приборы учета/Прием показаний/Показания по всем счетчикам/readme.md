@@ -156,3 +156,23 @@ node --check ./identification_account_number.js
 Тесты используют `node:test`, синтетические данные, подмененные глобалы и HTTP-клиент; реальных запросов нет. По умолчанию XML-глобалы заменены снимками объектов. Если уже доступен `xml-js`, дополнительный прогон с `READINGS_XML_MODULES`, указывающим каталог существующих Node-пакетов, использует XML-строки через адаптер. Новые зависимости не устанавливаются. Наличие штатных `xml2js`, `js2xmlparser`, `https`, `axios` проверить на платформе.
 
 Распознавание речи, сохранение попыток сценария при переходах и маршруты оператора проверяются на стенде по [scenario-plan.md](scenario-plan.md).
+
+
+## Диагностика загрузки приборов и передачи контекста
+
+В readings-controller.js добавлены структурированные INFO-события без изменения контракта настроек:
+
+| Событие | Основные поля |
+|---|---|
+| Readings meters received | serviceIndex, serviceCode, meterCount |
+| Readings meter received | meterIndex, последние три символа номера, scaleCount |
+| Readings scale received | Позиции услуги/прибора/шкалы; apiPreviousReading, apiDigitsAfterDot, apiMaximum; duplicateScale |
+| Readings queue built | Число услуг и уникальных шкал в очереди |
+| Readings controller input | readingsAction, readingStatus, readingsStepId, expectedStepId, stepIdPresent, stepIdMatches, stepIdSlotId, scaleType и точность входа/состояния |
+| Readings controller output | Те же поля для слотов реально формируемого ответа; technical указывает технический маршрут |
+
+Readings controller failed дополнен тем же техническим контекстом, включая ожидаемый и полученный ID шага. Числовые поля из API выводятся только в допустимом числовом формате, иначе null. Полные SOAP, ЛС, адрес, телефон, полные номера приборов и GUID шкал не выводятся. Введенное новое показание не печатается: только признак наличия. Технический ID шага выводится для сопоставления ответа и следующего вызова.
+
+Чтобы проверить дробную анкету, сравнить apiDigitsAfterDot события Readings scale received с currentDigitsAfterDot/scaleType события Readings controller output для выбранного queueIndex. Позиции в очереди отсчитываются от нуля; при дублях использовать флаг duplicateScale и порядок услуг/приборов/шкал. Чтобы найти потерю ID, сравнить readingsStepId на output с input следующего process. Значение expectedStepId берется из сохраненного состояния, но не подставляется вместо отсутствующего входа. Проверка Missing step ID сохраняется.
+
+Логи включены обычными вызовами logger.info; дополнительных настроек и изменений SOAP-модуля не требуется. В большой очереди будет строка на каждую полученную шкалу. Локальная проверка выполняется только через vm с подменой HTTP/хранилища и проверкой отсутствия приватных полей; реальный SOAP не вызывать.

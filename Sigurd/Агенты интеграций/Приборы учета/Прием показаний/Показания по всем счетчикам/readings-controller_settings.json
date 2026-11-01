@@ -1,0 +1,55 @@
+{
+  "url": "",
+  "timeoutMs": 30000,
+  "rejectUnauthorized": true,
+  "aiAgent": "",
+  "routingAgent": "",
+  "articles": {
+    "input": "",
+    "correction": "",
+    "error": "",
+    "finish": ""
+  },
+  "maxConsumption": "100",
+  "services": [
+    {
+      "code": "24",
+      "name": "электроэнергии"
+    },
+    {
+      "code": "2",
+      "name": "горячей воды"
+    },
+    {
+      "code": "21",
+      "name": "холодной воды"
+    },
+    {
+      "code": "1",
+      "name": "отопления"
+    }
+  ],
+  "slots": {
+    "accountId": "account_id",
+    "contract": "account_number",
+    "address": "account_address",
+    "authSuccess": "successful_identification",
+    "addressSuccess": "address_success",
+    "service": "current_service",
+    "meterNumber": "current_meter_number",
+    "meterNumberShort": "current_meter_number_short",
+    "meterLocation": "current_meter_location",
+    "scaleName": "current_scale_name",
+    "previousReading": "current_previous_reading",
+    "digitsAfterDot": "current_digits_after_dot",
+    "scaleType": "scale_type",
+    "newReading": "current_new_reading",
+    "error": "reading_error",
+    "status": "reading_status",
+    "skip": "skip_service",
+    "action": "readings_action",
+    "stepId": "readings_step_id",
+    "sentCount": "readings_sent_count",
+    "skippedCount": "readings_skipped_count"
+  }
+}
