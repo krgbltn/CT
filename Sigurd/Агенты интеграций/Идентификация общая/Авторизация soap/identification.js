@@ -579,10 +579,14 @@ const main = async () => {
 	}
 
 	logger.info(`Contracts found: ${Array.isArray(responseData) ? responseData.length : 0}`)
+	const contractAddresses = Array.isArray(responseData)
+		? responseData.map(contract => contract?.WebProperties?.Address || "")
+		: []
+	logger.info(`Contract addresses: ${JSON.stringify(contractAddresses)}`)
 
 	if (!responseData || !Array.isArray(responseData) || responseData.length === 0) {
 		logger.warn('No contracts found or invalid response')
-		return [nextArticleReply({ final_answer: 'error' })]
+		return [operatorTransferReply()]
 	}
 
 	const contracts = responseData
@@ -600,5 +604,5 @@ main()
 	.then(res => resolve(res))
 	.catch(error => {
 		logger.error({ stack: error.stack }, `Error when execute main func. ${error}`)
-		resolve([nextArticleReply({ final_answer: 'error' })])
+		resolve([operatorTransferReply()])
 	})

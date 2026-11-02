@@ -16,6 +16,7 @@ const contracts = [
 // Каждый ход исполняет исходник заново: состояние существует только в слотах ответа.
 const session = (data = contracts, overrides = {}) => {
 	const calls = []
+	const logs = []
 	let slots = { phone: '9000000000', classifier: 'classifier-test' }
 	const settings = {
 		url: 'https://example.invalid/IVR.asmx', phoneSlotId: 'phone',
@@ -32,6 +33,7 @@ const session = (data = contracts, overrides = {}) => {
 	}
 	return {
 		calls,
+		logs,
 		get slots() { return slots },
 		async turn(text = '', type = 1, fallbackText = false) {
 			let built = 0
@@ -43,7 +45,7 @@ const session = (data = contracts, overrides = {}) => {
 						message_type: type, ...(fallbackText ? { text } : { message: { text } }),
 						slot_context: { filled_slots: Object.entries(slots).map(([slot_id, value]) => ({ slot_id, value })) }
 					},
-					logger: { info() {}, warn() {}, error() {} },
+					logger: { info(value) { logs.push(value) }, warn() {}, error() {} },
 					https: require('node:https'),
 					axios: async (request) => {
 						calls.push(request)
@@ -477,16 +479,53 @@ test('SOAP: город в полном адресе не дублируется'
 	assert.equal((await s.turn('да')).slots.address, address)
 })
 
-test('SOAP: корректный пустой результат → error в следующую статью', async (t) => {
+test('SOAP: адреса результата поиска записываются в лог один раз без номеров ЛС', async () => {
+	const s = session(contracts)
+	await s.turn()
+	const addressLogs = () => s.logs.filter(value => typeof value === 'string' && value.startsWith('Contract addresses: '))
+	assert.equal(addressLogs().length, 1)
+	assert.deepEqual(JSON.parse(addressLogs()[0].slice('Contract addresses: '.length)), contracts.map(item => item.WebProperties.Address))
+	assert.ok(contracts.every(item => !addressLogs()[0].includes(item.WebProperties.ContractNo)))
+	await s.turn('совсем неизвестный адрес')
+	assert.equal(addressLogs().length, 1)
+})
+
+test('SOAP: пустой результат записывается как пустой список адресов', async () => {
+	const s = session([])
+	failed(await s.turn())
+	assert.ok(s.logs.includes('Contract addresses: []'))
+})
+
+test('SOAP: корректный пустой результат → оператор', async (t) => {
 	for (const data of [soapResponse(''), soapResponse({}), soapResponse({ ContractInfo: [] }), []]) {
 		await t.test(JSON.stringify(data), async () => {
 			const s = session(data)
 			const reply = await s.turn()
-			assert.match(reply.text, /intent_id="next-test"/)
-			assert.equal(reply.slots.final_answer, 'error')
-			assert.equal(reply.slots.id_step, '')
+			failed(reply)
+			assert.equal(reply.slots.final_answer, undefined)
 		})
 	}
+})
+
+test('Пустой или некорректный результат заглушки → оператор независимо от next_article', async (t) => {
+	for (const stubResponse of [[], {}, 'null']) {
+		await t.test(JSON.stringify(stubResponse), async () => {
+			const s = session(contracts, { stub: true, stubResponse })
+			s.slots.next_article = 'must-not-return-here'
+			failed(await s.turn())
+			assert.equal(s.lookupCount(), 0)
+		})
+	}
+})
+
+test('Непредвиденная ошибка обработки ответа → оператор с очисткой состояния', async () => {
+	const s = session([contracts[0]])
+	await s.turn()
+	assert.equal(s.slots.id_step, 'confirm_single')
+	s.slots.next_article = 'must-not-return-here'
+	// Некорректный тип текста вызывает ошибку внутри нормализации ответа.
+	failed(await s.turn({ unexpected: 'object instead of text' }))
+	assert.equal(s.lookupCount(), 1)
 })
 
 test('SOAP: Fault, повреждённый ответ и неполный ContractInfo → оператор', async (t) => {

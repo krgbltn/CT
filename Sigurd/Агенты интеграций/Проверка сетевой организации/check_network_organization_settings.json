@@ -1,13 +1,11 @@
 {
-  "url": "https://api.enplus.ru/v2/webapifl/sbyt/api/service/sigurd/fl/{{slots.uid}}/network_organization_data",
+  "url": "https://api.enplus.ru/v2/webapifl/sbyt/api/service/sigurd/fl/{{slots.uid}}/disconnection_report_info",
   "method": "get",
   "nextArticle": "",
   "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
-  "slotsMapping": [
-    { "slotId": "network_organization_id", "path": "Id" }
-  ],
   "authorizationToken": "Basic U2lndXJkOk05NTA5MjtkcDpAKTAtMHI5Oy0zbXFrZjs5MDd4ejk4M1J5",
   "headers": {
+    "Host": "api.enplus.ru",
     "ES-Request-Source": "Website",
     "Accept": "application/json"
   }

@@ -122,7 +122,10 @@ const resolveTemplates = (data) => {
 	return data
 }
 
-const createRequestBody = () => resolveTemplates(requestBody)
+const createRequestBody = () => {
+	const body = resolveTemplates(requestBody)
+	return { ...body, isfrequent: body.message === "FrequentShutdowns" }
+}
 const createRequestUrl = () => renderTemplateString(url)
 
 const normalizeSlotValue = (value) => {
@@ -145,7 +148,7 @@ const sendRequest = async (requestUrl, body) => {
 			data: body,
 			httpsAgent: new https.Agent({ rejectUnauthorized: false })
 		})
-		return res?.data
+		return res
 	} catch (error) {
 		logger.error({ stack: error.stack }, `Error when sending request to ${url}. ${error}`)
 	}
@@ -175,22 +178,17 @@ const fillSlotsFromRequest = (data) => {
 
 const main = async () => {
 	const requestUrl = createRequestUrl()
-	logger.info(`Created request url: ${requestUrl}`)
 
 	const body = createRequestBody()
-	logger.info(`Created request body: ${JSON.stringify(body)}`)
 
-	const responseData = await sendRequest(requestUrl, body)
+	const response = await sendRequest(requestUrl, body)
 
-	if (!responseData) {
-		logger.warn('No response data or request failed')
+	if (!response || !(response.status >= 200 && response.status < 300)) {
+		logger.error('Request failed or returned an unsuccessful HTTP status')
 		return [operatorTransferReply()]
 	}
 
-	logger.info(`Got response data: ${JSON.stringify(responseData || {})}`)
-
-	let filledSlots = fillSlotsFromRequest(responseData)
-	logger.info(`Filled slots: ${JSON.stringify(filledSlots)}`)
+	let filledSlots = fillSlotsFromRequest(response.data)
 
 	filledSlots = {
 		...filledSlots,
@@ -198,7 +196,6 @@ const main = async () => {
 	}
 
 	logger.info(`Final answer: 1`)
-	logger.info(`All slots (with final_answer): ${JSON.stringify(filledSlots)}`)
 
 	return [nextArticleReply(filledSlots)]
 }

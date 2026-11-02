@@ -3,7 +3,6 @@ const {
 	method = "get",
 	headers = {},
 	authorizationToken,
-	slotsMapping = [],
 	nextArticle,
 	operatorArticle
 } = agentSettings
@@ -17,8 +16,15 @@ const nextArticleReply = (slots) => {
 	return agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${targetArticle}"`, undefined, undefined, slots)
 }
 
+const emptyResultSlots = () => ({
+	network_organization_id: "",
+	network_organization_message: "",
+	network_organization_phone: "",
+	request_text: ""
+})
+
 const operatorTransferReply = () =>
-	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`)
+	agentApi.makeTextReply(`/switchredirect ${classifier()} intent_id="${operatorArticle}"`, undefined, undefined, emptyResultSlots())
 
 const normalizePath = (path) => {
 	if (path === undefined || path === null || path === "" || path === "$") {
@@ -91,41 +97,66 @@ const renderTemplateString = (template) => {
 	return ""
 }
 
-const normalizeSlotValue = (value) => {
-	if (typeof value === "object") {
-		return JSON.stringify(value)
-	}
-
-	return value.toString()
-}
+const isNonEmptyText = (value) => typeof value === "string" && value.trim() !== ""
 
 const fillSlotsFromRequest = (data) => {
-	if (data === undefined || data === null) {
-		return {}
+	if (!data || typeof data !== "object" || Array.isArray(data) || typeof data.hasrequest !== "boolean") {
+		throw new Error("Invalid disconnection report response or hasrequest")
 	}
 
-	const filledSlots = {}
+	const filledSlots = emptyResultSlots()
 
-	for (const mapping of slotsMapping) {
-		const value = getValueByPath(data, mapping.path)
-		const slotValue = value === undefined || value === null ? mapping.defaultValue : value
-
-		if (slotValue === undefined || slotValue === null) {
-			logger.warn(`Value by path '${mapping.path}' for slot '${mapping.slotId}' was not found`)
-			continue
+	// An existing request takes priority over organization and permission checks.
+	if (data.hasrequest === true) {
+		if (!isNonEmptyText(data.requesttext)) {
+			throw new Error("Existing request has no requesttext")
 		}
 
-		filledSlots[mapping.slotId] = normalizeSlotValue(slotValue)
+		return { ...filledSlots, network_organization_id: "4", request_text: data.requesttext }
 	}
 
-	return filledSlots
+	const organizationData = data.network_organization_data
+	const contacts = organizationData?.network_organization_contacts ?? []
+	if (!Array.isArray(contacts)) {
+		throw new Error("Invalid network organization contacts")
+	}
+
+	if (contacts.some(contact => contact?.networkorganizationid === "00000000-0000-0000-0000-000000000000")) {
+		logger.info("Network organization is undefined: zero GUID returned")
+		return { ...filledSlots, network_organization_id: "3" }
+	}
+
+	if (organizationData?.request_allowed === true) {
+		return { ...filledSlots, network_organization_id: "1" }
+	}
+
+	if (organizationData?.request_allowed !== false) {
+		throw new Error("Invalid network organization request_allowed")
+	}
+
+	const phoneContact = contacts.find(contact => contact?.contact_type === "Phone"
+		&& isNonEmptyText(contact.contact) && isNonEmptyText(contact.message))
+	if (!phoneContact) {
+		throw new Error("Network organization has no phone contact with message")
+	}
+
+	return {
+		...filledSlots,
+		network_organization_id: "2",
+		network_organization_message: phoneContact.message,
+		network_organization_phone: phoneContact.contact
+	}
 }
 
 const createRequestUrl = () => renderTemplateString(url)
 
 const main = async () => {
+	if (!isNonEmptyText(getSlotValueById("uid"))) {
+		logger.error("uid slot is empty")
+		return [operatorTransferReply()]
+	}
+
 	const requestUrl = createRequestUrl()
-	logger.info(`Request url: ${requestUrl}`)
 
 	try {
 		const requestHeaders = authorizationToken
@@ -139,20 +170,13 @@ const main = async () => {
 		})
 
 		const responseData = res?.data
-		logger.info(`Response data: ${JSON.stringify(responseData || {})}`)
-
-		if (!responseData) {
-			logger.warn("No response data")
-			return [operatorTransferReply()]
-		}
 
 		const filledSlots = fillSlotsFromRequest(responseData)
-		logger.info(`Filled slots: ${JSON.stringify(filledSlots)}`)
+		logger.info(`Network organization result: ${filledSlots.network_organization_id}`)
 
 		return [nextArticleReply(filledSlots)]
 	} catch (error) {
-		logger.error({ stack: error.stack }, `Error when sending request: ${error}`)
-		logger.error(`Response data: ${JSON.stringify(error.response?.data)}`)
+		logger.error({ stack: error.stack }, `Error when checking network organization: ${error}`)
 		return [operatorTransferReply()]
 	}
 }

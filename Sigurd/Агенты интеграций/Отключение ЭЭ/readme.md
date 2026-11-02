@@ -2,6 +2,10 @@
 
 Скрипт: Отключение электроэнергии
 
+| Task | Entrypoint | Customer |
+|---|---|---|
+| Проверка отключения и оформление аварийной заявки | `disabling_electro.js`, `ksrt_report.js` | Sigurd |
+
 ## Агенты
 
 | № | Агент | ID агента | Статус |
@@ -57,12 +61,24 @@ JSONPath для slotsMapping:
 Входные данные: uid (из слота)
 
 Тело запроса (requestBody):
-- is_building (boolean) — всегда `true`: заявка оформляется как отсутствие ЭЭ во всём доме / у соседей
+- isbuilding (boolean) — всегда `true`: заявка оформляется как отсутствие ЭЭ во всём доме / у соседей
+- iscounter (boolean) — `false` в текущих настройках
+- isfrequent (boolean) — вычисляется агентом: `true` для `message = FrequentShutdowns`, иначе `false`
 - message (string enum) — причина: NoPower / Invalid / FrequentShutdowns / Other / LightFlashes / NoPhase / LowVoltage. Из слота message, fallback NoPower
-- comment (string) — комментарий. Из слота comment
+- comment (string) — комментарий. Из слота comment; fallback `Отсутствует ЭЭ` без дополнительных кавычек
 - phone (string) — номер телефона. Из слота phone
 
-Ответ: 200 OK, пустое тело
+Ответ: 200 OK, пустое тело. Любой успешный HTTP-статус 2xx возвращает `final_answer = "1"` независимо от наличия тела. При наличии тела сохраняется поддержка `slotsMapping`.
+
+Агент выполняет один POST без предварительного GET и без автоматического повтора при ошибке. Решение о переходе к оформлению принимает сценарий после вызова `check_network_organization`. Успех возвращается через `classifier` в `next_article` / `nextArticle`; ошибки — в `operatorArticle`. Новых слотов или веток `final_answer` не требуется.
+
+В настройках `ksrt_report_settings.json` задан `Host: api.enplus.ru` без порта. При загрузке настроек на платформу сохранить авторизацию и статьи окружения.
+
+Из корня репозитория можно выполнить изолированные тесты без реальных запросов:
+
+```powershell
+node --test 'Sigurd/Агенты интеграций/Отключение ЭЭ/tests/ksrt_report.test.cjs'
+```
 
 При ошибке диалог направляется через `classifier` в статью `operatorArticle`.
 
@@ -72,7 +88,7 @@ JSONPath для slotsMapping:
 
 Базовый URL API: https://webapisbytfl.dev.enplus.digital
 
-Авторизация: Basic U2lndXJkOjR3KTojQDAycTtvaXVhcTA3MmhhOWczNQ==
+Авторизация: `Basic <ключ окружения>`; задаётся в настройках.
 
 Заголовки:
 - ES-Request-Source: Website
