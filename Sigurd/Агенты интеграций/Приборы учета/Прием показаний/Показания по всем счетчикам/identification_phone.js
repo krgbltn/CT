@@ -252,6 +252,11 @@ const parseAddress = (value) => {
         const hasMarker = ADDRESS_MARKERS.some(({ pattern }) => new RegExp(`(^|\\s)(${pattern})(?=\\s|\\d|$)`).test(first))
         if (first && !hasMarker && !/\d/.test(first)) parts.city = first
     }
+    // Город перед улицей может быть указан без «г.» и запятой.
+    if (!parts.city && unique[0]?.type === 'street') {
+        const city = text.slice(0, unique[0].start).trim()
+        if (city && !/\d/.test(city)) parts.city = city
+    }
     const houseMarker = unique.find(marker => marker.type === 'house')
     const extraMarker = unique.find(marker => ['apartment', 'building', 'structure'].includes(marker.type))
     const prefix = normalizeNumbers(text.slice(0, houseMarker?.start ?? extraMarker?.start ?? text.length), false)
@@ -409,7 +414,17 @@ const confirmAddressReply = (state) => {
     const option = getContractAddressOption(state.contracts[state.selectedIndex])
     return questionReply(`Вы обращаетесь по адресу: ${formatAddress(option)}? Скажите «да» или «нет».`, state)
 }
-const addressListReply = (contracts, retry = 0) => {
+// Совпадение целого названия; без совпадений сохраняем полный список.
+const filterByCity = (contracts, text) => {
+    const words = ' ' + canonicalPart(normalizeAddress(text)) + ' '
+    const matching = contracts.filter(contract => {
+        const city = canonicalPart(getContractAddressOption(contract).address.parts.city)
+        return city && words.includes(' ' + city + ' ')
+    })
+    return matching.length ? matching : contracts
+}
+const addressListReply = (contracts, retry = 0, addressText = '') => {
+    contracts = filterByCity(contracts, addressText)
     const list = getAddressOptions(contracts).map((option, index) => `Номер ${index + 1}: ${formatAddress(option)}.`).join('\n')
     return questionReply(`Сейчас я перечислю найденные адреса, после этого назовите номер нужного адреса.\n${list}\nЕсли нужного адреса нет в озвученном списке, ответьте словом «нет».`, { contracts, step: 'choose_address', retry })
 }
@@ -444,7 +459,7 @@ const handleIdentification = async (state) => {
         if (message.message_type === 0) return confirmAddressReply(state)
         const answer = confirmationAnswer(text)
         if (answer === 'yes') return completeIdentification(contracts[state.selectedIndex], true)
-        if (answer === 'no' || state.retry === 1) return addressListReply(contracts)
+        if (answer === 'no' || state.retry === 1) return addressListReply(contracts, 0, state.addressText)
         return confirmAddressReply({ ...state, retry: 1 })
     }
     if (step === 'choose_address') {
@@ -461,14 +476,14 @@ const handleIdentification = async (state) => {
     const scored = scoreAddresses(getAddressOptions(contracts), text)
     const full = scored.filter(option => option.full)
     if (full.length === 1) return completeIdentification(contracts[full[0].index])
-    if (full.length > 1) return addressListReply(contracts)
+    if (full.length > 1) return addressListReply(contracts, 0, text)
     scored.sort((first, second) => second.score - first.score || second.partial - first.partial)
     const best = scored[0]
     const tied = scored.filter(option => option.score === best.score && option.partial === best.partial)
     logger.info(`Address candidates: ${tied.length}, score: ${best.score}, partial: ${best.partial}`)
     return tied.length === 1 && (best.score > 0 || best.partial > 0)
-        ? confirmAddressReply({ contracts, step: 'confirm_partial', selectedIndex: best.index, retry: 0 })
-        : addressListReply(contracts)
+        ? confirmAddressReply({ contracts, step: 'confirm_partial', selectedIndex: best.index, retry: 0, addressText: text })
+        : addressListReply(contracts, 0, text)
 }
 
 // Системные события подтверждаем; обычный вызов продолжает выбор или начинает новый поиск.

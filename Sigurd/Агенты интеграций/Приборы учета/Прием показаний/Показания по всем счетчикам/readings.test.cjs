@@ -198,8 +198,84 @@ test('Границы и точные сравнения десятичных с�
     })
 })
 
+test('Пробелы в показаниях удаляются до проверки и SOAP-отправки', async t => {
+    const cases = [
+        ['2 0 0', '200'], ['  000 200  ', '200'],
+        ['2\u00a00\u202f0', '200'], ['2\t0\n0', '200'],
+        ['2 0 0 , 0 8', '200.08'], ['200.0 8', '200.08']
+    ]
+    for (const [input, expected] of cases) await t.test(JSON.stringify(input), async () => {
+        const s = session()
+        await s.init()
+        const reply = await s.process(input)
+        assert.equal(reply.slots.reading_status, 'accepted')
+        assert.equal(reply.slots.current_new_reading, expected)
+        assert.equal(bodyOf(s.submissions()[0])['tem:MDScale_NewReadings'], expected)
+    })
+})
+
+test('Склейка пробелов сохраняет десятичную точку и проверки границ и формата', async t => {
+    const cases = [
+        ['1 0 0', '100', '1'],
+        ['3 0 0', '300', '2'], ['1 2 abc', '12abc', '3'],
+        ['2 0 0 . 0 , 8', '200.0,8', '3'], [' \t\u00a0 ', '', '3']
+    ]
+    for (const [input, normalized, error] of cases) await t.test(JSON.stringify(input), async () => {
+        const s = session()
+        await s.init()
+        const reply = await s.process(input)
+        assert.equal(reply.slots.reading_status, 'invalid')
+        assert.equal(reply.slots.current_new_reading, normalized)
+        assert.equal(reply.slots.reading_error, error)
+        assert.equal(s.submissions().length, 0)
+    })
+    const s = session({ meters: { '24': [meter('335', [scale('one', { MDSDigitsAfterDot: '3' })])] } })
+    await s.init()
+    assert.equal((await s.process('200.0 0 8')).slots.reading_status, 'accepted')
+    assert.equal(bodyOf(s.submissions()[0])['tem:MDScale_NewReadings'], '200.008')
+})
+
+test('Лишние дробные знаки обрезаются до точности шкалы без округления', async t => {
+    const cases = [
+        ['200.0 0 8', 2, '200.00'], ['123,4599', 2, '123.45'],
+        ['123.999', 0, '123'], ['123.4567', 3, '123.456'],
+        ['123.4', 3, '123.4'], ['200', 2, '200'],
+        ['9007199254740993123.4599', 2, '9007199254740993123.45']
+    ]
+    for (const [input, digits, expected] of cases) await t.test(`${input}/${digits}`, async () => {
+        const large = expected.length > 20
+        const previous = large ? '9007199254740993123.00' : '100.25'
+        const maximum = large ? '9007199254740993223.45' : '250.25'
+        const s = session({ meters: { '24': [meter('335', [scale('one', {
+            MDSDigitsAfterDot: String(digits), LastReadings: previous, MaxAcceptableNewMDReadingValue: maximum
+        })])] } })
+        await s.init()
+        const reply = await s.process(input)
+        assert.equal(reply.slots.reading_status, 'accepted')
+        assert.equal(reply.slots.current_new_reading, expected)
+        assert.equal(s.state.queue[0].value, expected)
+        assert.equal(bodyOf(s.submissions()[0])['tem:MDScale_NewReadings'], expected)
+    })
+})
+
+test('Границы проверяются после обрезки, предыдущее показание не обрезается', async t => {
+    for (const [previous, input, expected, error] of [
+        ['150.25', '250.259', '250.25', ''],
+        ['100.259', '100.259', '100.25', '1'],
+        ['150.25', '250.269', '250.26', '2']
+    ]) await t.test(input + '/' + previous, async () => {
+        const s = session({ meters: { '24': [meter('335', [scale('one', { LastReadings: previous })])] } })
+        await s.init()
+        const reply = await s.process(input)
+        assert.equal(reply.slots.current_previous_reading, previous)
+        assert.equal(reply.slots.current_new_reading, expected)
+        assert.equal(reply.slots.reading_error, error)
+        assert.equal(s.submissions().length, error ? 0 : 1)
+    })
+})
+
 test('Ошибки ввода сохраняют шкалу и значение; исправление использует новый шаг', async t => {
-    for (const [value, expected] of [['123abc', '3'], ['1,2.3', '3'], ['', '3'], ['1e3', '3'], ['0x10', '3'], ['-1', '3'], ['123.456', '4']]) {
+    for (const [value, expected] of [['123abc', '3'], ['1,2.3', '3'], ['', '3'], ['1e3', '3'], ['0x10', '3'], ['-1', '3']]) {
         await t.test(value || 'empty', async () => {
             const s = session()
             await s.init()
@@ -230,7 +306,10 @@ test('Точность 0 -> 3 -> 0; предыдущие дроби не обр�
     await s.process('123.456')
     await s.next()
     assert.equal(s.slots.scale_type, 'true')
-    assert.equal((await s.process('123.0')).slots.reading_error, '4')
+    const reply = await s.process('123.9')
+    assert.equal(reply.slots.reading_status, 'accepted')
+    assert.equal(reply.slots.current_new_reading, '123')
+    assert.equal(bodyOf(s.submissions()[2])['tem:MDScale_NewReadings'], '123')
 })
 
 test('Пропуск приоритен перед валидацией; одинаковые номера не объединяют приборы', async () => {

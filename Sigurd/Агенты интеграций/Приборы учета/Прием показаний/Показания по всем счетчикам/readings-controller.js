@@ -312,7 +312,14 @@ async function rcRun() {
 			}
 			return await rcAdvance(state)
 		}
-		item.value = rcText(rcSlot("newReading"))
+		// Склеиваем цифры, разделенные пробельными символами при распознавании речи.
+		item.value = rcText(rcSlot("newReading")).replace(/\s+/g, "")
+		// Обрезаем только новый ввод до точности шкалы, без округления и float.
+		const parsed = rcDecimal(item.value)
+		if (parsed && parsed.fraction.length > item.digits) {
+			const fraction = parsed.fraction.slice(0, item.digits)
+			item.value = parsed.integer + (fraction ? `.${fraction}` : "")
+		}
 		item.error = rcValueError(item, item.value, state.maxConsumption)
 		if (item.error) {
 			// Остаемся на той же шкале; новый ID отделяет исправление от прежнего ввода.
