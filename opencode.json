@@ -10,10 +10,6 @@
     "craft": {
       "path": "./Craft",
       "description": "Общие агенты платформы (GPT, MAX, VK)"
-    },
-    "sigurd": {
-      "path": "d:/сигурд",
-      "description": "Данные СИГУРД: готовые скрипты (xlsx + txt), Sigurd JS-агенты, rework"
     }
   },
 
