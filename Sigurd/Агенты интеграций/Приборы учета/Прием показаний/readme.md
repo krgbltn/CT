@@ -4,15 +4,15 @@
 
 | Task | Entrypoint | Customer |
 |---|---|---|
-| Поиск ЛС по телефону | `identification_phone_number.js` | СИГУРД |
-| Поиск ЛС по номеру | `identification_account_number.js` | СИГУРД |
+| Поиск ЛС по телефону | `identification_phone.js` | СИГУРД |
+| Поиск ЛС по номеру | `identification_account.js` | СИГУРД |
 | Передача показаний | `submit-readings.js` | СИГУРД |
 
 ## Агенты
 
 ### identification_phone_number
 
-Файлы: `identification_phone_number.js`, `identification_phone_number_settings.json`.
+Файлы: `identification_phone.js`, `identification_phone_number_settings.json`.
 
 Ищет лицевые счета по телефону вызовом `GetContractsInfo_By_Phone`. Для выбранного ЛС запрашивает приборы вызовом `GetMDInfo_By_ContractIDAndNomenclatureCode`: `1` для отопления, `2` для ГВС, `21` для ХВС и `24` для электроэнергии.
 
@@ -24,7 +24,7 @@
 
 ### identification_account_number
 
-Файлы: `identification_account_number.js`, `identification_account_number_settings.json`.
+Файлы: `identification_account.js`, `identification_account_number_settings.json`.
 
 Ищет ЛС по цифровой части номера из слота `account_number_client` (настройка `numberSlotId`) вызовом `FindAllByContractNumber`. Дальнейшая обработка приборов и ошибок идентична агенту поиска по телефону.
 

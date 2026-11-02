@@ -4,8 +4,8 @@
 
 | Task | Entrypoint | Customer |
 |---|---|---|
-| Поиск и выбор ЛС по телефону | `identification_phone_number.js` | СИГУРД |
-| Поиск и выбор ЛС по номеру | `identification_account_number.js` | СИГУРД |
+| Поиск и выбор ЛС по телефону | `identification_phone.js` | СИГУРД |
+| Поиск и выбор ЛС по номеру | `identification_account.js` | СИГУРД |
 | Очередь, проверка и отправка | `readings-controller.js` | СИГУРД |
 | SOAP-функции, подключаемый модуль | `readings-soap-module.js` | СИГУРД |
 | Прежняя отправка четырех фиксированных показаний | `submit-readings.js` | СИГУРД |
@@ -149,8 +149,8 @@
 node --test ./readings.test.cjs
 node --check ./readings-controller.js
 node --check ./readings-soap-module.js
-node --check ./identification_phone_number.js
-node --check ./identification_account_number.js
+node --check ./identification_phone.js
+node --check ./identification_account.js
 ```
 
 Тесты используют `node:test`, синтетические данные, подмененные глобалы и HTTP-клиент; реальных запросов нет. По умолчанию XML-глобалы заменены снимками объектов. Если уже доступен `xml-js`, дополнительный прогон с `READINGS_XML_MODULES`, указывающим каталог существующих Node-пакетов, использует XML-строки через адаптер. Новые зависимости не устанавливаются. Наличие штатных `xml2js`, `js2xmlparser`, `https`, `axios` проверить на платформе.

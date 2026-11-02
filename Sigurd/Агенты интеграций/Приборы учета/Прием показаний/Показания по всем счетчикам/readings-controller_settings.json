@@ -1,14 +1,14 @@
 {
-  "url": "",
+  "url": "https://sbyt.service.1c/IVR.asmx",
   "timeoutMs": 30000,
-  "rejectUnauthorized": true,
-  "aiAgent": "",
-  "routingAgent": "",
+  "rejectUnauthorized": false,
+  "aiAgent": "ai_pokazaniya",
+  "routingAgent": "routingagent",
   "articles": {
-    "input": "",
-    "correction": "",
-    "error": "",
-    "finish": ""
+    "input": "article-40530245-85f2-46e9-b5f5-7edfee037d0a",
+    "correction": "article-40530245-85f2-46e9-b5f5-7edfee037d0a",
+    "error": "article-cd7b7f00-c5a3-47e6-b33c-dfb8930d0c84",
+    "finish": "article-cbe8ab4f-de3a-4fee-b8b3-c44a62dc3c22"
   },
   "maxConsumption": "100",
   "services": [

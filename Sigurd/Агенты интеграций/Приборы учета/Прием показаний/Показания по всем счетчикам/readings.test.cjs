@@ -136,7 +136,7 @@ function session({ meters = basic(), source = controllerSource, settings = {}, h
 const article = (reply, name) => assert.match(reply.text, new RegExp(`intent_id="${name}-test"`))
 
 test('Все скрипты укладываются в лимит платформы; контракт не содержит reading_retry', () => {
-    for (const file of ['readings-controller.js', 'readings-soap-module.js', 'identification_account_number.js', 'identification_phone_number.js']) {
+    for (const file of ['readings-controller.js', 'readings-soap-module.js', 'identification_account.js', 'identification_phone.js']) {
         assert.ok(Buffer.byteLength(read(file), 'utf8') <= 32766, file)
     }
     assert.doesNotMatch(controllerSource, /reading_retry/)
