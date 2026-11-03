@@ -4,8 +4,8 @@
   "nextArticle": "",
   "operatorArticle": "article-d6585ce7-c4e9-4e42-97d2-bc4142e8ae1d",
   "requestBody": {
-    "isbuilding": true,
-    "iscounter": false,
+    "isbuilding": "{{slots.isbuilding}} || false",
+    "iscounter": "{{slots.iscounter}} || false",
     "message": "{{slots.message}} || NoPower",
     "comment": "{{slots.comment}} || Отсутствует ЭЭ",
     "phone": "{{slots.phone}}"

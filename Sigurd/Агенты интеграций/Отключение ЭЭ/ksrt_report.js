@@ -122,9 +122,16 @@ const resolveTemplates = (data) => {
 	return data
 }
 
+const normalizeBoolean = value => value === true || (typeof value === "string" && value.trim().toLowerCase() === "true")
+
 const createRequestBody = () => {
 	const body = resolveTemplates(requestBody)
-	return { ...body, isfrequent: body.message === "FrequentShutdowns" }
+	return {
+		...body,
+		isbuilding: normalizeBoolean(body.isbuilding),
+		iscounter: normalizeBoolean(body.iscounter),
+		isfrequent: body.message === "FrequentShutdowns"
+	}
 }
 const createRequestUrl = () => renderTemplateString(url)
 

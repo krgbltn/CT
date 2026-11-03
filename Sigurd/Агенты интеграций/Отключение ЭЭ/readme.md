@@ -61,8 +61,8 @@ JSONPath для slotsMapping:
 Входные данные: uid (из слота)
 
 Тело запроса (requestBody):
-- isbuilding (boolean) — всегда `true`: заявка оформляется как отсутствие ЭЭ во всём доме / у соседей
-- iscounter (boolean) — `false` в текущих настройках
+- isbuilding (boolean) — отсутствие ЭЭ во всём доме / у соседей; из слота `isbuilding`, по умолчанию `false`
+- iscounter (boolean) — об отключении счётчика; из слота `iscounter`, по умолчанию `false`
 - isfrequent (boolean) — вычисляется агентом: `true` для `message = FrequentShutdowns`, иначе `false`
 - message (string enum) — причина: NoPower / Invalid / FrequentShutdowns / Other / LightFlashes / NoPhase / LowVoltage. Из слота message, fallback NoPower
 - comment (string) — комментарий. Из слота comment; fallback `Отсутствует ЭЭ` без дополнительных кавычек
@@ -70,7 +70,9 @@ JSONPath для slotsMapping:
 
 Ответ: 200 OK, пустое тело. Любой успешный HTTP-статус 2xx возвращает `final_answer = "1"` независимо от наличия тела. При наличии тела сохраняется поддержка `slotsMapping`.
 
-Агент выполняет один POST без предварительного GET и без автоматического повтора при ошибке. Решение о переходе к оформлению принимает сценарий после вызова `check_network_organization`. Успех возвращается через `classifier` в `next_article` / `nextArticle`; ошибки — в `operatorArticle`. Новых слотов или веток `final_answer` не требуется.
+Для управления признаками сценарий заполняет слоты `isbuilding` и `iscounter` значениями `true` / `false`. Агент преобразует логическое `true` и строку `"true"` (без учёта регистра и внешних пробелов) в JSON boolean `true`; пустые, отсутствующие и остальные значения — в `false`. Перед новым обращением сбрасывайте оба слота, чтобы не переносить признаки предыдущей заявки.
+
+Агент выполняет один POST без предварительного GET и без автоматического повтора при ошибке. Решение о переходе к оформлению принимает сценарий после вызова `check_network_organization`. Успех возвращается через `classifier` в `next_article` / `nextArticle`; ошибки — в `operatorArticle`. Новых веток `final_answer` не требуется.
 
 В настройках `ksrt_report_settings.json` задан `Host: api.enplus.ru` без порта. При загрузке настроек на платформу сохранить авторизацию и статьи окружения.
 

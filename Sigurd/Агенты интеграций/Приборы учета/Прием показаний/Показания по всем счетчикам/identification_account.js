@@ -341,12 +341,13 @@ const scoreAddresses = (options, text) => {
     })
 }
 const title = (value) => value.replace(/(^|[\s-])([а-яa-z])/g, (_, prefix, letter) => prefix + letter.toUpperCase())
-const spokenOrdinal = (number) => {
+const spokenOrdinal = (number, ending) => {
     const n = Number(number)
-    if (n < 1 || n > 99) return number + '-я'
+    if (n < 1 || n > 99) return number + '-' + ending
     const word = n < 20 ? ORDINALS[n] : n % 10 ? ORDINALS[n % 10] : ORDINAL_TENS[n / 10 - 2]
-    const feminine = word === 'третий' ? 'третья' : word.slice(0, -2) + 'ая'
-    return n >= 20 && n % 10 ? TENS[Math.floor(n / 10) - 2] + ' ' + feminine : feminine
+    const suffix = /^(ая|яя|я)$/.test(ending) ? 'ая' : /^(ое|ее|е)$/.test(ending) ? 'ое' : ''
+    const ordinal = !suffix ? word : word === 'третий' ? (suffix === 'ая' ? 'третья' : 'третье') : word.slice(0, -2) + suffix
+    return n >= 20 && n % 10 ? TENS[Math.floor(n / 10) - 2] + ' ' + ordinal : ordinal
 }
 // Готовим адрес для озвучивания без индекса и дублирующего названия города.
 const formatAddress = (option) => {
@@ -354,7 +355,7 @@ const formatAddress = (option) => {
     const result = []
     if (parts.city) result.push(title(parts.city))
     if (parts.street) {
-        const name = parts.street.replace(/(\d+)\s*-?\s*(?:ая|яя|я|й)(?=\s|$)/g, (_, n) => spokenOrdinal(n))
+        const name = parts.street.replace(/(\d+)\s*-?\s*(ая|яя|ый|ий|ой|ое|ее|я|й|е)(?=\s|$)/g, (_, n, ending) => spokenOrdinal(n, ending))
         const label = streetType(streetLabel)
         result.push(['ул', 'улица'].includes(label) ? title(name) + (/^\d+$/.test(canonicalPart(name)) ? ' улица' : '') : label + ' ' + title(name))
     }

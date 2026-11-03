@@ -42,10 +42,27 @@ test('one POST, no GET: body matches contract and default comment has no literal
 	assert.equal(request.headers.Authorization, 'Basic <test-key>')
 	assert.equal(request.headers['Content-Type'], 'application/json')
 	assert.deepEqual(JSON.parse(JSON.stringify(request.data)), {
-		isbuilding: true, iscounter: false, isfrequent: false,
+		isbuilding: false, iscounter: false, isfrequent: false,
 		message: 'NoPower', comment: 'Отсутствует ЭЭ', phone: '79000000000'
 	})
 	assert.equal(reply.slots.final_answer, '1')
+})
+
+test('building and counter flags use independent slot values and are JSON booleans', async () => {
+	for (const [isbuilding, iscounter, expectedBuilding, expectedCounter] of [
+		['true', 'false', true, false],
+		['false', 'true', false, true],
+		[true, true, true, true],
+		[false, false, false, false],
+		[' TRUE ', ' False ', true, false],
+		['', '', false, false],
+		[null, undefined, false, false],
+		['   ', 'unexpected', false, false]
+	]) {
+		const { requests } = await run({ slots: { isbuilding, iscounter } })
+		assert.equal(requests[0].data.isbuilding, expectedBuilding)
+		assert.equal(requests[0].data.iscounter, expectedCounter)
+	}
 })
 
 test('custom reason/comment/phone, next_article and frequent flag', async () => {
