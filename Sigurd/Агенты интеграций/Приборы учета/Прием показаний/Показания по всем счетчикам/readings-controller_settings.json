@@ -11,10 +11,12 @@
     "finish": "article-cbe8ab4f-de3a-4fee-b8b3-c44a62dc3c22"
   },
   "maxConsumption": "100",
+  "maxConsumptionElectricity": "100",
   "services": [
     {
       "code": "24",
-      "name": "электроэнергии"
+      "name": "электроэнергии",
+      "isElectricity": true
     },
     {
       "code": "2",

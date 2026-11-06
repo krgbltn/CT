@@ -93,10 +93,14 @@ function rcCheckConfig() {
 	if (!/^https?:\/\//.test(agentSettings.url || "") || !Number.isSafeInteger(agentSettings.timeoutMs)
 		|| agentSettings.timeoutMs <= 0) throw new Error("Configure SOAP URL and positive timeoutMs")
 	if (!rcDecimal(agentSettings.maxConsumption)) throw new Error("Invalid maxConsumption")
+	if (!rcDecimal(agentSettings.maxConsumptionElectricity)) throw new Error("Invalid maxConsumptionElectricity")
 	if (!Array.isArray(agentSettings.services) || !agentSettings.services.length) throw new Error("Missing services")
 	for (const service of agentSettings.services) {
 		rcRequired(service.code, "service code")
 		rcRequired(service.name, "service name")
+		if (service.isElectricity !== undefined && typeof service.isElectricity !== "boolean") {
+			throw new Error("Invalid service isElectricity")
+		}
 	}
 	for (const id of [agentSettings.aiAgent, ...["input", "correction", "error", "finish"].map(key => agentSettings.articles?.[key])]) {
 		if (!rcRouteId(id)) throw new Error("Configure aiAgent and all articles")
@@ -125,6 +129,7 @@ function rcValidateState(state) {
 	for (const item of state.queue) {
 		if (!item || ["id", "meterKey", "number", "name", "service"].some(key => typeof item[key] !== "string" || !item[key].trim())
 			|| !rcDecimal(item.previous) || !rcDecimal(item.maximum)
+			|| (item.maxConsumption !== undefined && !rcDecimal(item.maxConsumption))
 			|| !Number.isSafeInteger(item.digits) || item.digits < 0
 			|| typeof item.value !== "string" || !["", "1", "2", "3", "4"].includes(item.error)
 			|| !["pending", "sending", "sent", "skipped", "failed", "unknown"].includes(item.status)) {
@@ -228,6 +233,9 @@ async function rcQueue(accountId) {
 			queue.push({
 				id, meterKey: `${serviceIndex}:${meterIndex}`, number, location: rcText(meter.location),
 				service: rcRequired(agentSettings.services[serviceIndex].name, "service name"),
+				// Фиксируем лимит услуги на цикл; название и точность шкалы на выбор не влияют.
+				maxConsumption: rcDecimal(agentSettings.services[serviceIndex].isElectricity === true
+					? agentSettings.maxConsumptionElectricity : agentSettings.maxConsumption).text,
 				name: rcRequired(scale.name, "scale name"), previous: previous.text,
 				maximum: maximum.text, digits: rcDigits(scale.digits), status: "pending", value: "", error: ""
 			})
@@ -320,7 +328,8 @@ async function rcRun() {
 			const fraction = parsed.fraction.slice(0, item.digits)
 			item.value = parsed.integer + (fraction ? `.${fraction}` : "")
 		}
-		item.error = rcValueError(item, item.value, state.maxConsumption)
+		// Очереди, созданные прежней версией, сохраняют общий лимит своего цикла.
+		item.error = rcValueError(item, item.value, item.maxConsumption ?? state.maxConsumption)
 		if (item.error) {
 			// Остаемся на той же шкале; новый ID отделяет исправление от прежнего ввода.
 			state.revision++

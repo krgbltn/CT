@@ -198,6 +198,87 @@ test('Границы и точные сравнения десятичных с�
     })
 })
 
+test('Раздельные лимиты электроэнергии и остальных услуг: граница и превышение', async t => {
+    for (const code of ['24', '2', '21', '1']) {
+        const limit = code === '24' ? '500.50' : '10.25'
+        const boundary = code === '24' ? '600.75' : '110.50'
+        const above = code === '24' ? '600.76' : '110.51'
+        await t.test(code, async () => {
+            const s = session({
+                settings: { maxConsumption: '10,25', maxConsumptionElectricity: '500,50' },
+                meters: { [code]: [meter('335', [scale('one', { MaxAcceptableNewMDReadingValue: '2000' })])] }
+            })
+            await s.init()
+            assert.equal(s.state.queue[0].maxConsumption, limit)
+            const rejected = await s.process(above)
+            assert.equal(rejected.slots.reading_error, '2')
+            assert.equal(s.submissions().length, 0)
+            const accepted = await s.process(boundary)
+            assert.equal(accepted.slots.reading_status, 'accepted')
+            assert.equal(s.submissions().length, 1)
+        })
+    }
+})
+
+test('Лимит выбирается по признаку услуги и фиксируется на init; максимум API сохраняется', async () => {
+    const s = session({
+        settings: {
+            maxConsumption: '10', maxConsumptionElectricity: '500',
+            services: [{ code: 'custom', name: 'Другое название', isElectricity: true },
+                { code: '24', name: 'электроэнергии', isElectricity: false }]
+        },
+        meters: {
+            custom: [meter('335', [scale('one'), scale('two', { MaxAcceptableNewMDReadingValue: '2000' })])],
+            '24': [meter('336', [scale('three')])]
+        }
+    })
+    await s.init()
+    assert.deepEqual(s.state.queue.map(item => item.maxConsumption), ['500', '500', '10'])
+    assert.equal((await s.process('250.26')).slots.reading_error, '2')
+    assert.equal(s.submissions().length, 0)
+    assert.equal((await s.process('250.25')).slots.reading_status, 'accepted')
+    await s.next()
+    s.config.maxConsumptionElectricity = '1'
+    s.config.services.reverse()
+    assert.equal((await s.process('600.25')).slots.reading_status, 'accepted')
+    await s.next()
+    assert.equal((await s.process('110.26')).slots.reading_error, '2')
+})
+
+test('Старая очередь продолжает использовать сохраненный общий лимит', async () => {
+    const s = session({ settings: { maxConsumptionElectricity: '500' } })
+    await s.init()
+    const legacy = s.state
+    for (const item of legacy.queue) delete item.maxConsumption
+    s.store.set('readings_controller', JSON.stringify(legacy))
+    s.config.maxConsumption = '1'
+    assert.equal((await s.process('200.26')).slots.reading_error, '2')
+    assert.equal((await s.process('200.25')).slots.reading_status, 'accepted')
+})
+
+test('Некорректные лимиты и признак услуги отклоняются до HTTP', async t => {
+    for (const key of ['maxConsumption', 'maxConsumptionElectricity']) {
+        for (const value of [undefined, null, '', '-1', 'abc']) await t.test(`${key}/${value}`, async () => {
+            const s = session({ settings: { [key]: value } })
+            article(await s.init(), 'error')
+            assert.equal(s.calls.length, 0)
+        })
+    }
+    const s = session({ settings: { services: [{ code: '24', name: 'ЭЭ', isElectricity: 'true' }] } })
+    article(await s.init(), 'error')
+    assert.equal(s.calls.length, 0)
+})
+
+test('Поврежденный сохраненный лимит шкалы не запускает отправку', async () => {
+    const s = session()
+    await s.init()
+    const bad = s.state
+    bad.queue[0].maxConsumption = 'abc'
+    s.store.set('readings_controller', JSON.stringify(bad))
+    article(await s.process('120'), 'error')
+    assert.equal(s.submissions().length, 0)
+})
+
 test('Пробелы в показаниях удаляются до проверки и SOAP-отправки', async t => {
     const cases = [
         ['2 0 0', '200'], ['  000 200  ', '200'],
