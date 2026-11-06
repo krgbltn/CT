@@ -87,7 +87,14 @@
 			"queue": "сервисное"
 		}
 	},
+	"search_notice": {
+		"aiassist_agent_id": "aiassist2"
+	},
 	"articles": {
+		"SEARCH_NOTICE": {
+			"ID": "article-5d23a2ac-5757-47d6-b754-b59ac991d254",
+			"NAME": "Информирование gpt"
+		},
 		"TRANSFER_FOR_OPERATOR": {
 			"ID": "article-319a599c-5931-42a4-aeae-6aa55f9970c9",
 			"NAME": "Перевод на оператора"
