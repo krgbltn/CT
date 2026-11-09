@@ -10,8 +10,8 @@
   "agent_name": "gpt_brainstorm",
   "llm_settings": {
     "timeout": 58,
-    "temperature": 0.5,
-    "temperature_smalltalk": 0.6,
+    "temperature": 0.3,
+    "temperature_smalltalk": 0.3,
     "top_p": 0.95,
     "top_k": 20,
     "min_p": 0,
