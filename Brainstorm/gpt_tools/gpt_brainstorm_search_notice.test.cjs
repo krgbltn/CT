@@ -2,24 +2,29 @@ const fs = require('node:fs')
 const path = require('node:path')
 const vm = require('node:vm')
 const assert = require('node:assert/strict')
-const test = require('node:test')
+const nodeTest = require('node:test')
 
 // Execute only the queue/continuation code with mocked platform and HTTP globals.
 const core = fs.readFileSync(path.join(__dirname, 'gpt_core.js'), 'utf8')
-const client = fs.readFileSync(path.join(__dirname, 'gpt_brainstorm_search_notice.js'), 'utf8')
+for (const clientName of ['gpt_brainstorm_search_notice.js', 'gpt_bs_phone.js']) {
+const test = (name, fn) => nodeTest(`${clientName}: ${name}`, fn)
+const client = fs.readFileSync(path.join(__dirname, clientName), 'utf8')
 const part = (source, start, end) => source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start)))
 const code = [
     part(core, 'class SwitchRedirectPropagate', 'const _AP_TOOLS'),
+    part(core, 'function scenario(scenarioName)', 'let KEYS ='),
     part(core, 'class ScenarioNotReadyError', 'function setScenariosForTransfer'),
     part(core, 'async function enqueueToolCalls', '// @module core/main'),
-    part(client, '// === Search notice continuation ===', 'const transfer_to_operator ='),
-    'const availableFunctions = {search_in_knowledge_base}',
+    clientName === 'gpt_bs_phone.js'
+        ? part(client, 'function unwrapKnowledgeBaseLinks', '// === Prompt & Model config ===') : '',
+    part(client, '// === Search notice continuation ===', 'const availableFunctions ='),
+    'const availableFunctions = {search_in_knowledge_base, transfer_to_operator}',
     part(client, 'async function _main(replies)', 'runEntrypoint()'),
 ].join('\n')
 
-function fixture({report = false, extraSearch = false, configured = true, httpFails = false} = {}) {
+function fixture({report = false, extraSearch = false, configured = true, httpFails = false, transfer = false} = {}) {
     const values = new Map()
-    const metrics = {decisions: 0, searches: 0, commits: []}
+    const metrics = {decisions: 0, searches: 0, commits: [], questions: []}
     const args = {product: 'autell', queries: ['TS508 ошибка -6', 'ошибка программирования TS508', 'AUTEL MaxiTPMS TS508 ошибка -6']}
     const call = id => ({id, function: {name: 'search_in_knowledge_base', arguments: JSON.stringify(args)}})
     const storage = {
@@ -33,7 +38,7 @@ function fixture({report = false, extraSearch = false, configured = true, httpFa
         const sandbox = {
             agentStorage: {dialogStorage: storage},
             agentSettings: {search_notice: configured ? {aiassist_agent_id: 'mock-aiassist'} : {}},
-            ARTICLES: {SEARCH_NOTICE: {ID: 'mock-notice-article'}},
+            ARTICLES: {SEARCH_NOTICE: {ID: 'mock-notice-article'}, TRANSFER_FOR_OPERATOR: {ID: 'mock-operator-article'}},
             IS_QUERY_REPORT: report,
             ITEM_TYPES: {function: 'function', commit: 'commit'},
             KEYS: {QUEUE_KEY: 'queue', N_CYCLES_KEY: 'cycles'}, WAIT_FOR_SCENARIO_TTL: 86400,
@@ -44,6 +49,7 @@ function fixture({report = false, extraSearch = false, configured = true, httpFa
             logger: {info() {}, debug() {}, warn() {}, error() {}},
             URL_CONTEXT_SEARCH: 'mock-only', CUSTOMER_ID: 'mock-customer', MAX_CONTEXTS: 5,
             PRODUCTS: {autell: {queue: 'mock-tpms'}}, slotManager: {setSlot() {}},
+            getSlotValue: () => undefined,
             removeArticleNavigation: content => content,
             processScenarios: (history, tools) => ({history, tools}),
             buildLLMHistory: history => history,
@@ -55,8 +61,12 @@ function fixture({report = false, extraSearch = false, configured = true, httpFa
                 if (httpFails) throw new Error('mock HTTP failure')
                 return {data: {context: [{title: 'TS508', content: 'Подтверждённый ответ'}]}}
             }},
-            async sendMessageToLLM() {
+            async sendMessageToLLM(question) {
                 metrics.decisions++
+                metrics.questions.push(question)
+                if (transfer && metrics.decisions === 1) {
+                    return {tool_calls: [{id: 'operator-call', function: {name: 'transfer_to_operator', arguments: '{}'}}]}
+                }
                 return {tool_calls: [call('original-call')]}
             },
             async commitToolResponses(results) {
@@ -134,3 +144,41 @@ test('HTTP failure returns the tool error to LLM and cleans notice state', async
     assert.match(f.metrics.commits[0][0].content, /ERROR: ошибка поиска/)
     assert.equal(f.values.has('brainstorm_search_notice'), false)
 })
+
+if (clientName === 'gpt_bs_phone.js') {
+    test('operator scenario releases the queue before handing off control', async () => {
+        const f = fixture({transfer: true})
+        await assert.rejects(f.boot('Соедините со специалистом')(), error => {
+            assert.equal(error.name, 'SwitchRedirectPropagate')
+            assert.equal(error.switchredirect, '/switchredirect aiassist2 intent_id="mock-operator-article"')
+            return true
+        })
+        assert.equal(JSON.parse(f.values.get('queue')).length, 0)
+        assert.equal(f.metrics.commits.length, 0)
+        assert.equal(f.metrics.searches, 0)
+    })
+
+    test('after switch back, an empty invocation waits and the next question starts a new search', async () => {
+        const f = fixture({transfer: true})
+        await assert.rejects(f.boot('Соедините со специалистом')(), {name: 'SwitchRedirectPropagate'})
+        await f.boot('')()
+        assert.equal(f.metrics.decisions, 1)
+        assert.equal(f.metrics.commits.length, 0)
+
+        const question = 'Ошибка -6 на TS508'
+        await assert.rejects(f.boot(question)(), error => {
+            assert.equal(error.switchredirect, '/switchredirect mock-aiassist intent_id="mock-notice-article"')
+            return true
+        })
+        assert.equal(f.metrics.decisions, 2)
+        assert.equal(f.metrics.questions[1], question)
+        assert.equal(JSON.parse(f.values.get('queue'))[0].name, 'search_in_knowledge_base')
+
+        await f.boot('')()
+        assert.equal(f.metrics.searches, 1)
+        assert.equal(f.metrics.commits.length, 1)
+        assert.equal(f.metrics.commits[0][0].tool_call_id, 'original-call')
+    })
+}
+
+}
