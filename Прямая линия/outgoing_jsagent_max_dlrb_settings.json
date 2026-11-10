@@ -1,0 +1,37 @@
+{
+  "maxBotToken": "f9LHodD0cOI-s9dcoSa2Mi-eDFtsmi55MXZjFGulsnxaGo2LOR6cwnBBI_HsSNrCnEJWOjMLGYSNg1rP6Zri",
+  "maxBotHost": "https://platform-api2.max.ru",
+  "slots": {
+    "maxChatId": "chat_id_max",
+    "maxUserId": "user_id_max",
+    "maxFirstName": "sys_firstname",
+    "maxLastName": "sys_lastname",
+    "maxUserName": "user_name_max",
+    "deep_linking_token": "deep_linking_token",
+    "skipScore": "skip_score"
+  },
+  "host": "https://cloud.craft-talk.ru",
+  "customerId": "directline_rb",
+  "incomingAgent": "incoming_jsagent_max_dlrb",
+  "webhook_events": [
+    "message_created",
+    "message_callback",
+    "bot_started",
+    "bot_stopped",
+    "bot_removed"
+  ],
+  "button_text": "Нажмите интересующую вас кнопку",
+  "has_score": false,
+  "has_combination_keyboards": false,
+  "disableLinkPreview": false,
+  "fileStorageUrl": "opbot-filestorage:8100",
+  "enableFinishMessage": false,
+  "scoreMessage": "Оцените работу оператора",
+  "scoreConfig": {
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5"
+  }
+}

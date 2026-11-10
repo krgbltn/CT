@@ -1,0 +1,17 @@
+{
+  "incoming_api": "http://opbot-channels:8082/webhooks/integration_channel/integration_channel_max_dlrb",
+  "authorization_token_incoming": "",
+  "slots": {
+    "maxChatId": "chat_id_max",
+    "maxUserId": "user_id_max",
+    "maxFirstName": "sys_firstname",
+    "maxLastName": "sys_lastname",
+    "maxUserName": "user_name_max",
+    "deep_linking_token": "deep_linking_token"
+  },
+  "maxBotHost": "https://platform-api2.max.ru",
+  "maxBotToken": "f9LHodD0cOI-s9dcoSa2Mi-eDFtsmi55MXZjFGulsnxaGo2LOR6cwnBBI_HsSNrCnEJWOjMLGYSNg1rP6Zri",
+  "removeButtonsAfterClick": true,
+  "evaluationMessage": "Спасибо за вашу оценку:",
+  "update_slot_user": false
+}

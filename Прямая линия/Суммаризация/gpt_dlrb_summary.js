@@ -2,6 +2,7 @@ const LAST_CONTEXT_PRICE = 0.19;
 const OTHER_CONTEXT_PRICE = 3.1;
 const ADD_OTHER_CONTEXT = false;
 const MAX_SUMMARY_LENGTH = 180;
+const FILE_SIZE_WARNING = 'Была попытка отправки файла размером более 20 Мегабайт';
 const { aiAssistAgentId, articleId } = agentSettings;
 
 function normalizeSummary(response) {
@@ -151,20 +152,29 @@ const LLM_MIN_P = agentSettings.llm_min_p ?? 0.0;
 const LLM_AUTH_TOKEN = agentSettings.llm_auth_token;
 const ENABLE_THINKING_SMALLTALK = agentSettings.enable_thinking_smalltalk ?? false;
 
+function getQuestionData() {
+	const value = message.slot_context?.filled_slots?.find(slot => slot.slot_id === 'question')?.value;
+	const original = typeof value === 'string' ? value : '';
+	return {
+		question: original.split(FILE_SIZE_WARNING).join('').trim(),
+		removedWarning: original.includes(FILE_SIZE_WARNING)
+	};
+}
+
 function makeSummaryReplies(summary) {
+	const { question, removedWarning } = getQuestionData();
 	return [
 		agentApi.makeTextReply(
 			`/switchredirect ${aiAssistAgentId} intent_id="${articleId}"`,
 			undefined,
 			undefined,
-			{ summary }
+			{ summary, ...(removedWarning ? { question } : {}) }
 		)
 	];
 }
 
 async function _main() {
-	const value = message.slot_context?.filled_slots?.find(slot => slot.slot_id === 'question')?.value;
-	const question = typeof value === 'string' ? value.trim() : '';
+	const { question } = getQuestionData();
 	if (!question) {
 		logger.info('Question slot is empty. Clear summary and continue.');
 		return makeSummaryReplies('');
