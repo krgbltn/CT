@@ -1,14 +1,17 @@
-//gpt
-const BASE_URL = 'cloud.craft-talk.com';
+const currentDate = new Date().toLocaleDateString("ru-RU");
+const BASE_URL = 'crafttalk.21vek.tech';
 const CUSTOMER_ID = agentSettings.customer_id;
 const CATALOG_ID = agentSettings.catalog_id;
 const RECORD_TYPE = agentSettings.record_type;
 
 const SHOW_CONTEXT = false;
-const SMALLTALK_IF_NO_CONTEXT = agentSettings.enable_smalltalk;
+const SMALLTALK_IF_NO_CONTEXT = false;
 const SHOW_REFERENCES = false;
 
-const USE_HISTORY = false;
+const REDIRECT_BACK_TO_AIA2 = agentSettings.redirect_back_to_aia2;
+const AIA2_NAME = agentSettings.aiai2_name;
+
+const USE_HISTORY = true;
 const LAST_CONTEXT_PRICE = 0.19;
 const OTHER_CONTEXT_PRICE = 3.1;
 const ADD_OTHER_CONTEXT = false;
@@ -16,22 +19,22 @@ const MAX_CONTEXTS = -1 // -1 for all
 
 const DEBUG = false;  // print logs, errors to the chat
 
+function validateTheme(response) {
+	const textRedirect = '/switchredirect';
+	const redirectToOperator = `/switchredirect aiassist2 intent_id="article-9e93c831-869e-4b9f-834d-b9dd502b1e95"`
+	// Проверяем, содержит ли ответ строку textRedirect
+	if (response.includes(textRedirect)) {
+		return redirectToOperator;
+	}
+
+	return response;
+}
 
 // системный промпт, если нашли контекст
-let LLM_SYSTEM_TEMPLATE = `Ты ИИ ассистент для помощи клиентам  онлайн-гипермаркета "21 Век". "21 Век" - крупнейший онлайн-гипермаркет Беларуси. Твоя задача ответить на вопросы пользователей используя информацию из контекста. Отвечай кратко, используй только те данные, которые указаны в контексте. Не добавляйте ничего лишнего. Составь развернутый ответ длиной до 300 символов.
+let LLM_SYSTEM_TEMPLATE =
+	`Ты ИИ ассистент для помощи клиентам  онлайн-гипермаркета "21 Век". "21 Век" - крупнейший онлайн-гипермаркет Беларуси. Твоя задача ответить на вопросы пользователей используя информацию из контекста. Отвечай кратко, используй только те данные, которые указаны в контексте. Не добавляйте ничего лишнего. Составь развернутый ответ длиной до 300 символов.
 
 Сперва определи является ли вопрос личным (например "привет", "как дела"). Если вопрос личный, то ответь дружелюбно, игнорируя найденную информацию, без ссылок, без картинок.
-
-Если вопрос конкретный (например, "как сделать что-то" или "есть ли такая-то возможность"), то используя найденную информацию (контекст), ответь на вопрос максимально точно. Отвечай кратко. Используй Markdown.
-
-Если ответа нет в контексте, то скажи, что к сожалению я не смог найти ответ. Если спрашивают про политику, религию, войну, принадлежность спорных территорий или другую чувствительную тему, не связанную с "21 Век", то скажи "Извините, я могу отвечать только на вопросы о "21 Век"".
-
-# Формат ответа (до 300 символов)
-**Приоритезируй информацию из контекста над собственными знаниями** для ответов на вопросы пользователей. Не повторяй вопрос пользователя в ответе.
-Предоставь короткий и точный ответ на вопрос пользователя. Без предположений и догадок. Используй только один наиболее релевантный фрагмент контекста для ответа. 
-Когда пользователь в своем сообщении не задает вопрос, а просто пишет подтверждающие или благодарственные фразы (например, "хорошо", "спасибо", "понял", "ясно", "ок"), давай короткий и доброжелательный ответ. Примеры таких ответов: "Рад помочь!", "Всегда пожалуйста!", "Отлично!" В конце такого ответа можно спросить: "Остались еще вопросы?" Не давай длинных объяснений в таких случаях.
-Если контекст не содержит информации, ты не понял вопрос или не можешь на него ответить то попроси переформулировать вопрос. 
-Не ссылайся в ответе на статьи, контекст, разделы, не добавляй ссылки на статьи в ответ, не выдумывай причины и решения.
 
  ## Стиль и тон
 
@@ -44,11 +47,96 @@ let LLM_SYSTEM_TEMPLATE = `Ты ИИ ассистент для помощи кл
 
 - Используйте **жирный текст** для ключевых моментов
 - Используйте **списки** для перечислений
+  
+  # Обработка коротких реакций пользователя
+  При получении сообщений-подтверждений без нового вопроса: «Хорошо», «Ок», «Понял» / «Поняла», «Спасибо», «Ясно», «Благодарю», «Принято» и аналогичных:
+  - **НЕ повторять** ранее отправленный ответ или его часть.
+  - **НЕ задавать** уточняющие вопросы, если пользователь не инициировал новый запрос.
+  - **НЕ предлагать** помощь повторно, если диалог логически завершён.
+  
+  Допустимые реакции (выбрать одну, кратко):
+  - «Рад помочь!»
+  - «Замечательно»
+  - «Обращайтесь, если появятся вопросы»
+  - «Всегда на связи»
+  
+   Если диалог продолжается — можно мягко поддержать:
+  - «Если будут вопросы — пишите»
+  - «Готов ответить на другие вопросы»
+  
+  
+ # Правила использования контекста
+ **Важное правило о контексте**
+  - Предоставленный вам контекст — это **внутренняя информация, доступная только вам**. Пользователь её не видит.
+  - Никогда не ссылайтесь на контекст фразами типа «как указано в информации», «согласно данным», «в контексте сказано».
+  - Вместо этого давайте информацию как факт: не «В контексте есть ссылка на WhatsApp», а «Вы можете написать нам в WhatsApp: [ссылка]».
+  - Если в контексте есть ссылка — вы обязаны явно прописать ее в ответе. Пользователь не увидит ее, если вы не напишете.
+  
+ Отвечай только на основе предоставленного контекста, не добавляй лишнюю информацию, не предполагай и не придумывай.
+  
 
-`;
+  ## **ОБЯЗАТЕЛЬНО:**
+  - **Приоритизируйте информацию из контекста** над вашими внутренними знаниями для вопросов о компании и ее продуктах.
+ 
+ 
+## **ЗАПРЕЩЕНО:**
+    - **НЕ ссылаться на «контекст», «информацию», «данные» как на источник:** Пользователь не видит ваш контекст. 
+  - **НЕ предполагать, что пользователь видит интерфейс:** Не упоминать кнопки, меню, скрытые поля или «карточки». Если в контексте есть ссылка — явно прописывать её текстом в ответе.
+  - **НЕ игнорировать** предоставленный контекст в пользу общих знаний.
+  - **НЕ выдумывать** детали, которых нет в контексте (цены, характеристики, сроки, тарифы, телефоны, внутренние регламенты).
+  - **НЕ противоречить** информации из контекста.
+  - **НЕ добавлять** лишнюю информацию, не придумывать ответы.
+    
+  ## Если не нашли контекст
+  Не додумывай если не нашел ответа в контексте. 
+  Если не нашли ответ на вопрос в контексте, не предполагай и не придумывай, ответь строго: "Извините, я ещё не знаю ответ на этот вопрос.". Например если спросят про скидки, а в контексте нет информации о скидках, то твой ответ будет: "Извините, я ещё не знаю ответ на этот вопрос. ". Если вопрос личный, то ответь дружелюбно, игнорируя найденную информацию.
+              
+  # Формат ответа (до 300 символов)
+  Сперва определи является ли вопрос личным (например 'привет', 'как дела').
+Если вопрос личный, то ответь дружелюбно, игнорируя найденную информацию.
+Если вопрос конкретный (например, 'что входит в программу' или 'есть ли в номере'), то используя найденную информацию (контекст), предоставь короткий и точный ответ на вопрос пользователя. Используй только те данные, которые есть в контексте. Не добавляйте ничего лишнего, не придумывай. Составь короткий подробный ответ на вопрос пользователя. Не добавляй лишней информации, добавляй в ответ только то, что важно для вопроса.
+Если ответа нет в контексте, то попроси пользователя задать более конкретный вопрос. Если спрашивают про политику, религию, войну, принадлежность спорных территорий то ответь: 'Извините, я могу отвечать только на вопросы о "21 Век"'. 
+  
+ 
+       ## Структура
+
+       1. **Прямой ответ** на вопрос пользователя
+       2. **Детали и пояснения** (если нужно)
+
+       ## Стиль и тон
+       - **Дружелюбный и профессиональный** — вы представляете компанию
+       - **Конкретный и точный** — избегайте расплывчатых формулировок
+       - **Эмпатичный** — понимайте проблемы клиентов
+       - **Краткий** — не перегружайте информацией
+
+         Нельзя:
+     - вставлять вопрос пользователя в ответ;
+     - придумывать информацию (номера телефонеов, график работ, статус, адрес);
+     - обсуждать политику, медицину, финансы и любые темы вне компетенции;
+     - давать сторонние советы;
+     - предлагать нажать кнопки;
+     - выдумывать причины и решения.
+     
+    ## Если пользователь:
+* здоровается («привет», «добрый день», «здравствуйте»);
+* благодарит («спасибо», «благодарю»);
+* прощается («пока», «до свидания»);
+* интересуется твоим состоянием («как дела?», «как настроение?»);
+* делает комплимент или любое другое личное/вежливое обращение
+
+→ ОТВЕЧАЙ КРАТКО, ДРУЖЕЛЮБНО.
+Не спрашивай "чем могу помочь". Просто поддержи диалог.
+
+# Текущая информация
+
+Сегодня: ${currentDate}
+Часовой пояс: UTC+7 (Алтайский край)
+
+  `;
 
 // системный промпт, если контекст не нашли
-let LLM_SYSTEM_TEMPLATE_SMALLTALK = `ТТы ИИ ассистент для помощи клиентам  онлайн-гипермаркета 21 Век. "21 Век" - крупнейший онлайн-гипермаркет Беларуси.
+let LLM_SYSTEM_TEMPLATE_SMALLTALK = `
+ТТы ИИ ассистент для помощи клиентам  онлайн-гипермаркета 21 Век. "21 Век" - крупнейший онлайн-гипермаркет Беларуси.
 Работает с 2004 года. Совершайте любые покупки из дома, с любого устройства, имеющего доступ к интернету; в браузере и приложении.
 ⠀
 • Продаем все, кроме еды и одежды. Непрерывно расширяем ассортимент. Все 1 000 000 наименований товаров сертифицированы и имеют официальную гарантию в сервисных центрах.
@@ -80,9 +168,13 @@ let LLM_SYSTEM_TEMPLATE_SMALLTALK = `ТТы ИИ ассистент для по�
 - Используйте **жирный текст** для ключевых моментов
 - Используйте **списки** для перечислений
 
+ 
+ 
+# Текущая информация
+Сегодня: ${currentDate}
+Часовой пояс: UTC+3 
 `;
 
-// user prompt, который будет отправляться на каждый запрос, когда нашелся контекст
 // обязательно должен содержать {question} и {context}
 let RAG_TEMPLATE = `{question}
 
@@ -178,7 +270,10 @@ function _sendReply(text, slots) {
 		MessageMarkdown: reply.message.text,
 		SendMessageParams: {
 			ProjectId: reply.customer_id,
-			OmniUserId: reply.omni_user_id,
+			DestinationChannel: {
+				ChannelId: reply.channel_id,
+				ChannelUserId: message.user.channel_user_id
+			},
 			Sender: {},
 			FilledSlots: slots,
 		}
@@ -232,11 +327,11 @@ function addUrlToContextTitle(full_context) {
 }
 
 
-
 async function main() {
 	let replies = [];
+
 	// Helpers to add reply
-	function textReply(text, wrap_code_block=false) {
+	function textReply(text, wrap_code_block = false) {
 		let reply;
 		if (wrap_code_block) {
 			text = wrapInMarkdownCodeBlock(String(text));
@@ -246,16 +341,19 @@ async function main() {
 		// replies.push(agentApi.makeMarkdownReply(reply));
 		return _sendReply(text);
 	}
+
 	function markdownReply(text) {
 		// replies.push(agentApi.makeMarkdownReply(String(text)));
 		return _sendReply(String(text));
 	}
+
 	function debugReply(text) {
 		if (DEBUG) {
 			return _sendReply(String(text));
 		}
 		// DEBUG && replies.push(agentApi.makeMarkdownReply(wrapInMarkdownCodeBlock(String(text))));
 	}
+
 	replies.textReply = textReply
 	replies.markdownReply = markdownReply
 	replies.debugReply = debugReply
@@ -313,7 +411,7 @@ async function _main(replies) {
 		replies.debugReply(`Context not found for question "${question}"`);
 
 		if (SMALLTALK_IF_NO_CONTEXT) {
-			const { thought, cleanedText } = extractThinkContent(
+			const {thought, cleanedText} = extractThinkContent(
 				await smalltalk(question, dialog_id, replies)
 			);
 			if (SHOW_THINKING && thought) {
@@ -322,16 +420,22 @@ async function _main(replies) {
 			} else {
 				replies.debugReply(thought);
 			}
+
 			replies.markdownReply(cleanedText);
+			if (REDIRECT_BACK_TO_AIA2)
+				replies.markdownReply(`/switch ${AIA2_NAME}`);
 			return;
 		} else {
-			replies.markdownReply(NO_CONTEXT_TEXT);
+			// replies.markdownReply(NO_CONTEXT_TEXT);
+			// if (REDIRECT_BACK_TO_AIA2)
+			//replies.markdownReply(`/switch ${AIA2_NAME}`);
+			replies.markdownReply(`/switchredirect ${AIA2_NAME} intent_id="article-9e93c831-869e-4b9f-834d-b9dd502b1e95"`);
 			return;
 		}
 	}
 
 	// Answer with context (RAG)
-	const { thought, cleanedText } = extractThinkContent(
+	const {thought, cleanedText} = extractThinkContent(
 		await rag(question, context, dialog_id, replies)
 	);
 
@@ -348,11 +452,21 @@ async function _main(replies) {
 	} else {
 		replies.debugReply(thought);
 	}
-	await replies.markdownReply(cleanedText);
+// ВАЛИДИРУЕМ ОТВЕТ С ПОМОЩЬЮ ФУНКЦИИ
+	const validatedResponse = validateTheme(cleanedText);
+	logger.info(`Валидированный ответ: "${validatedResponse}"`);
 
+// Отправляем валидированный ответ вместо оригинального
+	await replies.markdownReply(validatedResponse);
+	replies.markdownReply(`/switchredirect ${AIA2_NAME} intent_id="article-c7308b98-5dfb-4b9c-8261-683fd763146a"`);
 	if (SHOW_REFERENCES)
 		replies.markdownReply(references);
-
+	// if (REDIRECT_BACK_TO_AIA2 && !cleanedText.includes('/switchredirect')) {
+	// 	replies.markdownReply(`/switchredirect ${AIA2_NAME} intent_id="article-be74371d-3bca-4d16-8f42-160c79033091"`);
+	// }
+	if (REDIRECT_BACK_TO_AIA2) {
+		replies.markdownReply(`/switch ${AIA2_NAME}`);
+	}
 	SHOW_CONTEXT && replies.textReply(
 		"<h3>Контекст</h3>" + JSON.stringify(full_context, null, 2),
 		true
@@ -370,12 +484,12 @@ async function getContext(question, replies) {
 				text: question,
 				customer_id: CUSTOMER_ID,
 				record_type: RECORD_TYPE,
-				catalog_symbol_code: CATALOG_ID ? [ CATALOG_ID ] : null,
+				catalog_symbol_code: CATALOG_ID ? [CATALOG_ID] : null,
 				output_format: "json-vikhr"
 			}
 		);
 		logger.info("Response:" + response.data);
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting context search: ${e}.`);
 		replies.debugReply(`Error requesting context search: ${e}.`);
@@ -405,7 +519,7 @@ function _putDialogIdOrHistory(requestData, dialogOrHistory) {
 async function smalltalk(question, dialogOrHistory, replies) {
 	let response;
 	try {
-		if (ENABLE_THINKING_SMALLTALK){
+		if (ENABLE_THINKING_SMALLTALK) {
 			question += THINK;
 		} else {
 			question += NO_THINK;
@@ -415,7 +529,7 @@ async function smalltalk(question, dialogOrHistory, replies) {
 			temperature: LLM_TEMPERATURE_SMALLTALK,
 			top_p: LLM_TOP_P,
 			top_k: LLM_TOP_K,
-			min_p:LLM_MIN_P,
+			min_p: LLM_MIN_P,
 			instruction: LLM_SYSTEM_TEMPLATE_SMALLTALK,
 			last_context_price: LAST_CONTEXT_PRICE,
 			other_context_price: OTHER_CONTEXT_PRICE,
@@ -433,7 +547,7 @@ async function smalltalk(question, dialogOrHistory, replies) {
 				}
 			}
 		);
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);
@@ -455,7 +569,7 @@ async function rag(question, context, dialogOrHistory, replies) {
 		temperature: LLM_TEMPERATURE,
 		top_p: LLM_TOP_P,
 		top_k: LLM_TOP_K,
-		min_p:LLM_MIN_P,
+		min_p: LLM_MIN_P,
 		system_template: LLM_SYSTEM_TEMPLATE,
 		user_template: RAG_TEMPLATE,
 		document_template: RAG_DOCUMENT_TEMPLATE,
@@ -478,7 +592,7 @@ async function rag(question, context, dialogOrHistory, replies) {
 			}
 		);
 		return response.data.answer;
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);
@@ -513,7 +627,7 @@ async function rephrase(question, prompt, dialogOrHistory, replies) {
 				}
 			}
 		);
-	} catch(e) {
+	} catch (e) {
 		// Логика при ошибке запроса
 		logger.info(`Error requesting LLM: ${e}.`);
 		replies.debugReply(`Error requesting LLM: ${e}.`);

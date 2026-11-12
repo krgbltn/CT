@@ -1,0 +1,6 @@
+{
+  "push_api_url": "https://gate-crafttalk.21vek.by/chat/crafttalk/message",
+  "timeout_ms": 3000,
+  "min_attempts_ms": 500,
+  "max_attempts": 3
+}
