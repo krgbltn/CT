@@ -32,7 +32,7 @@
 
 | Каталог | Файлы для начала изучения |
 |---|---|
-| `21 Vek/` | `gpt_21vek.js` |
+| `21 Vek/` | `gpt_21vek.js`, `tools/gpt_21vek_tools.js`; ассистент оператора `gpt_assistant_agent_21vek.js` — [инструкция](../21%20Vek/readme.md) |
 | `GlobalNet/` | `gpt_mix_globalnet.js` |
 | `HHru/` | `gpt_hh.js` |
 | `Ingos/` | `gpt_qwen_1_back.js` — имя указывает на резервный вариант; актуальность уточнять по задаче |
