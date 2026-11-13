@@ -100,18 +100,18 @@ See `agent_docs/platform_agents.md` for full details and code examples.
 
 Read before implementing:
 
-| File | Content |
-|---|---|
-| `agent_docs/keywords.md` | Global imports reference |
-| `agent_docs/methods.json` | `agentApi` method signatures |
-| `agent_docs/models.md` | Data model definitions |
-| `agent_docs/message_type.md` | Message type constants |
-| `agent_docs/agent_endpoints.md` | External trigger patterns and reply examples |
-| `agent_docs/agent_settings.md` | Settings format and UI declaration |
-| `agent_docs/agent_storage.md` | Persistent storage patterns |
+| File | Content                                                                                                |
+|---|--------------------------------------------------------------------------------------------------------|
+| `agent_docs/keywords.md` | Global imports reference                                                                               |
+| `agent_docs/methods.json` | `agentApi` method signatures                                                                           |
+| `agent_docs/models.md` | Data model definitions                                                                                 |
+| `agent_docs/message_type.md` | Message type constants                                                                                 |
+| `agent_docs/agent_endpoints.md` | External trigger patterns and reply examples                                                           |
+| `agent_docs/agent_settings.md` | Settings format and UI declaration                                                                     |
+| `agent_docs/agent_storage.md` | Persistent storage patterns                                                                            |
 | `agent_docs/commands.md` | Platform commands (`/redirect`, `/switch`, `/switchredirect`, `/ack`) and their `agentApi` equivalents |
-| `agent_docs/platform_agents.md` | Built-in platform agents (`routingagent`, `aiassist2`, `finishagent`) and articles |
-| `agent_docs/system_events.md` | System event handling (`message_type === 200`, `domain_event_type`) |
-| `agent_docs/schedule.md` | Scheduler commands (`/schedule`, `/delete_schedule`) for deferred and timed actions |
-| `agent_docs/channel_adapters.md` | Channel adapter architecture (incoming/outgoing), Markdown converter, slot contract |
-| `agent_docs/modules.md` | JS agent modules — splitting large agents across multiple scripts (32 766 byte limit) |
+| `agent_docs/platform_agents.md` | Built-in platform agents (`routingagent`, `aiassist2`, `finishagent`) and articles                     |
+| `agent_docs/system_events.md` | System event handling (`message_type === 200`, `domain_event_type`)                                    |
+| `agent_docs/schedule.md` | Scheduler commands (`/schedule`, `/delete_schedule`) for deferred and timed actions                    |
+| `agent_docs/channel_adapters.md` | Channel adapter architecture (incoming/outgoing), Markdown converter, slot contract                    |
+| `agent_docs/modules.md` | Optional JS agent modules — no script size limit; use modules to separate isolated logic when useful |

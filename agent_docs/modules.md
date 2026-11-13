@@ -1,6 +1,6 @@
 # JS Agent Modules
 
-A JS agent script is limited to **32 766 bytes** (database field size). For complex agents that exceed this limit, the platform supports splitting the code across multiple JS agents acting as **modules**.
+JS agent scripts have no size limit, so splitting large agents is not required. The platform optionally supports **modules** to organize code, for example by separating isolated logic into reusable parts.
 
 Available since: platform release `2025.February`, JS agent version `jsagent.2024.December.1-Stable`.
 
