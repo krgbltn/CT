@@ -264,23 +264,6 @@ try {
 }
 
 
-function _sendReply(text, slots) {
-	reply = agentApi.makeMarkdownReply(text);
-	return agentApi.sendMessage({
-		MessageMarkdown: reply.message.text,
-		SendMessageParams: {
-			ProjectId: reply.customer_id,
-			DestinationChannel: {
-				ChannelId: reply.channel_id,
-				ChannelUserId: message.user.channel_user_id
-			},
-			Sender: {},
-			FilledSlots: slots,
-		}
-	}, logger).catch(e => logger.info(`Error sending reply: ${e}.`));
-	// don't block
-}
-
 function wrapInMarkdownCodeBlock(str) {
 	// Экранируем только неэкранированные тройные кавычки
 	const escapedStr = str.replace(/(?<!\\)```/g, '\\```');
@@ -332,26 +315,22 @@ async function main() {
 
 	// Helpers to add reply
 	function textReply(text, wrap_code_block = false) {
-		let reply;
 		if (wrap_code_block) {
 			text = wrapInMarkdownCodeBlock(String(text));
 		} else {
 			text = String(text);
 		}
-		// replies.push(agentApi.makeMarkdownReply(reply));
-		return _sendReply(text);
+		replies.push(agentApi.makeMarkdownReply(text));
 	}
 
 	function markdownReply(text) {
-		// replies.push(agentApi.makeMarkdownReply(String(text)));
-		return _sendReply(String(text));
+		replies.push(agentApi.makeMarkdownReply(String(text)));
 	}
 
 	function debugReply(text) {
 		if (DEBUG) {
-			return _sendReply(String(text));
+			markdownReply(text);
 		}
-		// DEBUG && replies.push(agentApi.makeMarkdownReply(wrapInMarkdownCodeBlock(String(text))));
 	}
 
 	replies.textReply = textReply
@@ -458,15 +437,16 @@ async function _main(replies) {
 
 // Отправляем валидированный ответ вместо оригинального
 	await replies.markdownReply(validatedResponse);
-	replies.markdownReply(`/switchredirect ${AIA2_NAME} intent_id="article-c7308b98-5dfb-4b9c-8261-683fd763146a"`);
+	// Переход к оператору из ответа не должен заменяться опросом.
+	if (validatedResponse.includes('/switchredirect')) {
+		return;
+	}
+	await replies.markdownReply(`/switchredirect ${AIA2_NAME} intent_id="article-c7308b98-5dfb-4b9c-8261-683fd763146a"`);
 	if (SHOW_REFERENCES)
 		replies.markdownReply(references);
 	// if (REDIRECT_BACK_TO_AIA2 && !cleanedText.includes('/switchredirect')) {
 	// 	replies.markdownReply(`/switchredirect ${AIA2_NAME} intent_id="article-be74371d-3bca-4d16-8f42-160c79033091"`);
 	// }
-	if (REDIRECT_BACK_TO_AIA2) {
-		replies.markdownReply(`/switch ${AIA2_NAME}`);
-	}
 	SHOW_CONTEXT && replies.textReply(
 		"<h3>Контекст</h3>" + JSON.stringify(full_context, null, 2),
 		true
@@ -690,17 +670,19 @@ function getReferences(full_context) {
 
 // Entrypoint
 if (message.message_type === 1) {
+	logger.info({
+		inputId: message.id,
+		parentId: message.parent_message_id,
+		agentId: message.agent_id,
+		agentCustId: message.agent_cust_id,
+		sessionId: message.user?.session_id,
+		messageType: message.message_type
+	}, 'GPT entry');
+
 	main()
 		.then(res => {
-			// resolve(res)
-			// sendReplies(res)
-			//.then(res2 => {
-			// ok
-			resolve([]);
-			/*})
-			.catch (error2 => {
-				resolve([agentApi.makeTextReply(String(error2))]);
-			});*/
+			// Ответ и переход выполняются платформой в рамках текущего сообщения.
+			resolve(res);
 		})
 		.catch(error => {
 			logger.info(`Error: ${error}`);
